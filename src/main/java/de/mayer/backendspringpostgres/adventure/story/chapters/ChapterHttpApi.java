@@ -1,12 +1,10 @@
-package de.mayer.backendspringpostgres.adventure.chapters;
+package de.mayer.backendspringpostgres.adventure.story.chapters;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestController("/chapter")
 public class ChapterHttpApi {

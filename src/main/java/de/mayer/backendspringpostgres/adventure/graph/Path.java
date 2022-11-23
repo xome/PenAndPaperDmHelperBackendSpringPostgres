@@ -1,6 +1,6 @@
 package de.mayer.backendspringpostgres.adventure.graph;
 
-import de.mayer.backendspringpostgres.adventure.chapters.Chapter;
+import de.mayer.backendspringpostgres.adventure.story.chapters.Chapter;
 
 import java.util.LinkedList;
 

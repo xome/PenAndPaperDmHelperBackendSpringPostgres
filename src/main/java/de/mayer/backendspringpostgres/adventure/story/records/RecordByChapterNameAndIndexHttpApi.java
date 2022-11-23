@@ -1,4 +1,4 @@
-package de.mayer.backendspringpostgres.adventure.chapters;
+package de.mayer.backendspringpostgres.adventure.story.records;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.*;
@@ -7,9 +7,9 @@ import org.springframework.web.bind.annotation.*;
 public class RecordByChapterNameAndIndexHttpApi {
 
     @GetMapping
-    public Record getRecordByNameAndIndex(@PathVariable("chapterName") String chapterName,
-                                           @PathVariable("index") Integer index,
-                                           HttpServletResponse httpResponse) {
+    public RecordInAChapter getRecordByNameAndIndex(@PathVariable("chapterName") String chapterName,
+                                                    @PathVariable("index") Integer index,
+                                                    HttpServletResponse httpResponse) {
         throw new RuntimeException("Not yet implemented!");
     }
 

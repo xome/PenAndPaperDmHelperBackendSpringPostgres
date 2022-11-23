@@ -1,4 +1,4 @@
-package de.mayer.backendspringpostgres.adventure.chapters;
+package de.mayer.backendspringpostgres.adventure.story.chapters;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.*;

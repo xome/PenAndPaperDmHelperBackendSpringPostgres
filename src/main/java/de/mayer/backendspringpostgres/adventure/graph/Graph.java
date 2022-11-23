@@ -1,7 +1,7 @@
 package de.mayer.backendspringpostgres.adventure.graph;
 
-import de.mayer.backendspringpostgres.adventure.chapters.Chapter;
-import de.mayer.backendspringpostgres.adventure.chapters.ChapterLink;
+import de.mayer.backendspringpostgres.adventure.story.chapters.Chapter;
+import de.mayer.backendspringpostgres.adventure.story.records.ChapterLink;
 
 import java.util.List;
 

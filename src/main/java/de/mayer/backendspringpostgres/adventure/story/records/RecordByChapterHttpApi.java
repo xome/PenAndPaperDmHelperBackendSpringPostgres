@@ -1,4 +1,4 @@
-package de.mayer.backendspringpostgres.adventure.chapters;
+package de.mayer.backendspringpostgres.adventure.story.records;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -12,8 +12,8 @@ import java.util.List;
 public class RecordByChapterHttpApi {
 
     @GetMapping
-    public List<Record> getRecordsByChapterName(@PathVariable("chapterName") String chapterName,
-                                                 HttpServletResponse httpResponse) {
+    public List<RecordInAChapter> getRecordsByChapterName(@PathVariable("chapterName") String chapterName,
+                                                          HttpServletResponse httpResponse) {
         throw new RuntimeException("Not yet implemented!");
     }
 
