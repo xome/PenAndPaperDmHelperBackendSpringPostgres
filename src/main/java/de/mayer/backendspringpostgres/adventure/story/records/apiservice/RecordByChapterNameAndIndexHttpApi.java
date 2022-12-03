@@ -1,13 +1,14 @@
-package de.mayer.backendspringpostgres.adventure.story.records;
+package de.mayer.backendspringpostgres.adventure.story.records.apiservice;
 
+import de.mayer.backendspringpostgres.adventure.story.records.model.RecordInAChapter;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.*;
 
 @RestController("/record/{adventureName}/{chapterName}/{index}")
-public class RecordByChapterNameAndIndexHttpApi {
+public interface RecordByChapterNameAndIndexHttpApi {
 
     @GetMapping
-    public RecordInAChapter getRecordByNameAndIndex(@PathVariable("adventureName") String adventure,
+    default RecordInAChapter getRecordByNameAndIndex(@PathVariable("adventureName") String adventure,
                                                     @PathVariable("chapterName") String chapterName,
                                                     @PathVariable("index") Integer index,
                                                     HttpServletResponse httpResponse) {
@@ -15,7 +16,7 @@ public class RecordByChapterNameAndIndexHttpApi {
     }
 
     @PutMapping
-    public void putRecordByChapterNameAndIndex(@PathVariable("adventureName") String adventure,
+    default void putRecordByChapterNameAndIndex(@PathVariable("adventureName") String adventure,
                                                @PathVariable("chapterName") String chapterName,
                                                   @PathVariable("index") Integer index,
                                                   HttpServletResponse httpResponse) {
@@ -23,7 +24,7 @@ public class RecordByChapterNameAndIndexHttpApi {
     }
 
     @PatchMapping
-    public void patchRecordByChapterNameAndIndex(@PathVariable("adventureName") String adventure,
+    default void patchRecordByChapterNameAndIndex(@PathVariable("adventureName") String adventure,
                                                  @PathVariable("chapterName") String chapterName,
                                                     @PathVariable("index") Integer index,
                                                     HttpServletResponse httpResponse) {
@@ -31,7 +32,7 @@ public class RecordByChapterNameAndIndexHttpApi {
     }
 
     @DeleteMapping
-    public void deleteRecordByChapterNameAndIndex(@PathVariable("adventureName") String adventure,
+    default void deleteRecordByChapterNameAndIndex(@PathVariable("adventureName") String adventure,
                                                   @PathVariable("chapterName") String chapterName,
                                                   @PathVariable("index") Integer index,
                                                   HttpServletResponse httpResponse) {

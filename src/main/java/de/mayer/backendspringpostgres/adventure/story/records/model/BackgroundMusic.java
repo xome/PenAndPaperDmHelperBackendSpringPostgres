@@ -1,4 +1,4 @@
-package de.mayer.backendspringpostgres.adventure.story.records;
+package de.mayer.backendspringpostgres.adventure.story.records.model;
 
 public class BackgroundMusic extends RecordInAChapter {
 

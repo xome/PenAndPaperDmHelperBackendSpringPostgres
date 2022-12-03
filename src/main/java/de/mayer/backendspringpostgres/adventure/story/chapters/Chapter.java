@@ -1,6 +1,6 @@
 package de.mayer.backendspringpostgres.adventure.story.chapters;
 
-import de.mayer.backendspringpostgres.adventure.story.records.RecordInAChapter;
+import de.mayer.backendspringpostgres.adventure.story.records.model.RecordInAChapter;
 
 import java.util.List;
 
