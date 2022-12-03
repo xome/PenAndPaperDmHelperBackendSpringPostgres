@@ -1,4 +1,4 @@
-package de.mayer.backendspringpostgres.adventure.story.chapters;
+package de.mayer.backendspringpostgres.adventure.story.chapters.model;
 
 import de.mayer.backendspringpostgres.adventure.story.records.model.RecordInAChapter;
 

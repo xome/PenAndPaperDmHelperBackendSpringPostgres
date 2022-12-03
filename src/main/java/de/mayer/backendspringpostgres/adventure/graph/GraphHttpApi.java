@@ -1,4 +1,4 @@
-package de.mayer.backendspringpostgres.adventure.story.graph;
+package de.mayer.backendspringpostgres.adventure.graph;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;

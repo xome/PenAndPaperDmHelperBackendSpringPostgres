@@ -1,5 +1,6 @@
-package de.mayer.backendspringpostgres.adventure.story.chapters;
+package de.mayer.backendspringpostgres.adventure.story.chapters.apiservice;
 
+import de.mayer.backendspringpostgres.adventure.story.chapters.model.Chapter;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.*;
 
@@ -8,8 +9,8 @@ public interface ChapterByNameHttpApi {
 
     @GetMapping
     default Chapter getChapterByName(@PathVariable("adventureName") String adventure,
-                                    @PathVariable("chapterName") String chapterName,
-                                    HttpServletResponse httpResponse) {
+                                     @PathVariable("chapterName") String chapterName,
+                                     HttpServletResponse httpResponse) {
         throw new RuntimeException("Not yet implemented!");
     }
 
