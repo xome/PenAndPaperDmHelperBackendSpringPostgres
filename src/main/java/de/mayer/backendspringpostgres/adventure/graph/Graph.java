@@ -5,5 +5,5 @@ import de.mayer.backendspringpostgres.adventure.story.records.ChapterLink;
 
 import java.util.List;
 
-public record Graph(List<Chapter> chapters, List<ChapterLink> chapterLinks) {
+public record Graph(String adventure, List<Chapter> chapters, List<ChapterLink> chapterLinks) {
 }

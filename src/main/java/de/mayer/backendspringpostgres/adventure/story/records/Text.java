@@ -19,6 +19,6 @@ public class Text extends RecordInAChapter {
     @Override
     public String toString() {
         return "Text{text='%s', chapterName='%s', index=%d}"
-                .formatted(text, chapterName, index);
+                .formatted(text, chapter, index);
     }
 }

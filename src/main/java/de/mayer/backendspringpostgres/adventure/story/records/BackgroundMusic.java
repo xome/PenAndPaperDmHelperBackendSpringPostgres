@@ -27,7 +27,7 @@ public class BackgroundMusic extends RecordInAChapter {
     public String toString() {
         return "BackgroundMusic{" +
                 "name='" + name + '\'' +
-                ", chapterName='" + chapterName + '\'' +
+                ", chapterName='" + chapter + '\'' +
                 ", index=" + index +
                 '}';
     }

@@ -6,17 +6,18 @@ import java.util.Objects;
 
 public abstract class RecordInAChapter {
 
-    protected String chapterName;
+    protected String adventure;
+    protected String chapter;
     protected Integer index;
 
 
     @JsonIgnore
-    public String getChapterName() {
-        return chapterName;
+    public String getChapter() {
+        return chapter;
     }
     @JsonIgnore
-    public void setChapterName(String chapterName) {
-        this.chapterName = chapterName;
+    public void setChapter(String chapter) {
+        this.chapter = chapter;
     }
 
     @JsonIgnore
@@ -34,11 +35,11 @@ public abstract class RecordInAChapter {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         RecordInAChapter that = (RecordInAChapter) o;
-        return chapterName.equals(that.chapterName) && index.equals(that.index);
+        return chapter.equals(that.chapter) && index.equals(that.index);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(chapterName, index);
+        return Objects.hash(chapter, index);
     }
 }

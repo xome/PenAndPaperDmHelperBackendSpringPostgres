@@ -25,6 +25,6 @@ public class ChapterLink extends RecordInAChapter {
     @Override
     public String toString() {
         return "ChapterLink{chapterNameFrom='%s', chapterNameTo='%s', chapterName='%s', index=%d}"
-                .formatted(chapterNameFrom, chapterNameTo, chapterName, index);
+                .formatted(chapterNameFrom, chapterNameTo, chapter, index);
     }
 }

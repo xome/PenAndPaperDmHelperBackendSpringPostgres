@@ -8,17 +8,19 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@RestController("/record/{chapterName}")
+@RestController("/record/{adventureName}/{chapterName}")
 public class RecordByChapterHttpApi {
 
     @GetMapping
-    public List<RecordInAChapter> getRecordsByChapterName(@PathVariable("chapterName") String chapterName,
+    public List<RecordInAChapter> getRecordsByChapterName(@PathVariable("adventureName") String adventure,
+                                                          @PathVariable("chapterName") String chapterName,
                                                           HttpServletResponse httpResponse) {
         throw new RuntimeException("Not yet implemented!");
     }
 
     @DeleteMapping
-    public void deleteRecordsByChapterName(@PathVariable("chapterName") String chapterName,
+    public void deleteRecordsByChapterName(@PathVariable("adventureName") String adventure,
+                                           @PathVariable("chapterName") String chapterName,
                                             HttpServletResponse httpResponse) {
         throw new RuntimeException("Not yet implemented!");
     }

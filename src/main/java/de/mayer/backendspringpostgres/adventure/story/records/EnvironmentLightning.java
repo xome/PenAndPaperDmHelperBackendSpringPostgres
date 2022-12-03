@@ -2,8 +2,6 @@ package de.mayer.backendspringpostgres.adventure.story.records;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import java.util.StringJoiner;
-
 public class EnvironmentLightning extends RecordInAChapter {
 
     private Float brightness;
@@ -56,6 +54,6 @@ public class EnvironmentLightning extends RecordInAChapter {
     @Override
     public String toString() {
         return "EnvironmentLightning{brightness=%s, rgb_1=%d, rgb_2=%d, rgb_3=%d, chapterName='%s', index=%d}"
-                .formatted(brightness, rgb_1, rgb_2, rgb_3, chapterName, index);
+                .formatted(brightness, rgb_1, rgb_2, rgb_3, chapter, index);
     }
 }

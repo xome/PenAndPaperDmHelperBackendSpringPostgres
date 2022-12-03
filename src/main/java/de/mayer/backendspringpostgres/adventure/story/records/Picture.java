@@ -33,6 +33,6 @@ public class Picture extends RecordInAChapter{
     @Override
     public String toString() {
         return "Picture{base64='%s...', fileFormat='%s', isShareableWithGroup=%s, chapterName='%s', index=%d}"
-                .formatted(base64.substring(1, 10), fileFormat, isShareableWithGroup, chapterName, index);
+                .formatted(base64.substring(1, 10), fileFormat, isShareableWithGroup, chapter, index);
     }
 }
