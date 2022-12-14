@@ -84,7 +84,7 @@ class GraphValidatorTest {
 
         assertThat(exc.getCause(), is(instanceOf(InvalidGraphException.class)));
         assertThat(exc.getCause().getMessage(),
-                matchesRegex("Graph is invalid\\. Circle detected on Path ((c01 -> c02 -> c03 -> c02 \\(4,00 Minutes\\))|(c01 -> c03 -> c02 -> c03 \\(4,00 Minutes\\)))\\."));
+                matchesRegex("Graph is invalid\\. Circle detected on Path ((c01 -> c02 -> c03 -> c02 \\(4([,.])00 Minutes\\))|(c01 -> c03 -> c02 -> c03 \\(4[,.]00 Minutes\\)))\\."));
     }
 
 
