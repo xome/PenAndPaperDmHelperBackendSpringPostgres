@@ -1,8 +1,6 @@
 package de.mayer.backendspringpostgres.adventure.model;
 
 
-import de.mayer.backendspringpostgres.IllegalModelAccessException;
-
 public record EnvironmentLightning(Double brightness, int[] rgb) implements RecordInAChapter {
 
     public EnvironmentLightning {

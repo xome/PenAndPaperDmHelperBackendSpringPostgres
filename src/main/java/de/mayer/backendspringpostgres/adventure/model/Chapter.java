@@ -1,7 +1,5 @@
 package de.mayer.backendspringpostgres.adventure.model;
 
-import de.mayer.backendspringpostgres.IllegalModelAccessException;
-
 import java.util.List;
 
 public record Chapter(

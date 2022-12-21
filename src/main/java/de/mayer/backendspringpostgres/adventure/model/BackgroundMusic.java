@@ -1,7 +1,5 @@
 package de.mayer.backendspringpostgres.adventure.model;
 
-import de.mayer.backendspringpostgres.IllegalModelAccessException;
-
 public record BackgroundMusic(String name, byte[] data) implements RecordInAChapter {
 
     public BackgroundMusic {

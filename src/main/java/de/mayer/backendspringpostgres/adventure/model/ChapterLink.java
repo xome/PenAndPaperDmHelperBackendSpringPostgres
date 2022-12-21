@@ -1,7 +1,5 @@
 package de.mayer.backendspringpostgres.adventure.model;
 
-import de.mayer.backendspringpostgres.IllegalModelAccessException;
-
 public record ChapterLink(String chapterNameTo) implements RecordInAChapter {
 
     public ChapterLink {

@@ -1,4 +1,4 @@
-package de.mayer.backendspringpostgres;
+package de.mayer.backendspringpostgres.graph.model;
 
 public class IllegalModelAccessException extends RuntimeException {
 

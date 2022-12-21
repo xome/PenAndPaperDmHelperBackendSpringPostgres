@@ -1,7 +1,5 @@
 package de.mayer.backendspringpostgres.adventure.model;
 
-import de.mayer.backendspringpostgres.IllegalModelAccessException;
-
 public record Picture(String base64, String fileFormat, Boolean isShareableWithGroup) implements RecordInAChapter {
     public Picture {
         if (base64 == null || base64.isEmpty())

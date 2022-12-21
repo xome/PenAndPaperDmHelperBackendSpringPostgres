@@ -4,9 +4,11 @@ import de.mayer.backendspringpostgres.graph.model.Chapter;
 import de.mayer.backendspringpostgres.graph.model.Graph;
 import de.mayer.backendspringpostgres.graph.model.InvalidGraphException;
 import de.mayer.backendspringpostgres.graph.model.Path;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -14,6 +16,32 @@ import java.util.stream.Collectors;
 @Service
 @Scope("prototype")
 public class GraphService {
+
+    private ChapterRepository chapterRepository;
+    private ChapterLinkRepository chapterLinkRepository;
+
+    public GraphService(ChapterRepository chapterRepository, ChapterLinkRepository inMemoryChapterLinkRepository) {
+        this.chapterRepository = chapterRepository;
+        chapterLinkRepository = inMemoryChapterLinkRepository;
+    }
+
+    public Graph createGraph(String adventure) throws NoChaptersForAdventureException, InvalidGraphException {
+        var chapters = chapterRepository
+                .findByAdventure(adventure)
+                .orElseThrow(() -> new NoChaptersForAdventureException("No Chapters found for adventure %s!"
+                        .formatted(adventure)));
+        var chapterLinks = chapterLinkRepository
+                .findByAdventure(adventure)
+                .orElseGet(Collections::emptySet);
+
+        var graph = new Graph(chapters, chapterLinks);
+
+        // A Graph is valid if and only if there are no circle Paths.
+        // If Paths are not valid, an InvalidGraphException is thrown here.
+        generatePaths(graph);
+
+        return graph;
+    }
 
     public Set<Path> generatePaths(Graph graph) throws InvalidGraphException {
 
@@ -44,7 +72,7 @@ public class GraphService {
                     var currentChapter = startingPoint;
                     var unusedLinks = new HashSet<>(graph.chapterLinks());
 
-                    if (endingPoints.contains(startingPoint)){
+                    if (endingPoints.contains(startingPoint)) {
                         allPaths.add(new PathBuilder(startingPoint).build());
                     }
 
