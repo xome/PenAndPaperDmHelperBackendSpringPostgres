@@ -49,3 +49,5 @@ jobs:
       - name : use Maven to build image
         id: build
         run: mvn -B --file pom.xml spring-boot:build-image -Dspring-boot.build-image.imageName=${{ env.IMAGE_NAME }}
+      - name: push to Docker Hub
+        run: docker push ${{ env.IMAGE_NAME }}
