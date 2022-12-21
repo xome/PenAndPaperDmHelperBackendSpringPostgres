@@ -9,13 +9,17 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class ChapterLinkRecordTest {
+class ChapterLinkTest {
 
     @Test
-    @DisplayName("Given chapterNameTo is null, when a record is created, then an exception is raised")
+    @DisplayName("""
+            Given chapterNameTo is null,
+            when a ChapterLink is created,
+            then an exception is raised
+            """)
     void chapterNameToCannotBeNull() {
         var exc = assertThrows(RuntimeException.class,
-                () -> new ChapterLinkRecord(null)
+                () -> new ChapterLink(null)
         );
 
         assertThat(exc.getCause(), is(instanceOf(IllegalAccessException.class)));
@@ -23,10 +27,14 @@ class ChapterLinkRecordTest {
     }
 
     @Test
-    @DisplayName("Given chapterNameTo is empty, when a record is created, then an exception is raised")
+    @DisplayName("""
+            Given chapterNameTo is empty,
+            when a ChapterLink is created,
+            then an exception is raised
+            """)
     void chapterNameToCannotBeEmpty() {
         var exc = assertThrows(RuntimeException.class,
-                () -> new ChapterLinkRecord("")
+                () -> new ChapterLink("")
         );
 
         assertThat(exc.getCause(), is(instanceOf(IllegalAccessException.class)));

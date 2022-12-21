@@ -1,4 +1,4 @@
-package de.mayer.backendspringpostgres.adventure.service.api.jacksonMixIn;
+package de.mayer.backendspringpostgres.adventure.api.jacksonMixIn;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.mayer.backendspringpostgres.adventure.model.RecordInAChapter;

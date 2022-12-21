@@ -14,7 +14,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class GraphTest {
 
     @Test
-    @DisplayName("Given chapters is null, when a Graph is created, then an exception is thrown")
+    @DisplayName("""
+            Given chapters is null,
+            when a Graph is created,
+            then an exception is thrown
+            """)
     void chaptersCannotBeNull() {
 
         var c01 = new Chapter("c01", 0.0d);
@@ -34,7 +38,11 @@ class GraphTest {
     }
 
     @Test
-    @DisplayName("Given chapters is null, when a Graph is created, then an exception is thrown")
+    @DisplayName("""
+            Given chapters is empty,
+            when a Graph is created,
+            then an exception is thrown
+            """)
     void chaptersCannotBeEmpty() {
         var c01 = new Chapter("c01", 0.0d);
         var c02 = new Chapter("c02", 1.0d);
@@ -52,7 +60,11 @@ class GraphTest {
     }
 
     @Test
-    @DisplayName("Given chapterLinks is null, when a Graph is created, then an exception is thrown")
+    @DisplayName("""
+            Given chapterLinks is null,
+            when a Graph is created,
+            then an exception is thrown
+            """)
     void chapterLinksCannotBeNull() {
         var c01 = new Chapter("c01", 0.0d);
         var exc = assertThrows(RuntimeException.class,

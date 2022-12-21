@@ -12,7 +12,11 @@ import static org.hamcrest.MatcherAssert.*;
 class BackgroundMusicTest {
 
     @Test
-    @DisplayName("Given name is null, when a record is created, then an exception is raised")
+    @DisplayName("""
+            Given name is null,
+            when a BackgroundMusic record is created,
+            then an exception is raised
+            """)
     void nameCannotBeNull() {
         var exc = assertThrows(RuntimeException.class,
                 () -> new BackgroundMusic(null, new byte[1])
@@ -23,7 +27,11 @@ class BackgroundMusicTest {
     }
 
     @Test
-    @DisplayName("Given name is empty, when a record is created, then an exception is raised")
+    @DisplayName("""
+            Given name is empty,
+            when a BackgroundMusic record is created,
+            then an exception is raised
+            """)
     void nameCannotBeEmpty() {
         var exc = assertThrows(RuntimeException.class,
                 () -> new BackgroundMusic("", new byte[1])
@@ -34,8 +42,12 @@ class BackgroundMusicTest {
     }
 
     @Test
-    @DisplayName("Given data is null, when a record is created, then an exception is raised")
-    void dataCannotBeNull(){
+    @DisplayName("""
+            Given data is null,
+            when a BackgroundMusic record is created,
+            then an exception is raised
+            """)
+    void dataCannotBeNull() {
         var exc = assertThrows(RuntimeException.class,
                 () -> new BackgroundMusic("Music", null)
         );
@@ -43,9 +55,14 @@ class BackgroundMusicTest {
         assertThat(exc.getCause(), is(instanceOf(IllegalAccessException.class)));
         assertThat(exc.getCause().getMessage(), containsStringIgnoringCase("data cannot be null"));
     }
+
     @Test
-    @DisplayName("Given data is a byte array of size 0, when a record is created, then an exception is raised")
-    void dataCannotBeEmpty(){
+    @DisplayName("""
+            Given data is a byte array of size 0,
+            when a BackgroundMusic record is created,
+            then an exception is raised
+            """)
+    void dataCannotBeEmpty() {
         var exc = assertThrows(RuntimeException.class,
                 () -> new BackgroundMusic("Music", new byte[0])
         );

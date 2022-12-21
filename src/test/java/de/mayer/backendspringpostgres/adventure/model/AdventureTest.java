@@ -12,7 +12,11 @@ import static org.junit.jupiter.api.Assertions.*;
 class AdventureTest {
 
     @Test
-    @DisplayName("When name is null, then exception is thrown")
+    @DisplayName("""
+            Given name is null,
+            when an Adventure is created,
+            then exception is thrown
+            """)
     void nameCannotBeNullable() {
         Throwable exception = assertThrows(RuntimeException.class, () -> new Adventure(null, null));
         assertThat(exception.getCause(), is(instanceOf(IllegalAccessException.class)));
@@ -20,7 +24,11 @@ class AdventureTest {
 
 
     @Test
-    @DisplayName("When name is empty, then exception is thrown")
+    @DisplayName("""
+            Given name is empty,
+            when an Adventure is created,
+            then exception is thrown
+            """)
     void nameCannotBeEmpty() {
         Throwable exc = assertThrows(RuntimeException.class, () -> new Adventure("", null));
         assertThat(exc.getCause(), is(instanceOf(IllegalAccessException.class)));

@@ -1,4 +1,4 @@
-package de.mayer.backendspringpostgres.adventure.service.api;
+package de.mayer.backendspringpostgres.adventure.api;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;

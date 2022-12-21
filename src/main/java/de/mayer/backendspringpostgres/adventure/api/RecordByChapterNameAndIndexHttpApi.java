@@ -1,4 +1,4 @@
-package de.mayer.backendspringpostgres.adventure.service.api;
+package de.mayer.backendspringpostgres.adventure.api;
 
 import de.mayer.backendspringpostgres.adventure.model.RecordInAChapter;
 import jakarta.servlet.http.HttpServletResponse;

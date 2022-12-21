@@ -1,4 +1,4 @@
-package de.mayer.backendspringpostgres.adventure.service.persistence;
+package de.mayer.backendspringpostgres.adventure.domainservice;
 
-public interface AdventurePersistenceService {
+public interface AdventureRepository {
 }

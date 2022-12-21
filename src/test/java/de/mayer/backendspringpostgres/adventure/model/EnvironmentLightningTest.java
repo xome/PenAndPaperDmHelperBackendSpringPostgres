@@ -13,14 +13,22 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class EnvironmentLightningTest {
 
     @Test
-    @DisplayName("Given brightness is null, when a record is created, then brightness is 0")
+    @DisplayName("""
+            Given brightness is null,
+            when an EnvironmentLightning record is created,
+            then brightness is 0
+            """)
     void defaultBrightnessIsZero() {
         var lightning = new EnvironmentLightning(null, new int[]{0, 0, 0});
         assertThat(lightning.brightness(), is(0.0d));
     }
 
     @Test
-    @DisplayName("Given rgb is null, when a record is created, then an exception is raised")
+    @DisplayName("""
+            Given rgb is null,
+            when an EnvironmentLightning record is created,
+            then an exception is raised
+            """)
     void rgbCannotBeNull() {
         var exc = assertThrows(RuntimeException.class, () -> new EnvironmentLightning(null, null));
         assertThat(exc.getCause(), is(instanceOf(IllegalAccessException.class)));
@@ -28,7 +36,11 @@ class EnvironmentLightningTest {
     }
 
     @Test
-    @DisplayName("Given rgb has a size of less than 3, when a record is created, then an exception is raised")
+    @DisplayName("""
+            Given rgb has a size of less than 3,
+            when an EnvironmentLightning record is created,
+            then an exception is raised
+            """)
     void rgbHasLessThanThreeElements() {
         var exc = assertThrows(RuntimeException.class,
                 () ->
@@ -38,7 +50,11 @@ class EnvironmentLightningTest {
     }
 
     @Test
-    @DisplayName("Given rgb has a size of more than 3, when a record is created, then an exception is raised")
+    @DisplayName("""
+            Given rgb has a size of more than 3,
+            when an EnvironmentLightning record is created,
+            then an exception is raised
+            """)
     void rgbHasMoreThanThreeElements() {
         var exc = assertThrows(RuntimeException.class,
                 () ->
@@ -48,7 +64,11 @@ class EnvironmentLightningTest {
     }
 
     @Test
-    @DisplayName("Given a negative r value, when a record is created, then an exception is raised.")
+    @DisplayName("""
+            Given a negative r value,
+            when an EnvironmentLightning record is created,
+            then an exception is raised
+            """)
     void rValueCannotBeNegative() {
         var exc = assertThrows(RuntimeException.class,
                 () ->
@@ -59,7 +79,11 @@ class EnvironmentLightningTest {
     }
 
     @Test
-    @DisplayName("Given a r value above 255, when a record is created, then an exception is raised.")
+    @DisplayName("""
+            Given a r value above 255,
+            when an EnvironmentLightning record is created,
+            then an exception is raised
+            """)
     void rValueCannotBeGreaterThan255() {
         var exc = assertThrows(RuntimeException.class,
                 () ->

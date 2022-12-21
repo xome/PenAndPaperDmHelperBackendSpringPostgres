@@ -12,7 +12,11 @@ import static org.junit.jupiter.api.Assertions.*;
 class ChapterTest {
 
     @Test
-    @DisplayName("When name is null, then an exception is thrown")
+    @DisplayName("""
+            Given name is null,
+            when a Chapter is created,
+            then an exception is thrown
+            """)
     void nameCannotBeNull() {
         var exc = assertThrows(RuntimeException.class, () ->
                 new Chapter(null,
@@ -23,7 +27,11 @@ class ChapterTest {
     }
 
     @Test
-    @DisplayName("When name is empty, then an exception is thrown")
+    @DisplayName("""
+            Given name is empty,
+            when a Chapter is created,
+            then an exception is thrown
+            """)
     void nameCannotBeEmpty() {
         var exc = assertThrows(RuntimeException.class, () ->
                 new Chapter("",
@@ -33,11 +41,6 @@ class ChapterTest {
         assertThat(exc.getCause(), is(instanceOf(IllegalAccessException.class)));
     }
 
-    @Test
-    @DisplayName("When adventure is null, no exception is thrown")
-    void adventureCanBeNull() {
-        new Chapter("Name", null, null, null);
-    }
 
 
 }

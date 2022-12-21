@@ -1,14 +1,12 @@
-package de.mayer.backendspringpostgres.graph.service;
+package de.mayer.backendspringpostgres.graph.domainservice;
 
 import de.mayer.backendspringpostgres.graph.model.Chapter;
 import de.mayer.backendspringpostgres.graph.model.Graph;
 import de.mayer.backendspringpostgres.graph.model.InvalidGraphException;
-import de.mayer.backendspringpostgres.graph.model.Path;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.stream.Collectors;
 
 @Service

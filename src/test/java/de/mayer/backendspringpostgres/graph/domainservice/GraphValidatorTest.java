@@ -1,4 +1,4 @@
-package de.mayer.backendspringpostgres.graph.service;
+package de.mayer.backendspringpostgres.graph.domainservice;
 
 import de.mayer.backendspringpostgres.graph.model.Chapter;
 import de.mayer.backendspringpostgres.graph.model.ChapterLink;
@@ -20,9 +20,12 @@ class GraphValidatorTest {
 
 
     @Test
-    @DisplayName("Given there are two chapters and the links are forming a circle, " +
-            "when a Graph is created, " +
-            "then an exception is thrown")
+    @DisplayName("""
+            Given there are two chapters
+                and the links are forming a circle,
+            when a Graph is created,
+            then an exception is thrown
+            """)
     void noStartpointsAndEndings() {
         var c01 = new Chapter("c01", 0.0d);
         var c02 = new Chapter("c02", 1.0d);
@@ -40,9 +43,11 @@ class GraphValidatorTest {
     }
 
     @Test
-    @DisplayName("Given there are three nodes and one Path is a circle," +
-            "when a Graph is created," +
-            "then an exception is thrown")
+    @DisplayName("""
+            Given there are three nodes and one Path is a circle,
+            when a Graph is created,
+            then an exception is thrown
+            """)
     void oneCirclePath() {
         var c01 = new Chapter("c01", 0.0d);
         var c02 = new Chapter("c02", 1.0d);
@@ -63,9 +68,13 @@ class GraphValidatorTest {
     }
 
     @Test
-    @DisplayName("Given there are three nodes and one Path is a circle," +
-            "when a Graph is created," +
-            "then an exception is thrown")
+    @DisplayName("""
+            Given there are four nodes\s
+               and one Path is no circle
+               and one Path is a circle,
+            when a Graph is created,
+            then an exception is thrown
+            """)
     void oneCirclePathAndOneNormalPath() {
         var c01 = new Chapter("c01", 1.0d);
         var c02 = new Chapter("c02", 1.0d);

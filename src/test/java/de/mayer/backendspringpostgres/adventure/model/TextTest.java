@@ -11,14 +11,22 @@ import static org.junit.jupiter.api.Assertions.*;
 class TextTest {
 
     @Test
-    @DisplayName("When text is null, then an exception is thrown")
+    @DisplayName("""
+            Given text is null,
+            when a Text is created,
+            then an exception is thrown
+            """)
     void textCannotBeNull() {
         var exc = assertThrows(RuntimeException.class, () -> new Text(null));
         assertThat(exc.getCause(), is(instanceOf(IllegalAccessException.class)));
     }
 
     @Test
-    @DisplayName("When text is empty, then an exception is thrown")
+    @DisplayName("""
+            Given text is empty,
+            when a Text is created,
+            then an exception is thrown
+            """)
     void textCannotBeEmpty() {
         var exc = assertThrows(RuntimeException.class, () -> new Text(""));
         assertThat(exc.getCause(), is(instanceOf(IllegalAccessException.class)));

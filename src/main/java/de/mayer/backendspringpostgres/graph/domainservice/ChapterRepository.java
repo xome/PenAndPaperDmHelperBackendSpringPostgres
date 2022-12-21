@@ -1,4 +1,4 @@
-package de.mayer.backendspringpostgres.graph.service;
+package de.mayer.backendspringpostgres.graph.domainservice;
 
-public interface ChapterPersistenceService {
+public interface ChapterRepository {
 }

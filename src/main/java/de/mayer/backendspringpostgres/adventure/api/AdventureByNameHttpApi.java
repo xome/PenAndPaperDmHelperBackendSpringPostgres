@@ -1,4 +1,4 @@
-package de.mayer.backendspringpostgres.adventure.service.api;
+package de.mayer.backendspringpostgres.adventure.api;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.*;

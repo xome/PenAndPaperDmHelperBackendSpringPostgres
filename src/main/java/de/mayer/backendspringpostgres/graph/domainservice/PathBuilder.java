@@ -1,4 +1,4 @@
-package de.mayer.backendspringpostgres.graph.service;
+package de.mayer.backendspringpostgres.graph.domainservice;
 
 import de.mayer.backendspringpostgres.graph.model.Chapter;
 import de.mayer.backendspringpostgres.graph.model.Path;
