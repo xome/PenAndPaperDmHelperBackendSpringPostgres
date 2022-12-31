@@ -1,9 +1,8 @@
 package de.mayer.backendspringpostgres.graph.domainservice;
 
 import de.mayer.backendspringpostgres.graph.model.*;
-import de.mayer.backendspringpostgres.graph.persistence.ChapterJpaId;
-import de.mayer.backendspringpostgres.graph.persistence.ChapterLinkId;
-import de.mayer.backendspringpostgres.graph.persistence.InMemoryChapterLinkRepository;
+import de.mayer.backendspringpostgres.graph.persistence.ChapterLinkJpa;
+import de.mayer.backendspringpostgres.graph.persistence.InMemoryChapterLinkDomainRepository;
 import de.mayer.backendspringpostgres.graph.persistence.InMemoryChapterDomainRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -37,7 +36,7 @@ class GraphServiceTest {
                 new ChapterLink(c02, c01)));
 
         var exc = assertThrows(InvalidGraphException.class,
-                () -> new GraphService(new InMemoryChapterDomainRepository(), new InMemoryChapterLinkRepository())
+                () -> new GraphService(new InMemoryChapterDomainRepository(), new InMemoryChapterLinkDomainRepository())
                         .generatePaths(new Graph(chapters, links)));
 
         assertThat(exc.getMessage(),
@@ -64,7 +63,7 @@ class GraphServiceTest {
                 new ChapterLink(c03, c02)));
 
         var exc = assertThrows(InvalidGraphException.class,
-                () -> new GraphService(new InMemoryChapterDomainRepository(), new InMemoryChapterLinkRepository())
+                () -> new GraphService(new InMemoryChapterDomainRepository(), new InMemoryChapterLinkDomainRepository())
                         .generatePaths(new Graph(chapters, links)));
 
         assertThat(exc.getMessage(),
@@ -93,7 +92,7 @@ class GraphServiceTest {
                 new ChapterLink(c01, c04)));
 
         var exc = assertThrows(InvalidGraphException.class,
-                () -> new GraphService(new InMemoryChapterDomainRepository(), new InMemoryChapterLinkRepository())
+                () -> new GraphService(new InMemoryChapterDomainRepository(), new InMemoryChapterLinkDomainRepository())
                         .generatePaths(new Graph(chapters, links)));
 
         assertThat(exc.getMessage(),
@@ -137,7 +136,7 @@ class GraphServiceTest {
                 .addChapter(c04)
                 .build();
 
-        var paths = new GraphService(new InMemoryChapterDomainRepository(), new InMemoryChapterLinkRepository())
+        var paths = new GraphService(new InMemoryChapterDomainRepository(), new InMemoryChapterLinkDomainRepository())
                 .generatePaths(new Graph(chapters, links));
 
         assertThat(paths, containsInAnyOrder(pathLong, pathShort));
@@ -163,7 +162,7 @@ class GraphServiceTest {
         var path03 = new PathBuilder(c03).build();
         var path04 = new PathBuilder(c04).build();
 
-        var paths = new GraphService(new InMemoryChapterDomainRepository(), new InMemoryChapterLinkRepository())
+        var paths = new GraphService(new InMemoryChapterDomainRepository(), new InMemoryChapterLinkDomainRepository())
                 .generatePaths(new Graph(chapters, Collections.emptySet()));
 
         assertThat(paths, containsInAnyOrder(path01, path02, path03, path04));
@@ -203,7 +202,7 @@ class GraphServiceTest {
                 .addChapter(c04)
                 .build();
 
-        var paths = new GraphService(new InMemoryChapterDomainRepository(), new InMemoryChapterLinkRepository())
+        var paths = new GraphService(new InMemoryChapterDomainRepository(), new InMemoryChapterLinkDomainRepository())
                 .generatePaths(new Graph(chapters, links));
 
         assertThat(paths, containsInAnyOrder(pathTo02, pathTo03, pathTo04));
@@ -222,7 +221,7 @@ class GraphServiceTest {
         String adventure = "Adventure which does not exist";
         inMemoryRepository.deleteByAdventure(adventure);
 
-        GraphService graphService = new GraphService(inMemoryRepository, new InMemoryChapterLinkRepository());
+        GraphService graphService = new GraphService(inMemoryRepository, new InMemoryChapterLinkDomainRepository());
         assertThrows(NoChaptersForAdventureException.class, () -> graphService.createGraph(adventure));
 
     }
@@ -239,13 +238,13 @@ class GraphServiceTest {
         var chapter1 = new Chapter("c01", 1.0d);
         var chapter2 = new Chapter("c02", 1.0d);
 
-        inMemoryChapterRepository.save(new ChapterJpaId(adventure, chapter1.name()), chapter1);
-        inMemoryChapterRepository.save(new ChapterJpaId(adventure, chapter2.name()), chapter2);
+        inMemoryChapterRepository.save(adventure, chapter1);
+        inMemoryChapterRepository.save(adventure, chapter2);
 
-        var inMemoryChapterLinkRepository = new InMemoryChapterLinkRepository();
-        inMemoryChapterLinkRepository.save(new ChapterLinkId(adventure, chapter1.name(), chapter2.name()),
+        var inMemoryChapterLinkRepository = new InMemoryChapterLinkDomainRepository();
+        inMemoryChapterLinkRepository.save(adventure,
                 new ChapterLink(chapter1, chapter2));
-        inMemoryChapterLinkRepository.save(new ChapterLinkId(adventure, chapter2.name(), chapter1.name()),
+        inMemoryChapterLinkRepository.save(adventure,
                 new ChapterLink(chapter2, chapter1));
 
         assertThrows(InvalidGraphException.class,
@@ -267,11 +266,11 @@ class GraphServiceTest {
         var chapter2 = new Chapter("c02", 1.0d);
         var link = new ChapterLink(chapter1, chapter2);
 
-        inMemoryChapterRepository.save(new ChapterJpaId(adventure, chapter1.name()), chapter1);
-        inMemoryChapterRepository.save(new ChapterJpaId(adventure, chapter2.name()), chapter2);
+        inMemoryChapterRepository.save(adventure, chapter1);
+        inMemoryChapterRepository.save(adventure, chapter2);
 
-        var inMemoryChapterLinkRepository = new InMemoryChapterLinkRepository();
-        inMemoryChapterLinkRepository.save(new ChapterLinkId(adventure, chapter1.name(), chapter2.name()),
+        var inMemoryChapterLinkRepository = new InMemoryChapterLinkDomainRepository();
+        inMemoryChapterLinkRepository.save(adventure,
                 link);
 
         var graphExpected = new Graph(Set.of(chapter1, chapter2), Set.of(link));

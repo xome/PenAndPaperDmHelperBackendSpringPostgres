@@ -14,12 +14,12 @@ public class InMemoryChapterDomainRepository implements ChapterDomainRepository 
     private HashMap<ChapterJpaId, Chapter> database;
 
     @Override
-    public void save(ChapterJpaId chapterJpaId, Chapter chapter) {
+    public void save(String adventure, Chapter chapter) {
         if (database == null) {
             database = new HashMap<>();
         }
 
-        database.put(chapterJpaId, chapter);
+        database.put(new ChapterJpaId(adventure, chapter.name()), chapter);
     }
 
     @Override

@@ -5,8 +5,10 @@ import de.mayer.backendspringpostgres.graph.model.Chapter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.swing.text.html.Option;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 public class ChapterRepository implements ChapterDomainRepository {
@@ -20,8 +22,8 @@ public class ChapterRepository implements ChapterDomainRepository {
 
 
     @Override
-    public void save(ChapterJpaId chapterJpaId, Chapter chapter) {
-
+    public void save(String adventure, Chapter chapter) {
+        jpaRepository.save(ChapterJpa.fromModel(adventure, chapter));
     }
 
     @Override
@@ -31,7 +33,14 @@ public class ChapterRepository implements ChapterDomainRepository {
 
     @Override
     public Optional<Set<Chapter>> findByAdventure(String adventure) {
-        return Optional.empty();
+
+        var jpaChapters = jpaRepository.findByAdventure(adventure);
+        if (jpaChapters.isEmpty()) return Optional.empty();
+        return Optional.of(jpaChapters
+                .stream()
+                .map(jpaChapter -> new Chapter(jpaChapter.getName(), jpaChapter.getApproximateDurationInMinutes()))
+                .collect(Collectors.toSet()));
+
     }
 
     @Override

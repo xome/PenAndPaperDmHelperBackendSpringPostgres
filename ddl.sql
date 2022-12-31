@@ -53,20 +53,15 @@ create table environment_lightning
         references record (adventure, chapter, index)
         on delete cascade on update cascade
 );
-
 create table chapter_link
 (
     adventure    text,
-    chapter      text,
-    index        integer,
     chapter_from text,
+    index        integer,
     chapter_to   text,
-    constraint chapter_link_pk primary key (adventure, chapter, index),
-    constraint chapter_link_records_fk foreign key (adventure, chapter, index)
+    constraint chapter_link_pk primary key (adventure, chapter_from, index),
+    constraint chapter_link_records_fk foreign key (adventure, chapter_from, index)
         references record (adventure, chapter, index)
-        on delete cascade on update cascade,
-    constraint chapter_link_chapter_from_fk foreign key (adventure, chapter_from)
-        references chapter (adventure, name)
         on delete cascade on update cascade,
     constraint chapter_link_chapter_to_fk foreign key (adventure, chapter_to)
         references chapter (adventure, name)

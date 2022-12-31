@@ -1,5 +1,6 @@
 package de.mayer.backendspringpostgres.graph.persistence;
 
+import de.mayer.backendspringpostgres.graph.model.Chapter;
 import jakarta.persistence.*;
 
 import java.util.Objects;
@@ -16,19 +17,15 @@ public final class ChapterJpa {
     @Column(name = "name")
     @Id
     private String name;
-    @Column(name = "subheader")
-    private String subheader;
     @Column(name = "approximate_duration_in_minutes")
-    private Long approximateDurationInMinutes;
+    private Double approximateDurationInMinutes;
 
     public ChapterJpa(String adventure,
                       String name,
-                      String subheader,
-                      Long approximateDurationInMinutes
+                      Double approximateDurationInMinutes
     ) {
         this.adventure = adventure;
         this.name = name;
-        this.subheader = subheader;
         this.approximateDurationInMinutes = approximateDurationInMinutes;
     }
 
@@ -36,23 +33,22 @@ public final class ChapterJpa {
 
     }
 
+    public static ChapterJpa fromModel(String adventure, Chapter chapterRecord) {
+        return new ChapterJpa(adventure, chapterRecord.name(), chapterRecord.approximateDurationInMinutes());
+    }
+
     @Column(name = "adventure")
-    public String adventure() {
+    public String getAdventure() {
         return adventure;
     }
 
     @Column(name = "name")
-    public String name() {
+    public String getName() {
         return name;
     }
 
-    @Column(name = "subheader")
-    public String subheader() {
-        return subheader;
-    }
-
     @Column(name = "approximate_duration_in_minutes")
-    public Long approximateDurationInMinutes() {
+    public Double getApproximateDurationInMinutes() {
         return approximateDurationInMinutes;
     }
 
@@ -63,13 +59,12 @@ public final class ChapterJpa {
         var that = (ChapterJpa) obj;
         return Objects.equals(this.adventure, that.adventure) &&
                 Objects.equals(this.name, that.name) &&
-                Objects.equals(this.subheader, that.subheader) &&
                 Objects.equals(this.approximateDurationInMinutes, that.approximateDurationInMinutes);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(adventure, name, subheader, approximateDurationInMinutes);
+        return Objects.hash(adventure, name, approximateDurationInMinutes);
     }
 
     @Override
@@ -77,7 +72,6 @@ public final class ChapterJpa {
         return "ChapterJpa[" +
                 "adventure=" + adventure + ", " +
                 "name=" + name + ", " +
-                "subheader=" + subheader + ", " +
                 "approximateDurationInMinutes=" + approximateDurationInMinutes + ']';
     }
 

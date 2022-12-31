@@ -1,6 +1,7 @@
 package de.mayer.backendspringpostgres.graph.persistence;
 
-import de.mayer.backendspringpostgres.graph.domainservice.ChapterLinkRepository;
+import de.mayer.backendspringpostgres.adventure.model.Adventure;
+import de.mayer.backendspringpostgres.graph.domainservice.ChapterLinkDomainRepository;
 import de.mayer.backendspringpostgres.graph.model.ChapterLink;
 
 import java.util.HashMap;
@@ -9,16 +10,16 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class InMemoryChapterLinkRepository implements ChapterLinkRepository {
-    private HashMap<ChapterLinkId, ChapterLink> database;
+public class InMemoryChapterLinkDomainRepository implements ChapterLinkDomainRepository {
+    private HashMap<String, ChapterLink> database;
 
     @Override
-    public void save(ChapterLinkId chapterLinkId, ChapterLink chapterLink) {
+    public void save(String adventure, ChapterLink chapterLink) {
         if (this.database == null) {
             this.database = new HashMap<>();
         }
 
-        this.database.put(chapterLinkId, chapterLink);
+        this.database.put(adventure, chapterLink);
 
     }
 
@@ -27,7 +28,7 @@ public class InMemoryChapterLinkRepository implements ChapterLinkRepository {
         var chapterLinks = database
                 .entrySet()
                 .stream()
-                .filter(entry -> entry.getKey().adventure().equals(adventure))
+                .filter(entry -> entry.getKey().equals(adventure))
                 .map(Map.Entry::getValue)
                 .collect(Collectors.toSet());
         if (chapterLinks.isEmpty())

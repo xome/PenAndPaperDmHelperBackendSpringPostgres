@@ -19,11 +19,11 @@ import java.util.stream.Collectors;
 public class GraphService {
 
     private final ChapterDomainRepository chapterDomainRepository;
-    private final ChapterLinkRepository chapterLinkRepository;
+    private final ChapterLinkDomainRepository chapterLinkDomainRepository;
 
-    public GraphService(ChapterDomainRepository chapterDomainRepository, ChapterLinkRepository inMemoryChapterLinkRepository) {
+    public GraphService(ChapterDomainRepository chapterDomainRepository, ChapterLinkDomainRepository inMemoryChapterLinkDomainRepository) {
         this.chapterDomainRepository = chapterDomainRepository;
-        chapterLinkRepository = inMemoryChapterLinkRepository;
+        chapterLinkDomainRepository = inMemoryChapterLinkDomainRepository;
     }
 
     public Graph createGraph(String adventure) throws NoChaptersForAdventureException, InvalidGraphException {
@@ -31,7 +31,7 @@ public class GraphService {
                 .findByAdventure(adventure)
                 .orElseThrow(() -> new NoChaptersForAdventureException("No Chapters found for adventure %s!"
                         .formatted(adventure)));
-        var chapterLinks = chapterLinkRepository
+        var chapterLinks = chapterLinkDomainRepository
                 .findByAdventure(adventure)
                 .orElseGet(Collections::emptySet);
 
