@@ -1,13 +1,10 @@
 package de.mayer.backendspringpostgres.graph.domainservice;
 
-import de.mayer.backendspringpostgres.graph.model.Chapter;
-import de.mayer.backendspringpostgres.graph.model.ChapterLink;
-import de.mayer.backendspringpostgres.graph.model.Graph;
-import de.mayer.backendspringpostgres.graph.model.InvalidGraphException;
-import de.mayer.backendspringpostgres.graph.persistence.ChapterId;
+import de.mayer.backendspringpostgres.graph.model.*;
+import de.mayer.backendspringpostgres.graph.persistence.ChapterJpaId;
 import de.mayer.backendspringpostgres.graph.persistence.ChapterLinkId;
 import de.mayer.backendspringpostgres.graph.persistence.InMemoryChapterLinkRepository;
-import de.mayer.backendspringpostgres.graph.persistence.InMemoryChapterRepository;
+import de.mayer.backendspringpostgres.graph.persistence.InMemoryChapterDomainRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -40,7 +37,7 @@ class GraphServiceTest {
                 new ChapterLink(c02, c01)));
 
         var exc = assertThrows(InvalidGraphException.class,
-                () -> new GraphService(new InMemoryChapterRepository(), new InMemoryChapterLinkRepository())
+                () -> new GraphService(new InMemoryChapterDomainRepository(), new InMemoryChapterLinkRepository())
                         .generatePaths(new Graph(chapters, links)));
 
         assertThat(exc.getMessage(),
@@ -67,7 +64,7 @@ class GraphServiceTest {
                 new ChapterLink(c03, c02)));
 
         var exc = assertThrows(InvalidGraphException.class,
-                () -> new GraphService(new InMemoryChapterRepository(), new InMemoryChapterLinkRepository())
+                () -> new GraphService(new InMemoryChapterDomainRepository(), new InMemoryChapterLinkRepository())
                         .generatePaths(new Graph(chapters, links)));
 
         assertThat(exc.getMessage(),
@@ -95,15 +92,21 @@ class GraphServiceTest {
                 new ChapterLink(c03, c02),
                 new ChapterLink(c01, c04)));
 
-        var exc = assertThrows(RuntimeException.class,
-                () -> new GraphService(new InMemoryChapterRepository(), new InMemoryChapterLinkRepository())
+        var exc = assertThrows(InvalidGraphException.class,
+                () -> new GraphService(new InMemoryChapterDomainRepository(), new InMemoryChapterLinkRepository())
                         .generatePaths(new Graph(chapters, links)));
 
-        assertThat(exc.getCause(), is(instanceOf(InvalidGraphException.class)));
-        assertThat(exc.getCause().getMessage(),
-                matchesRegex("Graph is invalid\\. Circle detected on Path " +
-                        "((c01 -> c02 -> c03 -> c02 \\(4([,.])00 Minutes\\))|" +
-                        "(c01 -> c03 -> c02 -> c03 \\(4[,.]00 Minutes\\)))\\."));
+        assertThat(exc.getMessage(),
+                is("There are problematic Graphs."));
+
+
+        var possiblePath1 = new PathBuilder(c01).addChapter(c02).addChapter(c03).addChapter(c02).build();
+        var possiblePath2 = new PathBuilder(c01).addChapter(c03).addChapter(c02).addChapter(c03).build();
+
+        assertThat(exc.getProblematicPaths(), hasItems(anyOf(is(possiblePath1), is(possiblePath2))));
+        assertThat(exc.getProblematicPaths(), hasSize(1));
+
+
     }
 
     @Test
@@ -134,7 +137,7 @@ class GraphServiceTest {
                 .addChapter(c04)
                 .build();
 
-        var paths = new GraphService(new InMemoryChapterRepository(), new InMemoryChapterLinkRepository())
+        var paths = new GraphService(new InMemoryChapterDomainRepository(), new InMemoryChapterLinkRepository())
                 .generatePaths(new Graph(chapters, links));
 
         assertThat(paths, containsInAnyOrder(pathLong, pathShort));
@@ -160,7 +163,7 @@ class GraphServiceTest {
         var path03 = new PathBuilder(c03).build();
         var path04 = new PathBuilder(c04).build();
 
-        var paths = new GraphService(new InMemoryChapterRepository(), new InMemoryChapterLinkRepository())
+        var paths = new GraphService(new InMemoryChapterDomainRepository(), new InMemoryChapterLinkRepository())
                 .generatePaths(new Graph(chapters, Collections.emptySet()));
 
         assertThat(paths, containsInAnyOrder(path01, path02, path03, path04));
@@ -200,7 +203,7 @@ class GraphServiceTest {
                 .addChapter(c04)
                 .build();
 
-        var paths = new GraphService(new InMemoryChapterRepository(), new InMemoryChapterLinkRepository())
+        var paths = new GraphService(new InMemoryChapterDomainRepository(), new InMemoryChapterLinkRepository())
                 .generatePaths(new Graph(chapters, links));
 
         assertThat(paths, containsInAnyOrder(pathTo02, pathTo03, pathTo04));
@@ -215,7 +218,7 @@ class GraphServiceTest {
             then an exception is thrown
             """)
     void noChaptersForAdventure() {
-        var inMemoryRepository = new InMemoryChapterRepository();
+        var inMemoryRepository = new InMemoryChapterDomainRepository();
         String adventure = "Adventure which does not exist";
         inMemoryRepository.deleteByAdventure(adventure);
 
@@ -231,13 +234,13 @@ class GraphServiceTest {
             then an exception is thrown
             """)
     void invalidGraph() {
-        var inMemoryChapterRepository = new InMemoryChapterRepository();
+        var inMemoryChapterRepository = new InMemoryChapterDomainRepository();
         var adventure = "Adventure";
         var chapter1 = new Chapter("c01", 1.0d);
         var chapter2 = new Chapter("c02", 1.0d);
 
-        inMemoryChapterRepository.save(new ChapterId(adventure, chapter1.name()), chapter1);
-        inMemoryChapterRepository.save(new ChapterId(adventure, chapter2.name()), chapter2);
+        inMemoryChapterRepository.save(new ChapterJpaId(adventure, chapter1.name()), chapter1);
+        inMemoryChapterRepository.save(new ChapterJpaId(adventure, chapter2.name()), chapter2);
 
         var inMemoryChapterLinkRepository = new InMemoryChapterLinkRepository();
         inMemoryChapterLinkRepository.save(new ChapterLinkId(adventure, chapter1.name(), chapter2.name()),
@@ -258,14 +261,14 @@ class GraphServiceTest {
             the Graph is returned
             """)
     void validGraph() throws InvalidGraphException, NoChaptersForAdventureException {
-        var inMemoryChapterRepository = new InMemoryChapterRepository();
+        var inMemoryChapterRepository = new InMemoryChapterDomainRepository();
         var adventure = "Adventure";
         var chapter1 = new Chapter("c01", 1.0d);
         var chapter2 = new Chapter("c02", 1.0d);
         var link = new ChapterLink(chapter1, chapter2);
 
-        inMemoryChapterRepository.save(new ChapterId(adventure, chapter1.name()), chapter1);
-        inMemoryChapterRepository.save(new ChapterId(adventure, chapter2.name()), chapter2);
+        inMemoryChapterRepository.save(new ChapterJpaId(adventure, chapter1.name()), chapter1);
+        inMemoryChapterRepository.save(new ChapterJpaId(adventure, chapter2.name()), chapter2);
 
         var inMemoryChapterLinkRepository = new InMemoryChapterLinkRepository();
         inMemoryChapterLinkRepository.save(new ChapterLinkId(adventure, chapter1.name(), chapter2.name()),

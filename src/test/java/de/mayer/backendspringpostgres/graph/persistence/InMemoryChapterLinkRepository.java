@@ -35,4 +35,9 @@ public class InMemoryChapterLinkRepository implements ChapterLinkRepository {
         else
             return Optional.of(chapterLinks);
     }
+
+    @Override
+    public void deleteAll() {
+        database.clear();
+    }
 }

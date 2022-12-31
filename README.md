@@ -3,3 +3,9 @@
 
 ## Getting started
 
+### Pull image from docker.io
+
+```
+docker pull xome42/pen-and-paper-dm-helper-backend-spring-postgres
+```
+

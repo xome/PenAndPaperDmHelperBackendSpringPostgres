@@ -1,6 +1,6 @@
 package de.mayer.backendspringpostgres.graph.persistence;
 
-import de.mayer.backendspringpostgres.graph.domainservice.ChapterRepository;
+import de.mayer.backendspringpostgres.graph.domainservice.ChapterDomainRepository;
 import de.mayer.backendspringpostgres.graph.model.Chapter;
 
 import java.util.HashMap;
@@ -9,17 +9,17 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class InMemoryChapterRepository implements ChapterRepository {
+public class InMemoryChapterDomainRepository implements ChapterDomainRepository {
 
-    private HashMap<ChapterId, Chapter> database;
+    private HashMap<ChapterJpaId, Chapter> database;
 
     @Override
-    public void save(ChapterId chapterId, Chapter chapter) {
+    public void save(ChapterJpaId chapterJpaId, Chapter chapter) {
         if (database == null) {
             database = new HashMap<>();
         }
 
-        database.put(chapterId, chapter);
+        database.put(chapterJpaId, chapter);
     }
 
     @Override
@@ -48,5 +48,10 @@ public class InMemoryChapterRepository implements ChapterRepository {
             return Optional.empty();
         else
             return Optional.of(chapters);
+    }
+
+    @Override
+    public void deleteAll() {
+        database.clear();
     }
 }

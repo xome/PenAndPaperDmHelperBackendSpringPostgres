@@ -9,7 +9,7 @@ create table chapter
     adventure                    text,
     name                         text,
     subheader                    text,
-    approximatedurationinminutes float4,
+    approximate_duration_in_minutes float4,
     constraint chapter_adventure_fk foreign key (adventure) references adventure (name)
         on delete cascade on update cascade,
     constraint chapter_pk primary key (adventure, name)
@@ -31,8 +31,8 @@ create table picture
     chapter              text,
     index                integer,
     base64               text,
-    fileformat           text,
-    isshareablewithgroup bool,
+    file_format           text,
+    is_shareable_with_group bool,
     constraint pictures_pk primary key (adventure, chapter, index),
     constraint pictures_records_fk foreign key (adventure, chapter, index)
         references record (adventure, chapter, index)
