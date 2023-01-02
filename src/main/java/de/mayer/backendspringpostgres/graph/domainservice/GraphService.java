@@ -4,6 +4,7 @@ import de.mayer.backendspringpostgres.graph.model.Chapter;
 import de.mayer.backendspringpostgres.graph.model.Graph;
 import de.mayer.backendspringpostgres.graph.model.InvalidGraphException;
 import de.mayer.backendspringpostgres.graph.model.Path;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +22,7 @@ public class GraphService {
     private final ChapterDomainRepository chapterDomainRepository;
     private final ChapterLinkDomainRepository chapterLinkDomainRepository;
 
+    @Autowired
     public GraphService(ChapterDomainRepository chapterDomainRepository, ChapterLinkDomainRepository inMemoryChapterLinkDomainRepository) {
         this.chapterDomainRepository = chapterDomainRepository;
         chapterLinkDomainRepository = inMemoryChapterLinkDomainRepository;
@@ -32,8 +34,7 @@ public class GraphService {
                 .orElseThrow(() -> new NoChaptersForAdventureException("No Chapters found for adventure %s!"
                         .formatted(adventure)));
         var chapterLinks = chapterLinkDomainRepository
-                .findByAdventure(adventure)
-                .orElseGet(Collections::emptySet);
+                .findByAdventure(adventure);
 
         var graph = new Graph(chapters, chapterLinks);
 

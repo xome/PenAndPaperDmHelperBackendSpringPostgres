@@ -5,19 +5,24 @@ import de.mayer.backendspringpostgres.graph.model.ChapterLink;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 public class ChapterLinkRepository implements ChapterLinkDomainRepository {
 
-    private ChapterLinkJpaRepository chapterLinkJpaRepository;
-    private RecordJpaRepository recordJpaRepository;
+    private final ChapterLinkJpaRepository chapterLinkJpaRepository;
+    private final RecordJpaRepository recordJpaRepository;
+    private final ChapterRepository chapterJpaRepository;
 
     @Autowired
-    public ChapterLinkRepository(ChapterLinkJpaRepository chapterLinkJpaRepository, RecordJpaRepository recordJpaRepository) {
+    public ChapterLinkRepository(ChapterLinkJpaRepository chapterLinkJpaRepository, RecordJpaRepository recordJpaRepository, ChapterRepository chapterJpaRepository) {
         this.chapterLinkJpaRepository = chapterLinkJpaRepository;
         this.recordJpaRepository = recordJpaRepository;
+        this.chapterJpaRepository = chapterJpaRepository;
     }
 
 
@@ -38,12 +43,26 @@ public class ChapterLinkRepository implements ChapterLinkDomainRepository {
     }
 
     @Override
-    public Optional<Set<ChapterLink>> findByAdventure(String adventure) {
-        return Optional.empty();
+    public Set<ChapterLink> findByAdventure(String adventure) {
+        var links = chapterLinkJpaRepository.findByAdventure(adventure);
+        if (links.isEmpty()) return Collections.emptySet();
+        return links
+                .stream()
+                .map(chapterLinkJpa -> {
+                    var chapterFrom = chapterJpaRepository.findById(adventure, chapterLinkJpa.chapterFrom());
+                    var chapterTo = chapterJpaRepository.findById(adventure, chapterLinkJpa.to());
+
+                    if (chapterFrom.isEmpty() || chapterTo.isEmpty()) {
+                        return null;
+                    }
+                    return new ChapterLink(chapterFrom.get(), chapterTo.get());
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
     }
 
     @Override
     public void deleteAll() {
-
+        chapterLinkJpaRepository.deleteAll();
     }
 }

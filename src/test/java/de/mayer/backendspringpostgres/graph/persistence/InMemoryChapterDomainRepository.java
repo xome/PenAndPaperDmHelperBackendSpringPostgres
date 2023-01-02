@@ -54,4 +54,9 @@ public class InMemoryChapterDomainRepository implements ChapterDomainRepository 
     public void deleteAll() {
         database.clear();
     }
+
+    @Override
+    public Optional<Chapter> findById(String adventure, String chapter) {
+        return Optional.empty();
+    }
 }

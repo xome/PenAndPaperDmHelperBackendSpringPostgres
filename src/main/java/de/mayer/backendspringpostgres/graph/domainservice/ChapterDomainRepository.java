@@ -13,4 +13,6 @@ public interface ChapterDomainRepository {
     Optional<Set<Chapter>> findByAdventure(String adventure);
 
     void deleteAll();
+
+    Optional<Chapter> findById(String adventure, String chapter);
 }

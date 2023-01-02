@@ -1,11 +1,9 @@
 package de.mayer.backendspringpostgres.graph.persistence;
 
-import de.mayer.backendspringpostgres.adventure.model.Adventure;
 import de.mayer.backendspringpostgres.graph.domainservice.ChapterLinkDomainRepository;
 import de.mayer.backendspringpostgres.graph.model.ChapterLink;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class InMemoryChapterLinkDomainRepository implements ChapterLinkDomainRepository {
     private HashMap<String, Set<ChapterLink>> database;
@@ -22,12 +20,8 @@ public class InMemoryChapterLinkDomainRepository implements ChapterLinkDomainRep
     }
 
     @Override
-    public Optional<Set<ChapterLink>> findByAdventure(String adventure) {
-        var chapterLinks = database.getOrDefault(adventure, new HashSet<>());
-        if (chapterLinks.isEmpty())
-            return Optional.empty();
-        else
-            return Optional.of(chapterLinks);
+    public Set<ChapterLink> findByAdventure(String adventure) {
+       return database.getOrDefault(adventure, new HashSet<>());
     }
 
     @Override
