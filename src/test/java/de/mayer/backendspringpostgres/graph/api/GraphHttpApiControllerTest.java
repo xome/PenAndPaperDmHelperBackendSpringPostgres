@@ -171,5 +171,44 @@ class GraphHttpApiControllerTest {
 
     }
 
+    @Test
+    @DisplayName("""
+            Given the adventure has a cycle,
+            when a graph is requested,
+            then HTTP-Status EXPECTATION_FAILED and the cyclic paths are returned
+            """)
+    void cycleAdventure() throws JsonProcessingException {
+
+        var adventure = "Advenutre";
+        var chapter01 = new Chapter("Chapter 01", 1.0d);
+        var chapter02 = new Chapter("Chapter 02", 1.0d);
+        var chapterLink01 = new ChapterLink(chapter01, chapter02);
+        var chapterLink02 = new ChapterLink(chapter02, chapter01);
+
+        chapterDomainRepository.save(adventure, chapter01);
+        chapterDomainRepository.save(adventure, chapter02);
+        chapterLinkDomainRepository.save(adventure, chapterLink01);
+        chapterLinkDomainRepository.save(adventure, chapterLink02);
+
+        var expectedBody = new LinkedHashMap<String, Object>();
+        expectedBody.put("message", "Graph is invalid. There are only Paths with circles.");
+        expectedBody.put("problematicPaths", Collections.emptySet());
+        String expectedBodyAsJson = jsonMapper.writeValueAsString(expectedBody);
+
+        var returnedBody =
+                given()
+                        .port(port)
+                        .pathParam("adventureName", adventure)
+                .when()
+                        .get("/graph/{adventureName}")
+                .then()
+                        .statusCode(is(HttpStatus.EXPECTATION_FAILED.value()))
+                        .extract()
+                        .body()
+                        .asString();
+
+        assertThat(returnedBody, is(expectedBodyAsJson));
+
+    }
 
 }

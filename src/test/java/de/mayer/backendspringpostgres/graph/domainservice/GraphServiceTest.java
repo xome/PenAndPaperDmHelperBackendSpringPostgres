@@ -1,16 +1,12 @@
 package de.mayer.backendspringpostgres.graph.domainservice;
 
 import de.mayer.backendspringpostgres.graph.model.*;
-import de.mayer.backendspringpostgres.graph.persistence.ChapterLinkJpa;
 import de.mayer.backendspringpostgres.graph.persistence.InMemoryChapterLinkDomainRepository;
 import de.mayer.backendspringpostgres.graph.persistence.InMemoryChapterDomainRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -41,7 +37,6 @@ class GraphServiceTest {
 
         assertThat(exc.getMessage(),
                 is("Graph is invalid. There are only Paths with circles."));
-
     }
 
     @Test

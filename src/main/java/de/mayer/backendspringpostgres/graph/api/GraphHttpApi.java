@@ -1,6 +1,5 @@
 package de.mayer.backendspringpostgres.graph.api;
 
-import de.mayer.backendspringpostgres.graph.model.Graph;
 import de.mayer.backendspringpostgres.graph.model.Path;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +13,7 @@ import java.util.List;
 public interface GraphHttpApi {
 
     @GetMapping("/graph/{adventureName}")
-    default ResponseEntity<Graph> getGraph(@PathVariable("adventureName") String adventureName){
+    default ResponseEntity<?> getGraph(@PathVariable("adventureName") String adventureName){
         return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
     }
 

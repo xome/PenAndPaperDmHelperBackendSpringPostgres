@@ -1,4 +1,4 @@
-package de.mayer.backendspringpostgres.graph.api;
+package de.mayer.backendspringpostgres.graph.api.jackson;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.mayer.backendspringpostgres.graph.model.Chapter;

@@ -1,9 +1,6 @@
 package de.mayer.backendspringpostgres.graph.domainservice;
 
-import de.mayer.backendspringpostgres.graph.model.Chapter;
-import de.mayer.backendspringpostgres.graph.model.Graph;
-import de.mayer.backendspringpostgres.graph.model.InvalidGraphException;
-import de.mayer.backendspringpostgres.graph.model.Path;
+import de.mayer.backendspringpostgres.graph.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -64,8 +61,9 @@ public class GraphService {
                                 .noneMatch(chapterLink -> chapterLink.from().equals(chapter)))
                 .collect(Collectors.toSet());
 
-        if (startingPoints.isEmpty() || endingPoints.isEmpty())
+        if (startingPoints.isEmpty() || endingPoints.isEmpty()) {
             throw new InvalidGraphException("Graph is invalid. There are only Paths with circles.", Collections.emptySet());
+        }
 
         var allPaths = new HashSet<Path>();
         var problematicPaths = new HashSet<Path>();
