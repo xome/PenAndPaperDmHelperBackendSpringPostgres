@@ -26,7 +26,10 @@ class CacheTest {
         var graph = new Graph(Set.of(chapter01), Collections.emptySet());
 
         cache.put("Adventure", graph);
-        assertThat(cache.get("Adventure", Graph.class), is(graph));
+        var optional = cache.get("Adventure", Graph.class);
+
+        assertThat(optional.isPresent(), is(true));
+        assertThat(optional.get(), is(graph));
 
     }
 
@@ -34,7 +37,8 @@ class CacheTest {
     @DisplayName("""
             Given a Graph is added,
             when the key is invalidated,
-            the Cache returns null""")
+            the Cache returns an empty Optional
+            """)
     void invalidatedKeyReturnsNull(){
         var cache = new Cache();
         var chapter = new Chapter("Chapter01", 1.0d);
@@ -43,7 +47,7 @@ class CacheTest {
         cache.put(key, graph);
 
         cache.invalidate(key);
-        assertThat(cache.get(key, Graph.class), is(nullValue()));
+        assertThat(cache.get(key, Graph.class).isEmpty(), is(true));
 
     }
 

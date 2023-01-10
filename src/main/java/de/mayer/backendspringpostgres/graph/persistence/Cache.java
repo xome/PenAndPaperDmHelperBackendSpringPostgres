@@ -1,11 +1,14 @@
 package de.mayer.backendspringpostgres.graph.persistence;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Optional;
 
 public class Cache {
     private HashMap<Class<?>, HashMap<String, Object>> cache;
+    private HashSet<String> invalidatedKeys;
 
-    public void put(String key, Object object) {
+    public <T> void put(String key, T object) {
         if (cache == null) {
             cache = new HashMap<>();
         }
@@ -17,22 +20,18 @@ public class Cache {
         cache.get(object.getClass()).put(key, object);
     }
 
-    public Object get(String key, Class<?> aClass) {
-        return cache.get(aClass).get(key);
+    public <T> Optional<T> get(String key, Class<T> aClass) {
+        if (invalidatedKeys != null
+                && invalidatedKeys.contains(key)) {
+            return Optional.empty();
+        }
+        return Optional.of(aClass.cast(cache.get(aClass).get(key)));
     }
 
     public void invalidate(String key) {
-        cache
-                .entrySet()
-                .parallelStream()
-                .filter((entry) -> entry
-                        .getValue()
-                        .keySet()
-                        .stream()
-                        .anyMatch(cacheKey -> cacheKey.equals(key)))
-                .forEach(entry ->
-                        cache
-                                .get(entry.getKey())
-                                .put(key, null));
+        if (invalidatedKeys == null) {
+            invalidatedKeys = new HashSet<>();
+        }
+        invalidatedKeys.add(key);
     }
 }
