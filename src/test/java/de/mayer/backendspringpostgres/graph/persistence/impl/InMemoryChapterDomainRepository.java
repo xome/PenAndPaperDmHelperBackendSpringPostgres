@@ -14,7 +14,6 @@ public class InMemoryChapterDomainRepository implements ChapterDomainRepository 
 
     private HashMap<ChapterJpaId, Chapter> database;
 
-    @Override
     public void save(String adventure, Chapter chapter) {
         if (database == null) {
             database = new HashMap<>();
@@ -23,7 +22,6 @@ public class InMemoryChapterDomainRepository implements ChapterDomainRepository 
         database.put(new ChapterJpaId(adventure, chapter.name()), chapter);
     }
 
-    @Override
     public void deleteByAdventure(String adventure) {
         if (database == null || database.isEmpty()) return;
         database
@@ -49,11 +47,6 @@ public class InMemoryChapterDomainRepository implements ChapterDomainRepository 
             return Optional.empty();
         else
             return Optional.of(chapters);
-    }
-
-    @Override
-    public void deleteAll() {
-        database.clear();
     }
 
     @Override

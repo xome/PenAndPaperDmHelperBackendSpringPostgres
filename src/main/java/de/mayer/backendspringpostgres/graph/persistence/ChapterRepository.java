@@ -21,16 +21,6 @@ public class ChapterRepository implements ChapterDomainRepository {
 
 
     @Override
-    public void save(String adventure, Chapter chapter) {
-        jpaRepository.save(ChapterJpa.fromModel(adventure, chapter));
-    }
-
-    @Override
-    public void deleteByAdventure(String adventure) {
-
-    }
-
-    @Override
     public Optional<Set<Chapter>> findByAdventure(String adventure) {
 
         var jpaChapters = jpaRepository.findByAdventure(adventure);
@@ -40,11 +30,6 @@ public class ChapterRepository implements ChapterDomainRepository {
                 .map(jpaChapter -> new Chapter(jpaChapter.getName(), jpaChapter.getApproximateDurationInMinutes()))
                 .collect(Collectors.toSet()));
 
-    }
-
-    @Override
-    public void deleteAll() {
-        jpaRepository.deleteAll();
     }
 
     @Override

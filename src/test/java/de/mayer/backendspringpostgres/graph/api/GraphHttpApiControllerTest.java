@@ -2,10 +2,14 @@ package de.mayer.backendspringpostgres.graph.api;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.mayer.backendspringpostgres.graph.domainservice.ChapterDomainRepository;
-import de.mayer.backendspringpostgres.graph.domainservice.ChapterLinkDomainRepository;
+import de.mayer.backendspringpostgres.graph.domainservice.Cache;
 import de.mayer.backendspringpostgres.graph.model.Chapter;
 import de.mayer.backendspringpostgres.graph.model.ChapterLink;
+import de.mayer.backendspringpostgres.graph.model.Graph;
+import de.mayer.backendspringpostgres.graph.persistence.ChapterJpa;
+import de.mayer.backendspringpostgres.graph.persistence.ChapterJpaRepository;
+import de.mayer.backendspringpostgres.graph.persistence.ChapterLinkJpa;
+import de.mayer.backendspringpostgres.graph.persistence.ChapterLinkJpaRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,9 +21,9 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.util.*;
 
-import static io.restassured.RestAssured.*;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.hamcrest.MatcherAssert.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
@@ -28,20 +32,23 @@ class GraphHttpApiControllerTest {
     @LocalServerPort
     private int port;
 
-    @AfterEach
-    void cleanup() {
-        chapterDomainRepository.deleteAll();
-    }
+    @Autowired
+    ChapterLinkJpaRepository chapterLinkJpaRepository;
 
     @Autowired
-    ChapterDomainRepository chapterDomainRepository;
-
-    @Autowired
-    ChapterLinkDomainRepository chapterLinkDomainRepository;
+    ChapterJpaRepository chapterJpaRepository;
 
     @Autowired
     ObjectMapper jsonMapper;
 
+    @Autowired
+    Cache cache;
+
+    @AfterEach
+    void cleanup() {
+        chapterLinkJpaRepository.deleteAll();
+        chapterJpaRepository.deleteAll();
+    }
     @Test
     @DisplayName("""
             Given there is no adventure by the name of the parameters value,
@@ -49,8 +56,7 @@ class GraphHttpApiControllerTest {
             Then Status NOT_FOUND is returned.
             """)
     void noAdventureByThatName() {
-
-        chapterDomainRepository.deleteAll();
+        cache.invalidate("test adventure", Graph.class);
 
         given()
                 .port(port)
@@ -69,15 +75,13 @@ class GraphHttpApiControllerTest {
             the simple Graph is returned
             """)
     void oneGraphNoLinks() throws JsonProcessingException {
-
-        chapterDomainRepository.deleteAll();
-        chapterLinkDomainRepository.deleteAll();
-
+        cache.invalidate("Adventure", Graph.class);
         var chapter = new Chapter("Chapter 01", 30d);
 
-        chapterDomainRepository
-                .save("Adventure",
-                        chapter);
+        chapterJpaRepository
+                .save(new ChapterJpa("Adventure",
+                        chapter.name(),
+                        chapter.approximateDurationInMinutes()));
         var map = new HashMap<String, Object>();
         map.put("chapters", Set.of(chapter.name()));
         map.put("chapterLinks", Collections.emptySet());
@@ -110,21 +114,26 @@ class GraphHttpApiControllerTest {
             the Graph is returned according to spec
             """)
     void twoChaptersOneLink() throws JsonProcessingException {
-
+        cache.invalidate("Adventure", Graph.class);
         var chapter = new Chapter("Chapter 01", 30d);
         var chapter2 = new Chapter("Chapter 02", 30d);
 
-        chapterDomainRepository
-                .save("Adventure",
-                        chapter);
+        chapterJpaRepository
+                .save(new ChapterJpa("Adventure",
+                        chapter.name(),
+                        chapter.approximateDurationInMinutes()));
 
-        chapterDomainRepository
-                .save("Adventure",
-                        chapter2);
+        chapterJpaRepository
+                .save(new ChapterJpa("Adventure",
+                        chapter2.name(),
+                        chapter2.approximateDurationInMinutes()));
 
-        chapterLinkDomainRepository
-                .save("Adventure",
-                        new ChapterLink(chapter, chapter2));
+        var link = new ChapterLink(chapter, chapter2);
+        chapterLinkJpaRepository
+                .save(new ChapterLinkJpa("Adventure",
+                        link.from().name(),
+                        0,
+                        link.to().name()));
 
         var linkMap = new LinkedHashMap<String, String>();
         linkMap.put("chapterNameFrom", chapter.name());
@@ -177,16 +186,25 @@ class GraphHttpApiControllerTest {
             """)
     void cycleAdventure() throws JsonProcessingException {
 
-        var adventure = "Advenutre";
+        var adventure = "Adventure";
+        cache.invalidate(adventure, Graph.class);
         var chapter01 = new Chapter("Chapter 01", 1.0d);
         var chapter02 = new Chapter("Chapter 02", 1.0d);
         var chapterLink01 = new ChapterLink(chapter01, chapter02);
         var chapterLink02 = new ChapterLink(chapter02, chapter01);
 
-        chapterDomainRepository.save(adventure, chapter01);
-        chapterDomainRepository.save(adventure, chapter02);
-        chapterLinkDomainRepository.save(adventure, chapterLink01);
-        chapterLinkDomainRepository.save(adventure, chapterLink02);
+        chapterJpaRepository.save(new ChapterJpa(adventure, chapter01.name(), chapter01.approximateDurationInMinutes()));
+        chapterJpaRepository.save(new ChapterJpa(adventure, chapter02.name(), chapter02.approximateDurationInMinutes()));
+        chapterLinkJpaRepository
+                .save(new ChapterLinkJpa(adventure,
+                        chapterLink01.from().name(),
+                        0,
+                        chapterLink01.to().name()));
+        chapterLinkJpaRepository
+                .save(new ChapterLinkJpa(adventure,
+                        chapterLink02.from().name(),
+                        0,
+                        chapterLink02.to().name()));
 
         var expectedBody = new LinkedHashMap<String, Object>();
         expectedBody.put("message", "Graph is invalid. There are only Paths with circles.");

@@ -288,10 +288,10 @@ class GraphServiceTest {
         var chapter02 = new Chapter("Chapter02", 2d);
         var chapterLink = new ChapterLink(chapter01, chapter02);
 
-        ChapterDomainRepository chapterRepo = new InMemoryChapterDomainRepository();
+        InMemoryChapterDomainRepository chapterRepo = new InMemoryChapterDomainRepository();
         chapterRepo.save(adventure, chapter01);
         chapterRepo.save(adventure, chapter02);
-        ChapterLinkDomainRepository chapterLinkRepo = new InMemoryChapterLinkDomainRepository();
+        InMemoryChapterLinkDomainRepository chapterLinkRepo = new InMemoryChapterLinkDomainRepository();
         chapterLinkRepo.save(adventure, chapterLink);
 
         var graphCached = new Graph(Set.of(chapter01), Collections.emptySet());
@@ -313,7 +313,7 @@ class GraphServiceTest {
         var adventure = "Adventure";
         var chapter01 = new Chapter("Chapter01", 1d);
 
-        ChapterDomainRepository chapterRepo = new InMemoryChapterDomainRepository();
+        InMemoryChapterDomainRepository chapterRepo = new InMemoryChapterDomainRepository();
         chapterRepo.save(adventure, chapter01);
 
         var cache = new InMemoryCache();

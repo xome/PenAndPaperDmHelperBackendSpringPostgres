@@ -8,7 +8,6 @@ import java.util.*;
 public class InMemoryChapterLinkDomainRepository implements ChapterLinkDomainRepository {
     private HashMap<String, Set<ChapterLink>> database;
 
-    @Override
     public void save(String adventure, ChapterLink chapterLink) {
         if (this.database == null) {
             this.database = new HashMap<>();
@@ -23,11 +22,6 @@ public class InMemoryChapterLinkDomainRepository implements ChapterLinkDomainRep
     public Set<ChapterLink> findByAdventure(String adventure) {
         if (this.database == null) return new HashSet<>();
        return database.getOrDefault(adventure, new HashSet<>());
-    }
-
-    @Override
-    public void deleteAll() {
-        database.clear();
     }
 
 }
