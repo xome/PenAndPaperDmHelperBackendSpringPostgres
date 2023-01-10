@@ -1,7 +1,8 @@
-package de.mayer.backendspringpostgres.graph.persistence;
+package de.mayer.backendspringpostgres.graph.persistence.impl;
 
 import de.mayer.backendspringpostgres.graph.domainservice.ChapterDomainRepository;
 import de.mayer.backendspringpostgres.graph.model.Chapter;
+import de.mayer.backendspringpostgres.graph.persistence.ChapterJpaId;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -59,4 +60,5 @@ public class InMemoryChapterDomainRepository implements ChapterDomainRepository 
     public Optional<Chapter> findById(String adventure, String chapter) {
         return Optional.empty();
     }
+
 }

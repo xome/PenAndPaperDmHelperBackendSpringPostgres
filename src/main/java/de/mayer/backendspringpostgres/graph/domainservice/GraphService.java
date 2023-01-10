@@ -18,14 +18,24 @@ public class GraphService {
 
     private final ChapterDomainRepository chapterDomainRepository;
     private final ChapterLinkDomainRepository chapterLinkDomainRepository;
+    private final Cache cache;
 
     @Autowired
-    public GraphService(ChapterDomainRepository chapterDomainRepository, ChapterLinkDomainRepository inMemoryChapterLinkDomainRepository) {
+    public GraphService(ChapterDomainRepository chapterDomainRepository,
+                        ChapterLinkDomainRepository inMemoryChapterLinkDomainRepository,
+                        Cache cache) {
         this.chapterDomainRepository = chapterDomainRepository;
-        chapterLinkDomainRepository = inMemoryChapterLinkDomainRepository;
+        this.chapterLinkDomainRepository = inMemoryChapterLinkDomainRepository;
+        this.cache = cache;
     }
 
     public Graph createGraph(String adventure) throws NoChaptersForAdventureException, InvalidGraphException {
+        var cachedGraph = cache.get(adventure, Graph.class);
+
+        if (cachedGraph.isPresent()){
+            return cachedGraph.get();
+        }
+
         var chapters = chapterDomainRepository
                 .findByAdventure(adventure)
                 .orElseThrow(() -> new NoChaptersForAdventureException("No Chapters found for adventure %s!"
@@ -39,6 +49,7 @@ public class GraphService {
         // If Paths are not valid, an InvalidGraphException is thrown here.
         generatePaths(graph);
 
+        cache.put(adventure, graph);
         return graph;
     }
 
@@ -120,6 +131,5 @@ public class GraphService {
         }
         return allPaths;
     }
-
 
 }

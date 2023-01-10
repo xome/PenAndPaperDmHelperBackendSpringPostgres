@@ -1,17 +1,24 @@
 package de.mayer.backendspringpostgres.graph.persistence;
 
+import de.mayer.backendspringpostgres.graph.domainservice.Cache;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
-public class Cache {
-    private HashMap<Class<?>, HashMap<String, Object>> cache;
-    private HashMap<Class<?>, HashSet<String>> invalidatedKeys;
+@Component
+@Scope("singleton")
+public class InMemoryCache implements Cache {
+    private ConcurrentHashMap<Class<?>, HashMap<String, Object>> cache;
+    private ConcurrentHashMap<Class<?>, HashSet<String>> invalidatedKeys;
 
-    public <T> void put(String key, T object) {
+    public void put(String key, Object object) {
         if (cache == null) {
-            cache = new HashMap<>();
+            cache = new ConcurrentHashMap<>();
         }
 
         if (!cache.containsKey(object.getClass())) {
@@ -43,9 +50,9 @@ public class Cache {
                 cache.get(aClass).getOrDefault(key, null)));
     }
 
-    public <T> void invalidate(String key, Class<T> aClass) {
+    public void invalidate(String key, Class<?> aClass) {
         if (invalidatedKeys == null) {
-            invalidatedKeys = new HashMap<>();
+            invalidatedKeys = new ConcurrentHashMap<>();
         }
         invalidatedKeys.put(aClass, new HashSet<>(Collections.singleton(key)));
     }

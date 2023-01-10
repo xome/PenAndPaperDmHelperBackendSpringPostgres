@@ -1,7 +1,8 @@
-package de.mayer.backendspringpostgres.graph.persistence;
+package de.mayer.backendspringpostgres.graph.domainservice;
 
 import de.mayer.backendspringpostgres.graph.model.Chapter;
 import de.mayer.backendspringpostgres.graph.model.Graph;
+import de.mayer.backendspringpostgres.graph.persistence.InMemoryCache;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -10,16 +11,16 @@ import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
-class CacheTest {
+class InMemoryCacheTest {
 
     @Test
     @DisplayName("""
-            Given the cache is empty,
+            Given the inMemoryCache is empty,
             when a Graph is added,
             it can be retrieved
             """)
     void emptyAddOne(){
-        var cache = new Cache();
+        var cache = new InMemoryCache();
         var chapter01 = new Chapter("Chapter 01", 2.0d);
         var graph = new Graph(Set.of(chapter01), Collections.emptySet());
 
@@ -39,7 +40,7 @@ class CacheTest {
             the Cache returns an empty Optional
             """)
     void invalidatedKeyReturnsNull(){
-        var cache = new Cache();
+        var cache = new InMemoryCache();
         var chapter = new Chapter("Chapter01", 1.0d);
         var graph = new Graph(Set.of(chapter), Collections.emptySet());
         var key = "Adventure";
@@ -57,7 +58,7 @@ class CacheTest {
             it can be retrieved
             """)
     void validateKey(){
-        var cache = new Cache();
+        var cache = new InMemoryCache();
         var chapter = new Chapter("Chapter01", 1.0d);
         var graph = new Graph(Set.of(chapter), Collections.emptySet());
         var key = "Adventure";
@@ -78,7 +79,7 @@ class CacheTest {
             """)
     void cacheNotInitialised(){
         assertThat("No object can be retrieved from an empty Cache.",
-                new Cache().get("any key", Graph.class).isEmpty(), is(true));
+                new InMemoryCache().get("any key", Graph.class).isEmpty(), is(true));
     }
 
     @Test
@@ -88,7 +89,7 @@ class CacheTest {
             an empty Optional is returned
             """)
     void classCacheNotInitialised(){
-        var cache = new Cache();
+        var cache = new InMemoryCache();
         cache.put("a key", new Chapter("Chapter 01", 2.0d));
 
         assertThat("There is no object retrieved for the given Key and Class",
@@ -102,7 +103,7 @@ class CacheTest {
             an empty Optional is returned
             """)
     void unknownKey(){
-        var cache = new Cache();
+        var cache = new InMemoryCache();
         cache.put("a key", new Chapter("Chapter 01", 1d));
 
         assertThat("No object can be retrieved for the given key",

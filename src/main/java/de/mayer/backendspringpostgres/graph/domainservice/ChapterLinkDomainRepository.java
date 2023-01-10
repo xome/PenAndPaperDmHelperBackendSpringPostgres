@@ -8,4 +8,5 @@ public interface ChapterLinkDomainRepository {
     void save(String adventure, ChapterLink chapterLink);
     Set<ChapterLink> findByAdventure(String adventure);
     void deleteAll();
+
 }

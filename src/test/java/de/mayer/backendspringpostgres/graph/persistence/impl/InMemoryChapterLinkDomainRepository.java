@@ -1,4 +1,4 @@
-package de.mayer.backendspringpostgres.graph.persistence;
+package de.mayer.backendspringpostgres.graph.persistence.impl;
 
 import de.mayer.backendspringpostgres.graph.domainservice.ChapterLinkDomainRepository;
 import de.mayer.backendspringpostgres.graph.model.ChapterLink;
@@ -21,6 +21,7 @@ public class InMemoryChapterLinkDomainRepository implements ChapterLinkDomainRep
 
     @Override
     public Set<ChapterLink> findByAdventure(String adventure) {
+        if (this.database == null) return new HashSet<>();
        return database.getOrDefault(adventure, new HashSet<>());
     }
 
@@ -28,4 +29,5 @@ public class InMemoryChapterLinkDomainRepository implements ChapterLinkDomainRep
     public void deleteAll() {
         database.clear();
     }
+
 }

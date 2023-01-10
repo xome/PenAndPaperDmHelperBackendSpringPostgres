@@ -6,8 +6,6 @@ import de.mayer.backendspringpostgres.graph.domainservice.ChapterDomainRepositor
 import de.mayer.backendspringpostgres.graph.domainservice.ChapterLinkDomainRepository;
 import de.mayer.backendspringpostgres.graph.model.Chapter;
 import de.mayer.backendspringpostgres.graph.model.ChapterLink;
-import de.mayer.backendspringpostgres.graph.model.Graph;
-import de.mayer.backendspringpostgres.graph.persistence.InMemoryChapterLinkDomainRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

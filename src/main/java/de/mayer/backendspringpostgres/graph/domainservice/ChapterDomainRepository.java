@@ -15,4 +15,5 @@ public interface ChapterDomainRepository {
     void deleteAll();
 
     Optional<Chapter> findById(String adventure, String chapter);
+
 }

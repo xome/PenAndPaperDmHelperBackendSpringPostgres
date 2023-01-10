@@ -1,7 +1,9 @@
 package de.mayer.backendspringpostgres.graph.persistence;
 
+import de.mayer.backendspringpostgres.graph.domainservice.ChapterDomainRepository;
 import de.mayer.backendspringpostgres.graph.domainservice.ChapterLinkDomainRepository;
 import de.mayer.backendspringpostgres.graph.model.ChapterLink;
+import de.mayer.backendspringpostgres.graph.model.Graph;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -15,13 +17,18 @@ public class ChapterLinkRepository implements ChapterLinkDomainRepository {
 
     private final ChapterLinkJpaRepository chapterLinkJpaRepository;
     private final RecordJpaRepository recordJpaRepository;
-    private final ChapterRepository chapterJpaRepository;
+    private final ChapterDomainRepository chapterDomainRepository;
+    private InMemoryCache cache;
 
     @Autowired
-    public ChapterLinkRepository(ChapterLinkJpaRepository chapterLinkJpaRepository, RecordJpaRepository recordJpaRepository, ChapterRepository chapterJpaRepository) {
+    public ChapterLinkRepository(ChapterLinkJpaRepository chapterLinkJpaRepository,
+                                 RecordJpaRepository recordJpaRepository,
+                                 ChapterDomainRepository chapterDomainRepository,
+                                 InMemoryCache cache) {
         this.chapterLinkJpaRepository = chapterLinkJpaRepository;
         this.recordJpaRepository = recordJpaRepository;
-        this.chapterJpaRepository = chapterJpaRepository;
+        this.chapterDomainRepository = chapterDomainRepository;
+        this.cache = cache;
     }
 
 
@@ -39,6 +46,7 @@ public class ChapterLinkRepository implements ChapterLinkDomainRepository {
                 chapterLink.from().name(),
                 newIndex,
                 chapterLink.to().name()));
+        cache.invalidate(adventure, Graph.class);
     }
 
     @Override
@@ -48,8 +56,8 @@ public class ChapterLinkRepository implements ChapterLinkDomainRepository {
         return links
                 .stream()
                 .map(chapterLinkJpa -> {
-                    var chapterFrom = chapterJpaRepository.findById(adventure, chapterLinkJpa.chapterFrom());
-                    var chapterTo = chapterJpaRepository.findById(adventure, chapterLinkJpa.to());
+                    var chapterFrom = chapterDomainRepository.findById(adventure, chapterLinkJpa.chapterFrom());
+                    var chapterTo = chapterDomainRepository.findById(adventure, chapterLinkJpa.to());
 
                     if (chapterFrom.isEmpty() || chapterTo.isEmpty()) {
                         return null;
@@ -64,4 +72,5 @@ public class ChapterLinkRepository implements ChapterLinkDomainRepository {
     public void deleteAll() {
         chapterLinkJpaRepository.deleteAll();
     }
+
 }
