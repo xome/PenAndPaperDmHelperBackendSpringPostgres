@@ -5,10 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -58,15 +55,8 @@ public class GraphService {
         var cacheKey = "AllPaths - %s".formatted(adventure);
         var cachedObject = cache.get(cacheKey, HashSet.class);
 
-        if (cachedObject.isPresent()){
-            if (cachedObject
-                    .get()
-                    .stream()
-                    .anyMatch(obj -> !(obj instanceof Path))){
-                throw new RuntimeException("Cache Failure.");
-            }
-            return (HashSet<Path>) cachedObject.get();
-        }
+        HashSet<Path> correctlyCastedCachedObject = safelyCastHashSetOfGenericToHashSetOfPaths(cachedObject);
+        if (correctlyCastedCachedObject != null) return correctlyCastedCachedObject;
 
         // compute all possible complete Paths and check for a circle
         var startingPoints = graph.chapters()
@@ -145,6 +135,22 @@ public class GraphService {
 
         cache.put(cacheKey, allPaths);
         return allPaths;
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    // If you try to cast a HashSet to a HashSet<Path> you always get these warnings,
+    // no matter how many precautions are in place.
+    private static HashSet<Path> safelyCastHashSetOfGenericToHashSetOfPaths(Optional<HashSet> cachedObject) {
+        if (cachedObject.isPresent()){
+            if (cachedObject
+                    .get()
+                    .stream()
+                    .anyMatch(obj -> !(obj instanceof Path))){
+                throw new RuntimeException("Cache Failure.");
+            }
+            return (HashSet<Path>) cachedObject.get();
+        }
+        return null;
     }
 
     public List<Path> getShortestPaths(String adventureName)
