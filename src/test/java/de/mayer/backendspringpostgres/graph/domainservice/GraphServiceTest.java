@@ -2,8 +2,8 @@ package de.mayer.backendspringpostgres.graph.domainservice;
 
 import de.mayer.backendspringpostgres.graph.model.*;
 import de.mayer.backendspringpostgres.graph.persistence.InMemoryCache;
-import de.mayer.backendspringpostgres.graph.persistence.impl.InMemoryChapterLinkDomainRepository;
-import de.mayer.backendspringpostgres.graph.persistence.impl.InMemoryChapterDomainRepository;
+import de.mayer.backendspringpostgres.graph.persistence.impl.InMemoryChapterLinkRepository;
+import de.mayer.backendspringpostgres.graph.persistence.impl.InMemoryChapterRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -33,7 +33,7 @@ class GraphServiceTest {
                 new ChapterLink(c02, c01)));
 
         var exc = assertThrows(InvalidGraphException.class,
-                () -> new GraphService(new InMemoryChapterDomainRepository(), new InMemoryChapterLinkDomainRepository(),
+                () -> new GraphService(new InMemoryChapterRepository(), new InMemoryChapterLinkRepository(),
                         new InMemoryCache())
                         .generatePaths("adventure", new Graph(chapters, links)));
 
@@ -60,7 +60,7 @@ class GraphServiceTest {
                 new ChapterLink(c03, c02)));
 
         var exc = assertThrows(InvalidGraphException.class,
-                () -> new GraphService(new InMemoryChapterDomainRepository(), new InMemoryChapterLinkDomainRepository(), new InMemoryCache())
+                () -> new GraphService(new InMemoryChapterRepository(), new InMemoryChapterLinkRepository(), new InMemoryCache())
                         .generatePaths("adventure", new Graph(chapters, links)));
 
         assertThat(exc.getMessage(),
@@ -89,7 +89,7 @@ class GraphServiceTest {
                 new ChapterLink(c01, c04)));
 
         var exc = assertThrows(InvalidGraphException.class,
-                () -> new GraphService(new InMemoryChapterDomainRepository(), new InMemoryChapterLinkDomainRepository(), new InMemoryCache())
+                () -> new GraphService(new InMemoryChapterRepository(), new InMemoryChapterLinkRepository(), new InMemoryCache())
                         .generatePaths("adventure", new Graph(chapters, links)));
 
         assertThat(exc.getMessage(),
@@ -133,7 +133,7 @@ class GraphServiceTest {
                 .addChapter(c04)
                 .build();
 
-        var paths = new GraphService(new InMemoryChapterDomainRepository(), new InMemoryChapterLinkDomainRepository(), new InMemoryCache())
+        var paths = new GraphService(new InMemoryChapterRepository(), new InMemoryChapterLinkRepository(), new InMemoryCache())
                 .generatePaths("adventure", new Graph(chapters, links));
 
         assertThat(paths, containsInAnyOrder(pathLong, pathShort));
@@ -159,7 +159,7 @@ class GraphServiceTest {
         var path03 = new PathBuilder(c03).build();
         var path04 = new PathBuilder(c04).build();
 
-        var paths = new GraphService(new InMemoryChapterDomainRepository(), new InMemoryChapterLinkDomainRepository(), new InMemoryCache())
+        var paths = new GraphService(new InMemoryChapterRepository(), new InMemoryChapterLinkRepository(), new InMemoryCache())
                 .generatePaths("adventure", new Graph(chapters, Collections.emptySet()));
 
         assertThat(paths, containsInAnyOrder(path01, path02, path03, path04));
@@ -199,7 +199,7 @@ class GraphServiceTest {
                 .addChapter(c04)
                 .build();
 
-        var paths = new GraphService(new InMemoryChapterDomainRepository(), new InMemoryChapterLinkDomainRepository(), new InMemoryCache())
+        var paths = new GraphService(new InMemoryChapterRepository(), new InMemoryChapterLinkRepository(), new InMemoryCache())
                 .generatePaths("adventure", new Graph(chapters, links));
 
         assertThat(paths, containsInAnyOrder(pathTo02, pathTo03, pathTo04));
@@ -214,11 +214,11 @@ class GraphServiceTest {
             then an exception is thrown
             """)
     void noChaptersForAdventure() {
-        var inMemoryRepository = new InMemoryChapterDomainRepository();
+        var inMemoryRepository = new InMemoryChapterRepository();
         String adventure = "Adventure which does not exist";
         inMemoryRepository.deleteByAdventure(adventure);
 
-        GraphService graphService = new GraphService(inMemoryRepository, new InMemoryChapterLinkDomainRepository(), new InMemoryCache());
+        GraphService graphService = new GraphService(inMemoryRepository, new InMemoryChapterLinkRepository(), new InMemoryCache());
         assertThrows(NoChaptersForAdventureException.class, () -> graphService.createGraph(adventure));
 
     }
@@ -230,7 +230,7 @@ class GraphServiceTest {
             then an exception is thrown
             """)
     void invalidGraph() {
-        var inMemoryChapterRepository = new InMemoryChapterDomainRepository();
+        var inMemoryChapterRepository = new InMemoryChapterRepository();
         var adventure = "Adventure";
         var chapter1 = new Chapter("c01", 1.0d);
         var chapter2 = new Chapter("c02", 1.0d);
@@ -238,7 +238,7 @@ class GraphServiceTest {
         inMemoryChapterRepository.save(adventure, chapter1);
         inMemoryChapterRepository.save(adventure, chapter2);
 
-        var inMemoryChapterLinkRepository = new InMemoryChapterLinkDomainRepository();
+        var inMemoryChapterLinkRepository = new InMemoryChapterLinkRepository();
         inMemoryChapterLinkRepository.save(adventure,
                 new ChapterLink(chapter1, chapter2));
         inMemoryChapterLinkRepository.save(adventure,
@@ -257,7 +257,7 @@ class GraphServiceTest {
             the Graph is returned
             """)
     void validGraph() throws InvalidGraphException, NoChaptersForAdventureException {
-        var inMemoryChapterRepository = new InMemoryChapterDomainRepository();
+        var inMemoryChapterRepository = new InMemoryChapterRepository();
         var adventure = "Adventure";
         var chapter1 = new Chapter("c01", 1.0d);
         var chapter2 = new Chapter("c02", 1.0d);
@@ -266,7 +266,7 @@ class GraphServiceTest {
         inMemoryChapterRepository.save(adventure, chapter1);
         inMemoryChapterRepository.save(adventure, chapter2);
 
-        var inMemoryChapterLinkRepository = new InMemoryChapterLinkDomainRepository();
+        var inMemoryChapterLinkRepository = new InMemoryChapterLinkRepository();
         inMemoryChapterLinkRepository.save(adventure,
                 link);
 
@@ -288,10 +288,10 @@ class GraphServiceTest {
         var chapter02 = new Chapter("Chapter02", 2d);
         var chapterLink = new ChapterLink(chapter01, chapter02);
 
-        InMemoryChapterDomainRepository chapterRepo = new InMemoryChapterDomainRepository();
+        InMemoryChapterRepository chapterRepo = new InMemoryChapterRepository();
         chapterRepo.save(adventure, chapter01);
         chapterRepo.save(adventure, chapter02);
-        InMemoryChapterLinkDomainRepository chapterLinkRepo = new InMemoryChapterLinkDomainRepository();
+        InMemoryChapterLinkRepository chapterLinkRepo = new InMemoryChapterLinkRepository();
         chapterLinkRepo.save(adventure, chapterLink);
 
         var graphCached = new Graph(Set.of(chapter01), Collections.emptySet());
@@ -313,11 +313,11 @@ class GraphServiceTest {
         var adventure = "Adventure";
         var chapter01 = new Chapter("Chapter01", 1d);
 
-        InMemoryChapterDomainRepository chapterRepo = new InMemoryChapterDomainRepository();
+        InMemoryChapterRepository chapterRepo = new InMemoryChapterRepository();
         chapterRepo.save(adventure, chapter01);
 
         var cache = new InMemoryCache();
-        var service = new GraphService(chapterRepo, new InMemoryChapterLinkDomainRepository(), cache);
+        var service = new GraphService(chapterRepo, new InMemoryChapterLinkRepository(), cache);
         var graph = service.createGraph(adventure);
 
         var optional = cache.get(adventure, Graph.class);
@@ -336,8 +336,8 @@ class GraphServiceTest {
     void multipleShortestPaths() throws InvalidGraphException, NoChaptersForAdventureException {
         var adventure = "Adventure";
         var cache = new InMemoryCache();
-        var chapterRepo = new InMemoryChapterDomainRepository();
-        var linkRepo = new InMemoryChapterLinkDomainRepository();
+        var chapterRepo = new InMemoryChapterRepository();
+        var linkRepo = new InMemoryChapterLinkRepository();
 
         var chapter1 = new Chapter("1", 1d);
         var chapter2 = new Chapter("2", 2d);
@@ -395,8 +395,8 @@ class GraphServiceTest {
 
         var adventure = "Adventure";
         var cache = new InMemoryCache();
-        var chapterRepo = new InMemoryChapterDomainRepository();
-        var linkRepo = new InMemoryChapterLinkDomainRepository();
+        var chapterRepo = new InMemoryChapterRepository();
+        var linkRepo = new InMemoryChapterLinkRepository();
 
         var chapter = new Chapter("1", 1d);
         var chapter2 = new Chapter("2", 2d);
@@ -419,8 +419,8 @@ class GraphServiceTest {
     void pathUpdatesCache() throws InvalidGraphException {
         var adventure = "Adventure";
         var cache = new InMemoryCache();
-        var chapterRepo = new InMemoryChapterDomainRepository();
-        var linkRepo = new InMemoryChapterLinkDomainRepository();
+        var chapterRepo = new InMemoryChapterRepository();
+        var linkRepo = new InMemoryChapterLinkRepository();
 
         var chapter = new Chapter("1", 1d);
 
@@ -436,4 +436,58 @@ class GraphServiceTest {
         assertThat(cachedObject.get(), is(expectedPath));
     }
 
+    @Test
+    @DisplayName("""
+            Given there are two Chapters
+                And they are linked,
+            When the next Paths for the starting point are requested,
+            Then a Path consisting of the second Chapter is returned
+            """)
+    void nextPathsTwoChapters() throws InvalidGraphException, NoChaptersForAdventureException {
+
+        var adventure = "Adventure";
+        var chapter1 = new Chapter("1", 1d);
+        var chapter2 = new Chapter("2", 2d);
+        var link = new ChapterLink(chapter1, chapter2);
+
+        var cache = new InMemoryCache();
+        var chapterRepo = new InMemoryChapterRepository();
+        var linkRepo = new InMemoryChapterLinkRepository();
+
+        chapterRepo.save(adventure, chapter1);
+        chapterRepo.save(adventure, chapter2);
+        linkRepo.save(adventure, link);
+
+        var expectedPath = List.of(new PathBuilder(chapter2).build());
+
+        var service = new GraphService(chapterRepo, linkRepo, cache);
+
+        assertThat(service.getNextPaths(adventure, chapter1.name()), is(expectedPath));
+    }
+
+    @Test
+    @DisplayName("""
+            Given a ending Chapter is given as a starting point,
+            When the next Paths are requested,
+            Then an empty List of Paths is returned
+            """)
+    void nextPathsEndingChapterAsStartingPoint() throws InvalidGraphException, NoChaptersForAdventureException {
+        var adventure = "Adventure";
+        var chapter1 = new Chapter("1", 1d);
+        var chapter2 = new Chapter("2", 2d);
+        var link = new ChapterLink(chapter1, chapter2);
+
+        var cache = new InMemoryCache();
+        var chapterRepo = new InMemoryChapterRepository();
+        var linkRepo = new InMemoryChapterLinkRepository();
+
+        chapterRepo.save(adventure, chapter1);
+        chapterRepo.save(adventure, chapter2);
+        linkRepo.save(adventure, link);
+
+        var service = new GraphService(chapterRepo, linkRepo, cache);
+
+        assertThat(service.getNextPaths(adventure, chapter2.name()), is(empty()));
+
+    }
 }

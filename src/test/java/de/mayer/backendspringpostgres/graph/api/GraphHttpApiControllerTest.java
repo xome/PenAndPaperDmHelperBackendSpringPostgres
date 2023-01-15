@@ -431,4 +431,25 @@ class GraphHttpApiControllerTest {
         assertThat(returnedBody, is(expectedBody));
     }
 
+
+    @Test
+    @DisplayName("""
+            Given there is one Chapter in a Graph,
+            When the next Paths are requested,
+            Then a empty list of Paths is returned
+            """)
+    void nextPathsOneChapter() {
+        var adventure = "Adventure";
+        var expectedBody = "[]";
+
+        var chapter = new Chapter("1", 1d);
+        chapterJpaRepository.save(new ChapterJpa(adventure, chapter.name(), chapter.approximateDurationInMinutes()));
+
+        var returnedBody =
+                given().port(port).pathParam("adventureName", adventure).pathParam("startingPoint", chapter.name())
+                        .when().get("/paths/next/{adventureName}/{startingPoint}")
+                        .then().statusCode(HttpStatus.OK.value()).extract().body().asString();
+
+        assertThat(returnedBody, is(expectedBody));
+    }
 }

@@ -198,4 +198,34 @@ public class GraphService {
         chapterRepository.invalidateCache();
         chapterLinkRepository.invalidateCache();
     }
+
+    public List<Path> getNextPaths(String adventureName, String startingPoint)
+            throws InvalidGraphException, NoChaptersForAdventureException {
+        var graph = createGraph(adventureName);
+        var allPaths = generatePaths(adventureName, graph);
+
+        var startingChapter = chapterRepository
+                .findById(adventureName, startingPoint)
+                .orElseThrow(() -> new RuntimeException("Chapter %s could not be found in adventure %s"
+                        .formatted(startingPoint, adventureName)));
+
+        return allPaths
+                .parallelStream()
+                .filter(path -> path.chapters().contains(startingChapter))
+                .map(wholePath -> {
+                    var pathBuilder = new PathBuilder();
+                    for (int index = wholePath.chapters().indexOf(startingChapter) + 1;
+                         index < wholePath.chapters().size();
+                         index++) {
+                        pathBuilder.addChapter(wholePath.chapters().get(index));
+                    }
+                    if (pathBuilder.isEmpty()) {
+                        return null;
+                    }
+                    return pathBuilder.build();
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+    }
 }

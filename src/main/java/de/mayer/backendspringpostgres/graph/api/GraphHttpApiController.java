@@ -59,6 +59,15 @@ public class GraphHttpApiController implements GraphHttpApi {
     }
 
     @Override
+    public ResponseEntity<?> getNextPaths(String adventureName, String startingPoint) {
+        try {
+            return ResponseEntity.ok(graphService.getNextPaths(adventureName, startingPoint));
+        } catch (InvalidGraphException | NoChaptersForAdventureException e) {
+            return getResponseFromException(e);
+        }
+    }
+
+    @Override
     public ResponseEntity<Void> modelHasChanged() {
         graphService.invalidateCaches();
         return ResponseEntity.ok().build();

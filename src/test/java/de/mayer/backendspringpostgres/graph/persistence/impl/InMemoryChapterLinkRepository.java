@@ -5,7 +5,7 @@ import de.mayer.backendspringpostgres.graph.model.ChapterLink;
 
 import java.util.*;
 
-public class InMemoryChapterLinkDomainRepository implements ChapterLinkRepository {
+public class InMemoryChapterLinkRepository implements ChapterLinkRepository {
     private HashMap<String, Set<ChapterLink>> database;
 
     public void save(String adventure, ChapterLink chapterLink) {

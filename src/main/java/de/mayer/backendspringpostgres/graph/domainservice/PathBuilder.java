@@ -37,5 +37,7 @@ public class PathBuilder {
     }
 
 
-
+    public boolean isEmpty() {
+        return this.path == null || this.path.chapters().isEmpty();
+    }
 }

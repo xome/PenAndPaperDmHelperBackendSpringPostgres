@@ -10,7 +10,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class InMemoryChapterDomainRepository implements ChapterRepository {
+public class InMemoryChapterRepository implements ChapterRepository {
 
     private HashMap<ChapterJpaId, Chapter> database;
 
@@ -51,7 +51,15 @@ public class InMemoryChapterDomainRepository implements ChapterRepository {
 
     @Override
     public Optional<Chapter> findById(String adventure, String chapter) {
-        return Optional.empty();
+        if (this.database == null || this.database.isEmpty())
+            return Optional.empty();
+
+        var id = new ChapterJpaId(adventure, chapter);
+        if (!this.database.containsKey(id))
+            return Optional.empty();
+
+        return Optional.of(this.database.get(id));
+
     }
 
     @Override
