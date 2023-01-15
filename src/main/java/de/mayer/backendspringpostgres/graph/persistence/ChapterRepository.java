@@ -23,6 +23,10 @@ public class ChapterRepository implements ChapterDomainRepository {
         this.jpaCache = jpaCache;
     }
 
+    private static Chapter mapJpaToDomain(ChapterJpa chapterJpa) {
+        return new Chapter(chapterJpa.getName(), chapterJpa.getApproximateDurationInMinutes());
+    }
+
 
     @Override
     public Optional<Set<Chapter>> findByAdventure(String adventure) {
@@ -31,7 +35,7 @@ public class ChapterRepository implements ChapterDomainRepository {
         if (jpaChapters.isEmpty()) return Optional.empty();
         return Optional.of(jpaChapters
                 .stream()
-                .map(jpaChapter -> new Chapter(jpaChapter.getName(), jpaChapter.getApproximateDurationInMinutes()))
+                .map(ChapterRepository::mapJpaToDomain)
                 .collect(Collectors.toSet()));
 
     }
@@ -40,8 +44,7 @@ public class ChapterRepository implements ChapterDomainRepository {
     public Optional<Chapter> findById(String adventure, String chapter) {
         return jpaRepository
                 .findById(new ChapterJpaId(adventure, chapter))
-                .map(chapterJpa ->
-                        new Chapter(chapterJpa.getName(), chapterJpa.getApproximateDurationInMinutes()));
+                .map(ChapterRepository::mapJpaToDomain);
     }
 
     @Override
