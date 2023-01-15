@@ -59,7 +59,11 @@ public class InMemoryCache implements Cache {
 
     @Override
     public void invalidateAll() {
-        cache.clear();
-        invalidatedKeys.clear();
+        if (cache != null) {
+            cache.clear();
+        }
+        if (invalidatedKeys != null) {
+            invalidatedKeys.clear();
+        }
     }
 }

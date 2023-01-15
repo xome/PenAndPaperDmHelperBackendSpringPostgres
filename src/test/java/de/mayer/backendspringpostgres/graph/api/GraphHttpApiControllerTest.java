@@ -50,6 +50,7 @@ class GraphHttpApiControllerTest {
 
     @AfterEach
     void cleanup() {
+        cache.invalidateAll();
         chapterLinkJpaRepository.deleteAll();
         chapterJpaRepository.deleteAll();
         jpaCache.getCacheNames().forEach(
@@ -289,21 +290,7 @@ class GraphHttpApiControllerTest {
         var adventure = "Adventure";
         cache.invalidate(adventure, Graph.class);
 
-        var chapter01 = new Chapter("1", 1d);
-        var chapter02 = new Chapter("2", 1d);
-
-        var link = new ChapterLink(chapter01, chapter02);
-        var link2 = new ChapterLink(chapter02, chapter01);
-
-        chapterJpaRepository.save(new ChapterJpa(adventure, chapter01.name(), chapter01.approximateDurationInMinutes()));
-        chapterJpaRepository.save(new ChapterJpa(adventure, chapter02.name(), chapter02.approximateDurationInMinutes()));
-        chapterLinkJpaRepository.save(new ChapterLinkJpa(adventure, link.from().name(), 0, link.to().name()));
-        chapterLinkJpaRepository.save(new ChapterLinkJpa(adventure, link2.from().name(), 1, link.to().name()));
-
-        var expectedBody = new LinkedHashMap<String, Object>();
-        expectedBody.put("message", "Graph is invalid. There are only Paths with circles.");
-        expectedBody.put("problematicPaths", Collections.emptySet());
-        String expectedBodyAsJson = jsonMapper.writeValueAsString(expectedBody);
+        String expectedBodyAsJson = prepareCyclicGraphAndGetJsonString(adventure);
 
         var returnedBody =
                 given()
@@ -318,6 +305,24 @@ class GraphHttpApiControllerTest {
                         .asString();
 
         assertThat(returnedBody, is(expectedBodyAsJson));
+    }
+
+    private String prepareCyclicGraphAndGetJsonString(String adventure) throws JsonProcessingException {
+        var chapter01 = new Chapter("1", 1d);
+        var chapter02 = new Chapter("2", 1d);
+
+        var link = new ChapterLink(chapter01, chapter02);
+        var link2 = new ChapterLink(chapter02, chapter01);
+
+        chapterJpaRepository.save(new ChapterJpa(adventure, chapter01.name(), chapter01.approximateDurationInMinutes()));
+        chapterJpaRepository.save(new ChapterJpa(adventure, chapter02.name(), chapter02.approximateDurationInMinutes()));
+        chapterLinkJpaRepository.save(new ChapterLinkJpa(adventure, link.from().name(), 0, link.to().name()));
+        chapterLinkJpaRepository.save(new ChapterLinkJpa(adventure, link2.from().name(), 1, link.to().name()));
+
+        var expectedBody = new LinkedHashMap<String, Object>();
+        expectedBody.put("message", "Graph is invalid. There are only Paths with circles.");
+        expectedBody.put("problematicPaths", Collections.emptySet());
+        return jsonMapper.writeValueAsString(expectedBody);
     }
 
     @Test
@@ -342,6 +347,88 @@ class GraphHttpApiControllerTest {
                 .asString();
 
         assertThat(returnedBody, is(emptyString()));
+    }
+
+    @Test
+    @DisplayName("""
+            Given there is an Adventure with one Chapter,
+            When the longest Path is requested,
+            Then a Path with the chapter is returned
+            """)
+    void longestPathOneChapter() throws JsonProcessingException {
+        var adventure = "Adventure";
+        var chapter = new Chapter("Chapter", 1d);
+
+        chapterJpaRepository.save(new ChapterJpa(adventure, chapter.name(), chapter.approximateDurationInMinutes()));
+
+        var pathInBody = new HashMap<String, Object>();
+        pathInBody.put("chapters", List.of(chapter.name()));
+        pathInBody.put("approximateDurationInMinutes", chapter.approximateDurationInMinutes());
+        var expectedBodyAsJson = jsonMapper.writeValueAsString(List.of(pathInBody));
+
+        var returnedBody =
+                given()
+                        .port(port)
+                        .pathParam("adventureName", adventure)
+                        .when()
+                        .get("/paths/longest/{adventureName}")
+                        .then()
+                        .statusCode(is(HttpStatus.OK.value()))
+                        .extract()
+                        .body()
+                        .asString();
+
+        assertThat(returnedBody, is(expectedBodyAsJson));
+    }
+
+    @Test
+    @DisplayName("""
+            Given there is no Chapter for the Adventure,
+            When the longest Path is requested,
+            Then status code NOT_FOUND is returned
+            """)
+    void longestPathNoChapters() {
+        var adventure = "Adventure";
+        var returnedBody =
+                given()
+                        .port(port)
+                        .pathParam("adventureName", adventure)
+                        .when()
+                        .get("/paths/longest/{adventureName}")
+                        .then()
+                        .statusCode(is(HttpStatus.NOT_FOUND.value()))
+                        .extract()
+                        .body()
+                        .asString();
+
+        assertThat(returnedBody, is(emptyString()));
+    }
+
+    @Test
+    @DisplayName("""
+            Given the Graph is cyclic,
+            When the longest Path is requested,
+            Then status code EXPECTATION_FAILED is returned
+            """)
+    void longestPathCyclicGraph() throws JsonProcessingException {
+
+        var adventure = "Adventure";
+        var expectedBody = prepareCyclicGraphAndGetJsonString(adventure);
+
+        var returnedBody =
+                given()
+                        .port(port)
+                        .pathParam("adventureName", adventure)
+                        .when()
+                        .get("/paths/longest/{adventureName}")
+                        .then()
+                        .statusCode(is(HttpStatus.EXPECTATION_FAILED.value()))
+                        .extract()
+                        .body()
+                        .asString();
+
+
+        assertThat(returnedBody, is(expectedBody));
     }
 
 }

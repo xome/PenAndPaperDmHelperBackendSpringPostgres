@@ -147,10 +147,8 @@ public class GraphService {
         return allPaths;
     }
 
-    public List<Path> getShortestPaths(String adventureName) throws InvalidGraphException,
-            NoChaptersForAdventureException {
-
-
+    public List<Path> getShortestPaths(String adventureName)
+            throws InvalidGraphException, NoChaptersForAdventureException {
 
         var allPaths = generatePaths(adventureName, createGraph(adventureName));
         var optionalMin = allPaths
@@ -164,11 +162,30 @@ public class GraphService {
 
         double minDuration = optionalMin.getAsDouble();
 
+        return getAllPathsWithDuration(allPaths, minDuration);
+    }
+
+    private static List<Path> getAllPathsWithDuration(Set<Path> allPaths, double duration) {
         return allPaths
                 .stream()
-                .filter(path -> path.approximateDurationInMinutes().equals(minDuration))
+                .filter(path -> path.approximateDurationInMinutes().equals(duration))
                 .collect(Collectors.toList());
     }
+
+
+    public List<Path> getLongestPath(String adventureName) throws InvalidGraphException, NoChaptersForAdventureException {
+        var allPaths = generatePaths(adventureName, createGraph(adventureName));
+        var optionalMax = allPaths
+                .stream()
+                .mapToDouble(Path::approximateDurationInMinutes)
+                .max();
+
+        if (optionalMax.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return getAllPathsWithDuration(allPaths, optionalMax.getAsDouble());
+    }
+
 
     public void invalidateCaches() {
         cache.invalidateAll();

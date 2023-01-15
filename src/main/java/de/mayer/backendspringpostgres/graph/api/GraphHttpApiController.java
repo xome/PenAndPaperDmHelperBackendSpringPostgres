@@ -22,14 +22,8 @@ public class GraphHttpApiController implements GraphHttpApi {
         try {
             return ResponseEntity
                     .ok(graphService.createGraph(adventureName));
-        } catch (NoChaptersForAdventureException noChaptersForAdventureException) {
-            return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
-                    .build();
-        } catch (InvalidGraphException invalidGraphException) {
-            return ResponseEntity
-                    .status(HttpStatus.EXPECTATION_FAILED)
-                    .body(invalidGraphException);
+        } catch (InvalidGraphException | NoChaptersForAdventureException e) {
+            return getResponseFromException(e);
         }
     }
 
@@ -37,15 +31,31 @@ public class GraphHttpApiController implements GraphHttpApi {
     public ResponseEntity<?> getShortestPaths(String adventureName) {
         try {
             return ResponseEntity.ok(graphService.getShortestPaths(adventureName));
-        } catch (InvalidGraphException e) {
+        } catch (InvalidGraphException | NoChaptersForAdventureException e) {
+            return getResponseFromException(e);
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> getLongestPaths(String adventureName) {
+        try {
+            return ResponseEntity.ok(graphService.getLongestPath(adventureName));
+        } catch (InvalidGraphException | NoChaptersForAdventureException e) {
+            return getResponseFromException(e);
+        }
+    }
+
+    private ResponseEntity<?> getResponseFromException(Throwable exception) {
+        if (exception instanceof InvalidGraphException) {
             return ResponseEntity
                     .status(HttpStatus.EXPECTATION_FAILED)
-                    .body(e);
-        } catch (NoChaptersForAdventureException e) {
+                    .body(exception);
+        } else if (exception instanceof NoChaptersForAdventureException) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
                     .build();
         }
+        throw new RuntimeException(exception);
     }
 
     @Override

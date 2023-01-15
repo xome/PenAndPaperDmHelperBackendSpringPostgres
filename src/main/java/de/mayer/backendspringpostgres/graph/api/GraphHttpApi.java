@@ -1,7 +1,5 @@
 package de.mayer.backendspringpostgres.graph.api;
 
-import de.mayer.backendspringpostgres.graph.model.InvalidGraphException;
-import de.mayer.backendspringpostgres.graph.model.NoChaptersForAdventureException;
 import de.mayer.backendspringpostgres.graph.model.Path;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +24,7 @@ public interface GraphHttpApi {
     }
 
     @GetMapping("/paths/longest/{adventureName}")
-    default ResponseEntity<List<Path>> getLongestPaths(@PathVariable("adventureName") String adventureName){
+    default ResponseEntity<?> getLongestPaths(@PathVariable("adventureName") String adventureName){
         return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
     }
 
