@@ -1,6 +1,6 @@
 package de.mayer.backendspringpostgres.graph.persistence.impl;
 
-import de.mayer.backendspringpostgres.graph.domainservice.ChapterDomainRepository;
+import de.mayer.backendspringpostgres.graph.domainservice.ChapterRepository;
 import de.mayer.backendspringpostgres.graph.model.Chapter;
 import de.mayer.backendspringpostgres.graph.persistence.ChapterJpaId;
 
@@ -10,7 +10,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class InMemoryChapterDomainRepository implements ChapterDomainRepository {
+public class InMemoryChapterDomainRepository implements ChapterRepository {
 
     private HashMap<ChapterJpaId, Chapter> database;
 

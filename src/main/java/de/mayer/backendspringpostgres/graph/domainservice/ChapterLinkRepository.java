@@ -4,7 +4,7 @@ import de.mayer.backendspringpostgres.graph.model.ChapterLink;
 
 import java.util.Set;
 
-public interface ChapterLinkDomainRepository {
+public interface ChapterLinkRepository {
     Set<ChapterLink> findByAdventure(String adventure);
     void invalidateCache();
 

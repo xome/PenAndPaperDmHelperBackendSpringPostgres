@@ -1,11 +1,11 @@
 package de.mayer.backendspringpostgres.graph.persistence.impl;
 
-import de.mayer.backendspringpostgres.graph.domainservice.ChapterLinkDomainRepository;
+import de.mayer.backendspringpostgres.graph.domainservice.ChapterLinkRepository;
 import de.mayer.backendspringpostgres.graph.model.ChapterLink;
 
 import java.util.*;
 
-public class InMemoryChapterLinkDomainRepository implements ChapterLinkDomainRepository {
+public class InMemoryChapterLinkDomainRepository implements ChapterLinkRepository {
     private HashMap<String, Set<ChapterLink>> database;
 
     public void save(String adventure, ChapterLink chapterLink) {

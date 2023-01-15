@@ -14,16 +14,16 @@ import java.util.stream.Collectors;
 @Scope("prototype")
 public class GraphService {
 
-    private final ChapterDomainRepository chapterDomainRepository;
-    private final ChapterLinkDomainRepository chapterLinkDomainRepository;
+    private final ChapterRepository chapterRepository;
+    private final ChapterLinkRepository chapterLinkRepository;
     private final Cache cache;
 
     @Autowired
-    public GraphService(ChapterDomainRepository chapterDomainRepository,
-                        ChapterLinkDomainRepository inMemoryChapterLinkDomainRepository,
+    public GraphService(ChapterRepository chapterRepository,
+                        ChapterLinkRepository chapterLinkRepository,
                         Cache cache) {
-        this.chapterDomainRepository = chapterDomainRepository;
-        this.chapterLinkDomainRepository = inMemoryChapterLinkDomainRepository;
+        this.chapterRepository = chapterRepository;
+        this.chapterLinkRepository = chapterLinkRepository;
         this.cache = cache;
     }
 
@@ -34,11 +34,11 @@ public class GraphService {
             return cachedGraph.get();
         }
 
-        var chapters = chapterDomainRepository
+        var chapters = chapterRepository
                 .findByAdventure(adventure)
                 .orElseThrow(() -> new NoChaptersForAdventureException("No Chapters found for adventure %s!"
                         .formatted(adventure)));
-        var chapterLinks = chapterLinkDomainRepository
+        var chapterLinks = chapterLinkRepository
                 .findByAdventure(adventure);
 
         var graph = new Graph(chapters, chapterLinks);
@@ -195,7 +195,7 @@ public class GraphService {
 
     public void invalidateCaches() {
         cache.invalidateAll();
-        chapterDomainRepository.invalidateCache();
-        chapterLinkDomainRepository.invalidateCache();
+        chapterRepository.invalidateCache();
+        chapterLinkRepository.invalidateCache();
     }
 }

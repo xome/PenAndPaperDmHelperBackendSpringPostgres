@@ -1,7 +1,7 @@
 package de.mayer.backendspringpostgres.graph.persistence;
 
-import de.mayer.backendspringpostgres.graph.domainservice.ChapterDomainRepository;
-import de.mayer.backendspringpostgres.graph.domainservice.ChapterLinkDomainRepository;
+import de.mayer.backendspringpostgres.graph.domainservice.ChapterLinkRepository;
+import de.mayer.backendspringpostgres.graph.domainservice.ChapterRepository;
 import de.mayer.backendspringpostgres.graph.model.ChapterLink;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
@@ -13,15 +13,15 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
-public class ChapterLinkRepository implements ChapterLinkDomainRepository {
+public class ChapterLinkRepositoryWithJpa implements ChapterLinkRepository {
 
     private final ChapterLinkJpaRepository chapterLinkJpaRepository;
-    private final ChapterDomainRepository chapterDomainRepository;
+    private final ChapterRepository chapterDomainRepository;
     private final ConcurrentMapCacheManager jpaCache;
 
     @Autowired
-    public ChapterLinkRepository(ChapterLinkJpaRepository chapterLinkJpaRepository,
-                                 ChapterDomainRepository chapterDomainRepository, ConcurrentMapCacheManager jpaCache) {
+    public ChapterLinkRepositoryWithJpa(ChapterLinkJpaRepository chapterLinkJpaRepository,
+                                        ChapterRepository chapterDomainRepository, ConcurrentMapCacheManager jpaCache) {
         this.chapterLinkJpaRepository = chapterLinkJpaRepository;
         this.chapterDomainRepository = chapterDomainRepository;
         this.jpaCache = jpaCache;
