@@ -54,4 +54,9 @@ public class InMemoryChapterDomainRepository implements ChapterDomainRepository 
         return Optional.empty();
     }
 
+    @Override
+    public void invalidateCache() {
+
+    }
+
 }

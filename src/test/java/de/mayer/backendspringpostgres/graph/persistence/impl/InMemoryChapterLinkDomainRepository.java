@@ -24,4 +24,9 @@ public class InMemoryChapterLinkDomainRepository implements ChapterLinkDomainRep
        return database.getOrDefault(adventure, new HashSet<>());
     }
 
+    @Override
+    public void invalidateCache() {
+
+    }
+
 }

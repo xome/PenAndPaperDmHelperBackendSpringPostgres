@@ -9,4 +9,6 @@ public interface ChapterDomainRepository {
     Optional<Set<Chapter>> findByAdventure(String adventure);
     Optional<Chapter> findById(String adventure, String chapter);
 
+    void invalidateCache();
+
 }

@@ -4,6 +4,7 @@ import de.mayer.backendspringpostgres.graph.domainservice.ChapterDomainRepositor
 import de.mayer.backendspringpostgres.graph.domainservice.ChapterLinkDomainRepository;
 import de.mayer.backendspringpostgres.graph.model.ChapterLink;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
@@ -16,12 +17,14 @@ public class ChapterLinkRepository implements ChapterLinkDomainRepository {
 
     private final ChapterLinkJpaRepository chapterLinkJpaRepository;
     private final ChapterDomainRepository chapterDomainRepository;
+    private final ConcurrentMapCacheManager jpaCache;
 
     @Autowired
     public ChapterLinkRepository(ChapterLinkJpaRepository chapterLinkJpaRepository,
-                                 ChapterDomainRepository chapterDomainRepository) {
+                                 ChapterDomainRepository chapterDomainRepository, ConcurrentMapCacheManager jpaCache) {
         this.chapterLinkJpaRepository = chapterLinkJpaRepository;
         this.chapterDomainRepository = chapterDomainRepository;
+        this.jpaCache = jpaCache;
     }
 
     @Override
@@ -41,6 +44,14 @@ public class ChapterLinkRepository implements ChapterLinkDomainRepository {
                 })
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
+    }
+
+    @Override
+    public void invalidateCache() {
+        var chapterCache = jpaCache.getCache("graphChapterLinkCache");
+        if (chapterCache != null){
+            chapterCache.invalidate();
+        }
     }
 
 }

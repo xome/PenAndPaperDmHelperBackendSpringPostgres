@@ -3,6 +3,7 @@ package de.mayer.backendspringpostgres.graph.persistence;
 import de.mayer.backendspringpostgres.graph.domainservice.ChapterDomainRepository;
 import de.mayer.backendspringpostgres.graph.model.Chapter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -14,9 +15,12 @@ public class ChapterRepository implements ChapterDomainRepository {
 
     private final ChapterJpaRepository jpaRepository;
 
+    private final ConcurrentMapCacheManager jpaCache;
+
     @Autowired
-    public ChapterRepository(ChapterJpaRepository jpaRepository) {
+    public ChapterRepository(ChapterJpaRepository jpaRepository, ConcurrentMapCacheManager jpaCache) {
         this.jpaRepository = jpaRepository;
+        this.jpaCache = jpaCache;
     }
 
 
@@ -38,5 +42,13 @@ public class ChapterRepository implements ChapterDomainRepository {
                 .findById(new ChapterJpaId(adventure, chapter))
                 .map(chapterJpa ->
                         new Chapter(chapterJpa.getName(), chapterJpa.getApproximateDurationInMinutes()));
+    }
+
+    @Override
+    public void invalidateCache() {
+        var chapterCache = jpaCache.getCache("graphChaptersByAdventure");
+        if (chapterCache != null){
+            chapterCache.invalidate();
+        }
     }
 }

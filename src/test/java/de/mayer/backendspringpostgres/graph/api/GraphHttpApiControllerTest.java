@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -44,11 +45,23 @@ class GraphHttpApiControllerTest {
     @Autowired
     Cache cache;
 
+    @Autowired
+    ConcurrentMapCacheManager jpaCache;
+
     @AfterEach
     void cleanup() {
         chapterLinkJpaRepository.deleteAll();
         chapterJpaRepository.deleteAll();
+        jpaCache.getCacheNames().forEach(
+                cacheName -> {
+                    var cache = jpaCache.getCache(cacheName);
+                    if (cache != null)
+                        cache.invalidate();
+                }
+        );
+
     }
+
     @Test
     @DisplayName("""
             Given there is no adventure by the name of the parameters value,
@@ -71,8 +84,8 @@ class GraphHttpApiControllerTest {
     @Test
     @DisplayName("""
             Given there is an adventure with one chapter,
-            when get graph is called,
-            the simple Graph is returned
+            When a Graph is requested,
+            Then the simple Graph is returned
             """)
     void oneGraphNoLinks() throws JsonProcessingException {
         cache.invalidate("Adventure", Graph.class);
@@ -109,9 +122,9 @@ class GraphHttpApiControllerTest {
     @Test
     @DisplayName("""
             Given there is an adventure with two chapters
-            and a link,
-            when get graph is called,
-            the Graph is returned according to spec
+                and one link,
+            When a Graph is requested,
+            Then the Graph is returned according to spec
             """)
     void twoChaptersOneLink() throws JsonProcessingException {
         cache.invalidate("Adventure", Graph.class);
@@ -181,8 +194,8 @@ class GraphHttpApiControllerTest {
     @Test
     @DisplayName("""
             Given the adventure has a cycle,
-            when a graph is requested,
-            then HTTP-Status EXPECTATION_FAILED and the cyclic paths are returned
+            When a Graph is requested,
+            Then HTTP-Status EXPECTATION_FAILED and the cyclic paths are returned
             """)
     void cycleAdventure() throws JsonProcessingException {
 
@@ -215,9 +228,9 @@ class GraphHttpApiControllerTest {
                 given()
                         .port(port)
                         .pathParam("adventureName", adventure)
-                .when()
+                        .when()
                         .get("/graph/{adventureName}")
-                .then()
+                        .then()
                         .statusCode(is(HttpStatus.EXPECTATION_FAILED.value()))
                         .extract()
                         .body()
@@ -225,6 +238,110 @@ class GraphHttpApiControllerTest {
 
         assertThat(returnedBody, is(expectedBodyAsJson));
 
+    }
+
+    @Test
+    @DisplayName("""
+            Given there is only one Path,
+            When the shortest Path is requested,
+            Then the only Path is returned
+            """)
+    void shortestPathWithOnePath() throws JsonProcessingException {
+        var adventure = "Adventure";
+        cache.invalidate(adventure, Graph.class);
+
+        var chapter01 = new Chapter("1", 1d);
+        var chapter02 = new Chapter("2", 1d);
+
+        var link = new ChapterLink(chapter01, chapter02);
+
+        chapterJpaRepository.save(new ChapterJpa(adventure, chapter01.name(), chapter01.approximateDurationInMinutes()));
+        chapterJpaRepository.save(new ChapterJpa(adventure, chapter02.name(), chapter02.approximateDurationInMinutes()));
+        chapterLinkJpaRepository.save(new ChapterLinkJpa(adventure, link.from().name(), 0, link.to().name()));
+
+        var expectedBody = new LinkedHashMap<String, Object>();
+        expectedBody.put("chapters", List.of(link.from().name(), link.to().name()));
+        expectedBody.put("approximateDurationInMinutes", 2d);
+        var expectedBodyAsJson = jsonMapper.writeValueAsString(List.of(expectedBody));
+
+        var returnedBody =
+                given()
+                        .port(port)
+                        .pathParam("adventureName", adventure)
+                        .when()
+                        .get("/paths/shortest/{adventureName}")
+                        .then()
+                        .statusCode(is(HttpStatus.OK.value()))
+                        .extract()
+                        .body()
+                        .asString();
+
+        assertThat(returnedBody, is(expectedBodyAsJson));
+    }
+
+    @Test
+    @DisplayName("""
+            Given the Graph is invalid,
+            When the shortest Path is requested,
+            Then Code EXPECTATION_FAILED is returned
+            """)
+    void shortestPathOfInvalidGraph() throws JsonProcessingException {
+        var adventure = "Adventure";
+        cache.invalidate(adventure, Graph.class);
+
+        var chapter01 = new Chapter("1", 1d);
+        var chapter02 = new Chapter("2", 1d);
+
+        var link = new ChapterLink(chapter01, chapter02);
+        var link2 = new ChapterLink(chapter02, chapter01);
+
+        chapterJpaRepository.save(new ChapterJpa(adventure, chapter01.name(), chapter01.approximateDurationInMinutes()));
+        chapterJpaRepository.save(new ChapterJpa(adventure, chapter02.name(), chapter02.approximateDurationInMinutes()));
+        chapterLinkJpaRepository.save(new ChapterLinkJpa(adventure, link.from().name(), 0, link.to().name()));
+        chapterLinkJpaRepository.save(new ChapterLinkJpa(adventure, link2.from().name(), 1, link.to().name()));
+
+        var expectedBody = new LinkedHashMap<String, Object>();
+        expectedBody.put("message", "Graph is invalid. There are only Paths with circles.");
+        expectedBody.put("problematicPaths", Collections.emptySet());
+        String expectedBodyAsJson = jsonMapper.writeValueAsString(expectedBody);
+
+        var returnedBody =
+                given()
+                        .port(port)
+                        .pathParam("adventureName", adventure)
+                        .when()
+                        .get("/paths/shortest/{adventureName}")
+                        .then()
+                        .statusCode(is(HttpStatus.EXPECTATION_FAILED.value()))
+                        .extract()
+                        .body()
+                        .asString();
+
+        assertThat(returnedBody, is(expectedBodyAsJson));
+    }
+
+    @Test
+    @DisplayName("""
+            Given there are no Chapters for the adventure,
+            When the shortest Paths are requested,
+            Then status NOT_FOUND is returned
+            """)
+    void shortestPathForAdventureWithoutChapters() {
+        var adventure = "Adventure";
+        cache.invalidate(adventure, Graph.class);
+
+        var returnedBody = given()
+                .port(port)
+                .pathParam("adventureName", adventure)
+                .when()
+                .get("/paths/shortest/{adventureName}")
+                .then()
+                .statusCode(is(HttpStatus.NOT_FOUND.value()))
+                .extract()
+                .body()
+                .asString();
+
+        assertThat(returnedBody, is(emptyString()));
     }
 
 }

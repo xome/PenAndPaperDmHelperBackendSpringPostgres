@@ -35,7 +35,7 @@ class GraphServiceTest {
         var exc = assertThrows(InvalidGraphException.class,
                 () -> new GraphService(new InMemoryChapterDomainRepository(), new InMemoryChapterLinkDomainRepository(),
                         new InMemoryCache())
-                        .generatePaths(new Graph(chapters, links)));
+                        .generatePaths("adventure", new Graph(chapters, links)));
 
         assertThat(exc.getMessage(),
                 is("Graph is invalid. There are only Paths with circles."));
@@ -61,7 +61,7 @@ class GraphServiceTest {
 
         var exc = assertThrows(InvalidGraphException.class,
                 () -> new GraphService(new InMemoryChapterDomainRepository(), new InMemoryChapterLinkDomainRepository(), new InMemoryCache())
-                        .generatePaths(new Graph(chapters, links)));
+                        .generatePaths("adventure", new Graph(chapters, links)));
 
         assertThat(exc.getMessage(),
                 is("Graph is invalid. There are only Paths with circles."));
@@ -90,7 +90,7 @@ class GraphServiceTest {
 
         var exc = assertThrows(InvalidGraphException.class,
                 () -> new GraphService(new InMemoryChapterDomainRepository(), new InMemoryChapterLinkDomainRepository(), new InMemoryCache())
-                        .generatePaths(new Graph(chapters, links)));
+                        .generatePaths("adventure", new Graph(chapters, links)));
 
         assertThat(exc.getMessage(),
                 is("There are problematic Graphs."));
@@ -134,7 +134,7 @@ class GraphServiceTest {
                 .build();
 
         var paths = new GraphService(new InMemoryChapterDomainRepository(), new InMemoryChapterLinkDomainRepository(), new InMemoryCache())
-                .generatePaths(new Graph(chapters, links));
+                .generatePaths("adventure", new Graph(chapters, links));
 
         assertThat(paths, containsInAnyOrder(pathLong, pathShort));
         assertThat(paths, hasSize(2));
@@ -160,7 +160,7 @@ class GraphServiceTest {
         var path04 = new PathBuilder(c04).build();
 
         var paths = new GraphService(new InMemoryChapterDomainRepository(), new InMemoryChapterLinkDomainRepository(), new InMemoryCache())
-                .generatePaths(new Graph(chapters, Collections.emptySet()));
+                .generatePaths("adventure", new Graph(chapters, Collections.emptySet()));
 
         assertThat(paths, containsInAnyOrder(path01, path02, path03, path04));
         assertThat(paths, hasSize(4));
@@ -200,7 +200,7 @@ class GraphServiceTest {
                 .build();
 
         var paths = new GraphService(new InMemoryChapterDomainRepository(), new InMemoryChapterLinkDomainRepository(), new InMemoryCache())
-                .generatePaths(new Graph(chapters, links));
+                .generatePaths("adventure", new Graph(chapters, links));
 
         assertThat(paths, containsInAnyOrder(pathTo02, pathTo03, pathTo04));
         assertThat(paths, hasSize(3));
@@ -326,5 +326,114 @@ class GraphServiceTest {
 
     }
 
+
+    @Test
+    @DisplayName("""
+            Given there are multiple shortest Paths in a Graph,
+            When the shortest Path is requested,
+            Then all shortest Paths are returned
+            """)
+    void multipleShortestPaths() throws InvalidGraphException, NoChaptersForAdventureException {
+        var adventure = "Adventure";
+        var cache = new InMemoryCache();
+        var chapterRepo = new InMemoryChapterDomainRepository();
+        var linkRepo = new InMemoryChapterLinkDomainRepository();
+
+        var chapter1 = new Chapter("1", 1d);
+        var chapter2 = new Chapter("2", 2d);
+        var chapter3 = new Chapter("3", 3d);
+        var chapter4 = new Chapter("4", 1d);
+        var chapter5 = new Chapter("5", 100d);
+        chapterRepo.save(adventure, chapter1);
+        chapterRepo.save(adventure, chapter2);
+        chapterRepo.save(adventure, chapter3);
+        chapterRepo.save(adventure, chapter4);
+        chapterRepo.save(adventure, chapter5);
+
+        //  Path 1 with 4 minutes
+        var link1To2 = new ChapterLink(chapter1, chapter2);
+        var link2To4 = new ChapterLink(chapter2, chapter4);
+        var path1 = new PathBuilder(chapter1)
+                .addChapter(chapter2)
+                .addChapter(chapter4)
+                .build();
+
+        // Path 2 with 4 minutes
+        var link1To3 = new ChapterLink(chapter1, chapter3);
+        linkRepo.save(adventure, link1To2);
+        linkRepo.save(adventure, link2To4);
+        linkRepo.save(adventure, link1To3);
+        var path2 = new PathBuilder(chapter1)
+                .addChapter(chapter3)
+                .build();
+
+        // Path 3 with 101 minutes
+        var link1To5 = new ChapterLink(chapter1, chapter5);
+        linkRepo.save(adventure, link1To5);
+        var path3 = new PathBuilder(chapter1)
+                .addChapter(chapter5)
+                .build();
+
+
+        var shortestPaths = new GraphService(chapterRepo, linkRepo, cache)
+                .getShortestPaths(adventure);
+
+
+        assertThat(shortestPaths, containsInAnyOrder(path1, path2));
+        assertThat(shortestPaths, not(contains(path3)));
+        assertThat(shortestPaths, hasSize(2));
+
+    }
+
+    @Test
+    @DisplayName("""
+            Given the Paths for the adventure are cached,,
+            When all Paths are requested,
+            Then the cached Paths are returned
+            """)
+    void cacheIsUsed() throws InvalidGraphException {
+
+        var adventure = "Adventure";
+        var cache = new InMemoryCache();
+        var chapterRepo = new InMemoryChapterDomainRepository();
+        var linkRepo = new InMemoryChapterLinkDomainRepository();
+
+        var chapter = new Chapter("1", 1d);
+        var chapter2 = new Chapter("2", 2d);
+        var expectedPaths = new HashSet<>(Set.of(new PathBuilder(chapter).addChapter(chapter2).build()));
+        cache.put("AllPaths - %s".formatted(adventure), expectedPaths);
+
+        var graph = new Graph(Set.of(chapter), Collections.emptySet());
+
+        assertThat(new GraphService(chapterRepo, linkRepo, cache).generatePaths(adventure, graph),
+                is(expectedPaths));
+
+    }
+
+    @Test
+    @DisplayName("""
+            Given an empty Cache,
+            When Paths are generated,
+            Then the Cache is populated
+            """)
+    void pathUpdatesCache() throws InvalidGraphException {
+        var adventure = "Adventure";
+        var cache = new InMemoryCache();
+        var chapterRepo = new InMemoryChapterDomainRepository();
+        var linkRepo = new InMemoryChapterLinkDomainRepository();
+
+        var chapter = new Chapter("1", 1d);
+
+        var graph = new Graph(Set.of(chapter), Collections.emptySet());
+        var expectedPath = new HashSet<>(Set.of(new PathBuilder(chapter).build()));
+
+        new GraphService(chapterRepo, linkRepo, cache).generatePaths(adventure, graph);
+
+        var cacheKey = "AllPaths - %s".formatted(adventure);
+        var cachedObject = cache.get(cacheKey, HashSet.class);
+
+        assertThat(cachedObject.isPresent(), is(true));
+        assertThat(cachedObject.get(), is(expectedPath));
+    }
 
 }

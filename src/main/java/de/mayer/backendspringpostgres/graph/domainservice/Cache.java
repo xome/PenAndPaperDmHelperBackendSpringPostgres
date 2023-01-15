@@ -8,5 +8,5 @@ public interface Cache {
     <T> Optional<T> get(String key, Class<T> aClass);
     void invalidate(String key, Class<?> aClass);
 
-
+    void invalidateAll();
 }

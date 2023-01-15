@@ -31,6 +31,28 @@ public class GraphHttpApiController implements GraphHttpApi {
                     .status(HttpStatus.EXPECTATION_FAILED)
                     .body(invalidGraphException);
         }
-
     }
+
+    @Override
+    public ResponseEntity<?> getShortestPaths(String adventureName) {
+        try {
+            return ResponseEntity.ok(graphService.getShortestPaths(adventureName));
+        } catch (InvalidGraphException e) {
+            return ResponseEntity
+                    .status(HttpStatus.EXPECTATION_FAILED)
+                    .body(e);
+        } catch (NoChaptersForAdventureException e) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .build();
+        }
+    }
+
+    @Override
+    public ResponseEntity<Void> modelHasChanged() {
+        graphService.invalidateCaches();
+        return ResponseEntity.ok().build();
+    }
+
+
 }

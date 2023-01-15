@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -47,13 +48,25 @@ public class GraphService {
 
         // A Graph is valid if and only if there are no circle Paths.
         // If Paths are not valid, an InvalidGraphException is thrown here.
-        generatePaths(graph);
+        generatePaths(adventure, graph);
 
         cache.put(adventure, graph);
         return graph;
     }
 
-    public Set<Path> generatePaths(Graph graph) throws InvalidGraphException {
+    public Set<Path> generatePaths(String adventure, Graph graph) throws InvalidGraphException {
+        var cacheKey = "AllPaths - %s".formatted(adventure);
+        var cachedObject = cache.get(cacheKey, HashSet.class);
+
+        if (cachedObject.isPresent()){
+            if (cachedObject
+                    .get()
+                    .stream()
+                    .anyMatch(obj -> !(obj instanceof Path))){
+                throw new RuntimeException("Cache Failure.");
+            }
+            return (HashSet<Path>) cachedObject.get();
+        }
 
         // compute all possible complete Paths and check for a circle
         var startingPoints = graph.chapters()
@@ -129,7 +142,37 @@ public class GraphService {
         if (!problematicPaths.isEmpty()) {
             throw new InvalidGraphException("There are problematic Graphs.", problematicPaths);
         }
+
+        cache.put(cacheKey, allPaths);
         return allPaths;
     }
 
+    public List<Path> getShortestPaths(String adventureName) throws InvalidGraphException,
+            NoChaptersForAdventureException {
+
+
+
+        var allPaths = generatePaths(adventureName, createGraph(adventureName));
+        var optionalMin = allPaths
+                .stream()
+                .mapToDouble(Path::approximateDurationInMinutes)
+                .min();
+
+        if (optionalMin.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        double minDuration = optionalMin.getAsDouble();
+
+        return allPaths
+                .stream()
+                .filter(path -> path.approximateDurationInMinutes().equals(minDuration))
+                .collect(Collectors.toList());
+    }
+
+    public void invalidateCaches() {
+        cache.invalidateAll();
+        chapterDomainRepository.invalidateCache();
+        chapterLinkDomainRepository.invalidateCache();
+    }
 }

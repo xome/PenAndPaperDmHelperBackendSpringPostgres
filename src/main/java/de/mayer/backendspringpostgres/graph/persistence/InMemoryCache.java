@@ -56,4 +56,10 @@ public class InMemoryCache implements Cache {
         }
         invalidatedKeys.put(aClass, new HashSet<>(Collections.singleton(key)));
     }
+
+    @Override
+    public void invalidateAll() {
+        cache.clear();
+        invalidatedKeys.clear();
+    }
 }
