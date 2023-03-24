@@ -6,10 +6,7 @@ import de.mayer.backendspringpostgres.graph.domainservice.Cache;
 import de.mayer.backendspringpostgres.graph.model.Chapter;
 import de.mayer.backendspringpostgres.graph.model.ChapterLink;
 import de.mayer.backendspringpostgres.graph.model.Graph;
-import de.mayer.backendspringpostgres.graph.persistence.ChapterJpa;
-import de.mayer.backendspringpostgres.graph.persistence.ChapterJpaRepository;
-import de.mayer.backendspringpostgres.graph.persistence.ChapterLinkJpa;
-import de.mayer.backendspringpostgres.graph.persistence.ChapterLinkJpaRepository;
+import de.mayer.backendspringpostgres.graph.persistence.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -48,11 +45,17 @@ class GraphHttpApiControllerTest {
     @Autowired
     ConcurrentMapCacheManager jpaCache;
 
+    @Autowired
+    AdventureGraphJpaRepository adventureJpaRepository;
+    @Autowired
+    private RecordJpaRepository recordJpaRepository;
+
     @AfterEach
     void cleanup() {
         cache.invalidateAll();
         chapterLinkJpaRepository.deleteAll();
         chapterJpaRepository.deleteAll();
+        adventureJpaRepository.deleteAll();
         jpaCache.getCacheNames().forEach(
                 cacheName -> {
                     var cache = jpaCache.getCache(cacheName);
@@ -90,10 +93,13 @@ class GraphHttpApiControllerTest {
             """)
     void oneGraphNoLinks() throws JsonProcessingException {
         cache.invalidate("Adventure", Graph.class);
+        var adventure = new AdventureJpa("Adventure");
         var chapter = new Chapter("Chapter 01", 30d);
 
+        adventure = adventureJpaRepository.save(adventure);
+
         chapterJpaRepository
-                .save(new ChapterJpa("Adventure",
+                .save(new ChapterJpa(adventure.getId(),
                         chapter.name(),
                         chapter.approximateDurationInMinutes()));
         var map = new HashMap<String, Object>();
@@ -107,7 +113,7 @@ class GraphHttpApiControllerTest {
         var graphReturned =
                 given()
                         .port(port)
-                        .pathParam("adventureName", "Adventure")
+                        .pathParam("adventureName", adventure.getName())
                 .when()
                         .get("/graph/{adventureName}")
                 .then()
@@ -132,22 +138,22 @@ class GraphHttpApiControllerTest {
         var chapter = new Chapter("Chapter 01", 30d);
         var chapter2 = new Chapter("Chapter 02", 30d);
 
-        chapterJpaRepository
-                .save(new ChapterJpa("Adventure",
+        var adventure = new AdventureJpa("Adventure");
+        adventure = adventureJpaRepository.save(adventure);
+
+        var chapter1Jpa = chapterJpaRepository
+                .save(new ChapterJpa(adventure.getId(),
                         chapter.name(),
                         chapter.approximateDurationInMinutes()));
 
-        chapterJpaRepository
-                .save(new ChapterJpa("Adventure",
+        var chapter2Jpa = chapterJpaRepository
+                .save(new ChapterJpa(adventure.getId(),
                         chapter2.name(),
                         chapter2.approximateDurationInMinutes()));
 
-        var link = new ChapterLink(chapter, chapter2);
+        var record = recordJpaRepository.save(new RecordJpa(chapter1Jpa.getId(), 0));
         chapterLinkJpaRepository
-                .save(new ChapterLinkJpa("Adventure",
-                        link.from().name(),
-                        0,
-                        link.to().name()));
+                .save(new ChapterLinkJpa(record, chapter2Jpa.getId()));
 
         var linkMap = new LinkedHashMap<String, String>();
         linkMap.put("chapterNameFrom", chapter.name());
@@ -200,25 +206,28 @@ class GraphHttpApiControllerTest {
             """)
     void cycleAdventure() throws JsonProcessingException {
 
-        var adventure = "Adventure";
-        cache.invalidate(adventure, Graph.class);
+        var adventure = adventureJpaRepository.save(new AdventureJpa("Adventure"));
+        cache.invalidate(adventure.getName(), Graph.class);
         var chapter01 = new Chapter("Chapter 01", 1.0d);
         var chapter02 = new Chapter("Chapter 02", 1.0d);
-        var chapterLink01 = new ChapterLink(chapter01, chapter02);
-        var chapterLink02 = new ChapterLink(chapter02, chapter01);
 
-        chapterJpaRepository.save(new ChapterJpa(adventure, chapter01.name(), chapter01.approximateDurationInMinutes()));
-        chapterJpaRepository.save(new ChapterJpa(adventure, chapter02.name(), chapter02.approximateDurationInMinutes()));
+        var chapter01Jpa = chapterJpaRepository.save(new ChapterJpa(adventure.getId(),
+                chapter01.name(),
+                chapter01.approximateDurationInMinutes()));
+
+        var chapter02Jpa = chapterJpaRepository.save(new ChapterJpa(adventure.getId(),
+                chapter02.name(),
+                chapter02.approximateDurationInMinutes()));
+
+        var record01 = recordJpaRepository.save(new RecordJpa(chapter01Jpa.getId(), 0));
+        var record02 = recordJpaRepository.save(new RecordJpa(chapter02Jpa.getId(), 0));
+
         chapterLinkJpaRepository
-                .save(new ChapterLinkJpa(adventure,
-                        chapterLink01.from().name(),
-                        0,
-                        chapterLink01.to().name()));
+                .save(new ChapterLinkJpa(record01,
+                        chapter02Jpa.getId()));
         chapterLinkJpaRepository
-                .save(new ChapterLinkJpa(adventure,
-                        chapterLink02.from().name(),
-                        0,
-                        chapterLink02.to().name()));
+                .save(new ChapterLinkJpa(record02,
+                        chapter02Jpa.getId()));
 
         var expectedBody = new LinkedHashMap<String, Object>();
         expectedBody.put("message", "Graph is invalid. There are only Paths with circles.");
@@ -228,7 +237,7 @@ class GraphHttpApiControllerTest {
         var returnedBody =
                 given()
                         .port(port)
-                        .pathParam("adventureName", adventure)
+                        .pathParam("adventureName", adventure.getName())
                         .when()
                         .get("/graph/{adventureName}")
                         .then()
@@ -248,17 +257,19 @@ class GraphHttpApiControllerTest {
             Then the only Path is returned
             """)
     void shortestPathWithOnePath() throws JsonProcessingException {
-        var adventure = "Adventure";
-        cache.invalidate(adventure, Graph.class);
+        var adventure = adventureJpaRepository.save(new AdventureJpa("Adventure"));
+        cache.invalidate(adventure.getName(), Graph.class);
 
         var chapter01 = new Chapter("1", 1d);
         var chapter02 = new Chapter("2", 1d);
 
         var link = new ChapterLink(chapter01, chapter02);
 
-        chapterJpaRepository.save(new ChapterJpa(adventure, chapter01.name(), chapter01.approximateDurationInMinutes()));
-        chapterJpaRepository.save(new ChapterJpa(adventure, chapter02.name(), chapter02.approximateDurationInMinutes()));
-        chapterLinkJpaRepository.save(new ChapterLinkJpa(adventure, link.from().name(), 0, link.to().name()));
+        var chapter01Jpa = chapterJpaRepository.save(new ChapterJpa(adventure.getId(), chapter01.name(), chapter01.approximateDurationInMinutes()));
+        var chapter02Jpa = chapterJpaRepository.save(new ChapterJpa(adventure.getId(), chapter02.name(), chapter02.approximateDurationInMinutes()));
+
+        var record = recordJpaRepository.save(new RecordJpa(chapter01Jpa.getId(), 0));
+        chapterLinkJpaRepository.save(new ChapterLinkJpa(record, chapter02Jpa.getId()));
 
         var expectedBody = new LinkedHashMap<String, Object>();
         expectedBody.put("chapters", List.of(link.from().name(), link.to().name()));
@@ -268,7 +279,7 @@ class GraphHttpApiControllerTest {
         var returnedBody =
                 given()
                         .port(port)
-                        .pathParam("adventureName", adventure)
+                        .pathParam("adventureName", adventure.getName())
                         .when()
                         .get("/paths/shortest/{adventureName}")
                         .then()
@@ -308,16 +319,23 @@ class GraphHttpApiControllerTest {
     }
 
     private String prepareCyclicGraphAndGetJsonString(String adventure) throws JsonProcessingException {
+        var adventureJpa = adventureJpaRepository.save(new AdventureJpa(adventure));
+
         var chapter01 = new Chapter("1", 1d);
         var chapter02 = new Chapter("2", 1d);
 
-        var link = new ChapterLink(chapter01, chapter02);
-        var link2 = new ChapterLink(chapter02, chapter01);
+        var chapter01Jpa = chapterJpaRepository.save(new ChapterJpa(adventureJpa.getId(),
+                chapter01.name(),
+                chapter01.approximateDurationInMinutes()));
 
-        chapterJpaRepository.save(new ChapterJpa(adventure, chapter01.name(), chapter01.approximateDurationInMinutes()));
-        chapterJpaRepository.save(new ChapterJpa(adventure, chapter02.name(), chapter02.approximateDurationInMinutes()));
-        chapterLinkJpaRepository.save(new ChapterLinkJpa(adventure, link.from().name(), 0, link.to().name()));
-        chapterLinkJpaRepository.save(new ChapterLinkJpa(adventure, link2.from().name(), 1, link.to().name()));
+        var chapter02Jpa = chapterJpaRepository.save(new ChapterJpa(adventureJpa.getId(),
+                chapter02.name(),
+                chapter02.approximateDurationInMinutes()));
+
+        var record = recordJpaRepository.save(new RecordJpa(chapter01Jpa.getId(), 0));
+        chapterLinkJpaRepository.save(new ChapterLinkJpa(record, chapter02Jpa.getId()));
+        var record02 = recordJpaRepository.save(new RecordJpa(chapter02Jpa.getId(), 0));
+        chapterLinkJpaRepository.save(new ChapterLinkJpa(record02, chapter01Jpa.getId()));
 
         var expectedBody = new LinkedHashMap<String, Object>();
         expectedBody.put("message", "Graph is invalid. There are only Paths with circles.");
@@ -356,10 +374,12 @@ class GraphHttpApiControllerTest {
             Then a Path with the chapter is returned
             """)
     void longestPathOneChapter() throws JsonProcessingException {
-        var adventure = "Adventure";
+        var adventure = adventureJpaRepository.save(new AdventureJpa("Adventure"));
         var chapter = new Chapter("Chapter", 1d);
 
-        chapterJpaRepository.save(new ChapterJpa(adventure, chapter.name(), chapter.approximateDurationInMinutes()));
+        chapterJpaRepository.save(new ChapterJpa(adventure.getId(),
+                chapter.name(),
+                chapter.approximateDurationInMinutes()));
 
         var pathInBody = new HashMap<String, Object>();
         pathInBody.put("chapters", List.of(chapter.name()));
@@ -369,7 +389,7 @@ class GraphHttpApiControllerTest {
         var returnedBody =
                 given()
                         .port(port)
-                        .pathParam("adventureName", adventure)
+                        .pathParam("adventureName", adventure.getName())
                         .when()
                         .get("/paths/longest/{adventureName}")
                         .then()
@@ -439,14 +459,14 @@ class GraphHttpApiControllerTest {
             Then a empty list of Paths is returned
             """)
     void nextPathsOneChapter() {
-        var adventure = "Adventure";
+        var adventure = adventureJpaRepository.save(new AdventureJpa("Adventure"));
         var expectedBody = "[]";
 
         var chapter = new Chapter("1", 1d);
-        chapterJpaRepository.save(new ChapterJpa(adventure, chapter.name(), chapter.approximateDurationInMinutes()));
+        chapterJpaRepository.save(new ChapterJpa(adventure.getId(), chapter.name(), chapter.approximateDurationInMinutes()));
 
         var returnedBody =
-                given().port(port).pathParam("adventureName", adventure).pathParam("startingPoint", chapter.name())
+                given().port(port).pathParam("adventureName", adventure.getName()).pathParam("startingPoint", chapter.name())
                         .when().get("/paths/next/{adventureName}/{startingPoint}")
                         .then().statusCode(HttpStatus.OK.value()).extract().body().asString();
 

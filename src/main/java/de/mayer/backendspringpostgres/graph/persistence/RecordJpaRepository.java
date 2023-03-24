@@ -1,10 +1,9 @@
 package de.mayer.backendspringpostgres.graph.persistence;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 
-public interface RecordJpaRepository extends JpaRepository<RecordJpa, RecordJpa> {
+import java.util.Set;
 
-    @Query("select max(r.index) from RecordJpa r where r.adventure = ?1 and r.chapter = ?2")
-    Integer findMaxIndexByAdventureAndChapter(String adventure, String chapter);
+public interface RecordJpaRepository extends JpaRepository<RecordJpa, Long> {
+    Set<RecordJpa> findByChapterId(Long chapterId);
 }

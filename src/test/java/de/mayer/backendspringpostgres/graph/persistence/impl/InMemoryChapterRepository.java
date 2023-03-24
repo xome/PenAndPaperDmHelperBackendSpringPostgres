@@ -2,24 +2,20 @@ package de.mayer.backendspringpostgres.graph.persistence.impl;
 
 import de.mayer.backendspringpostgres.graph.domainservice.ChapterRepository;
 import de.mayer.backendspringpostgres.graph.model.Chapter;
-import de.mayer.backendspringpostgres.graph.persistence.ChapterJpaId;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class InMemoryChapterRepository implements ChapterRepository {
 
-    private HashMap<ChapterJpaId, Chapter> database;
+    private HashMap<String, Chapter> database;
 
     public void save(String adventure, Chapter chapter) {
         if (database == null) {
             database = new HashMap<>();
         }
 
-        database.put(new ChapterJpaId(adventure, chapter.name()), chapter);
+        database.put(adventure + chapter.name(), chapter);
     }
 
     public void deleteByAdventure(String adventure) {
@@ -27,26 +23,21 @@ public class InMemoryChapterRepository implements ChapterRepository {
         database
                 .keySet()
                 .stream()
-                .filter(id -> id.adventure().equals(adventure))
+                .filter(id -> id.startsWith(adventure))
                 .forEach(id -> database.remove(id));
     }
 
     @Override
-    public Optional<Set<Chapter>> findByAdventure(String adventure) {
+    public Set<Chapter> findByAdventure(String adventure) {
         if (database == null || database.isEmpty())
-            return Optional.empty();
+            return Collections.emptySet();
 
-        var chapters = database
+        return database
                 .entrySet()
                 .stream()
-                .filter(entry -> entry.getKey().adventure().equals(adventure))
+                .filter(entry -> entry.getKey().startsWith(adventure))
                 .map(Map.Entry::getValue)
                 .collect(Collectors.toSet());
-
-        if (chapters.isEmpty())
-            return Optional.empty();
-        else
-            return Optional.of(chapters);
     }
 
     @Override
@@ -54,11 +45,10 @@ public class InMemoryChapterRepository implements ChapterRepository {
         if (this.database == null || this.database.isEmpty())
             return Optional.empty();
 
-        var id = new ChapterJpaId(adventure, chapter);
-        if (!this.database.containsKey(id))
+        if (!this.database.containsKey(adventure + chapter))
             return Optional.empty();
 
-        return Optional.of(this.database.get(id));
+        return Optional.of(this.database.get(adventure + chapter));
 
     }
 

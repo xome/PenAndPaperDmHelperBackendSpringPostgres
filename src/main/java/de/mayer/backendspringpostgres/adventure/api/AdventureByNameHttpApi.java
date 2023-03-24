@@ -1,27 +1,23 @@
 package de.mayer.backendspringpostgres.adventure.api;
 
-import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@RestController("/adventure/{adventureName}")
 public interface AdventureByNameHttpApi {
 
-    @DeleteMapping
-    default void deleteAdventureByName(@PathVariable("adventureName") String adventure,
-                                       HttpServletResponse httpResponse) {
+    @DeleteMapping("/adventure/{adventureName}")
+    default ResponseEntity<Void> deleteAdventureByName(@PathVariable("adventureName") String adventure) {
         throw new RuntimeException("Not yet implemented!");
     }
 
-    @PutMapping
-    default void putAdventureByName(@PathVariable("adventureName") String adventure,
-                                    HttpServletResponse httpResponse) {
+    @PutMapping("/adventure/{adventureName}")
+    default ResponseEntity<Void> putAdventureByName(@PathVariable("adventureName") String adventure) {
         throw new RuntimeException("Not yet implemented!");
     }
 
-    @PatchMapping
-    default void patchAdventureByName(@PathVariable("adventureName") String adventure,
-                                      @RequestBody String newAdventureName,
-                                      HttpServletResponse httpResponse) {
+    @PatchMapping(value = "/adventure/{adventureName}")
+    default ResponseEntity<Void> patchAdventureByName(@PathVariable("adventureName") String adventure,
+                                                      @RequestBody String newAdventureName) {
         throw new RuntimeException("Not yet implemented!");
     }
 

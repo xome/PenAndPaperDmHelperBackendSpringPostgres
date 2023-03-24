@@ -30,14 +30,15 @@ public class GraphService {
     public Graph createGraph(String adventure) throws NoChaptersForAdventureException, InvalidGraphException {
         var cachedGraph = cache.get(adventure, Graph.class);
 
-        if (cachedGraph.isPresent()){
+        if (cachedGraph.isPresent()) {
             return cachedGraph.get();
         }
 
-        var chapters = chapterRepository
-                .findByAdventure(adventure)
-                .orElseThrow(() -> new NoChaptersForAdventureException("No Chapters found for adventure %s!"
-                        .formatted(adventure)));
+        var chapters = chapterRepository.findByAdventure(adventure);
+        if (chapters.isEmpty())
+            throw new NoChaptersForAdventureException("No Chapters found for adventure %s!"
+                    .formatted(adventure));
+
         var chapterLinks = chapterLinkRepository
                 .findByAdventure(adventure);
 

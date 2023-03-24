@@ -2,49 +2,46 @@ package de.mayer.backendspringpostgres.graph.persistence;
 
 import jakarta.persistence.*;
 
-import java.io.Serializable;
 import java.util.Objects;
 
 @Entity
 @Table(name = "record")
-@IdClass(RecordJpa.class)
-public class RecordJpa implements Serializable {
+public class RecordJpa  {
 
+    @Column(name = "id")
     @Id
-    @Column(name = "adventure")
-    private String adventure;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @Id
-    @Column(name = "chapter")
-    private String chapter;
+    @Column(name = "chapter_id")
+    private Long chapterId;
 
-    @Id
     @Column(name = "index")
     private Integer index;
 
     public RecordJpa() {
     }
 
-    public RecordJpa(String adventure, String chapter, Integer index) {
-        this.adventure = adventure;
-        this.chapter = chapter;
+    public RecordJpa(Long chapterId, Integer index) {
+        this.chapterId = chapterId;
         this.index = index;
     }
 
-    public String getAdventure() {
-        return adventure;
+
+    public Long getId() {
+        return id;
     }
 
-    public void setAdventure(String adventure) {
-        this.adventure = adventure;
+    public void setId(Long id) {
+        this.id = id;
     }
 
-    public String getChapter() {
-        return chapter;
+    public Long getChapterId() {
+        return chapterId;
     }
 
-    public void setChapter(String chapter) {
-        this.chapter = chapter;
+    public void setChapterId(Long chapterId) {
+        this.chapterId = chapterId;
     }
 
     public Integer getIndex() {
@@ -60,20 +57,19 @@ public class RecordJpa implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         RecordJpa recordJpa = (RecordJpa) o;
-        return Objects.equals(adventure, recordJpa.adventure) && Objects.equals(chapter, recordJpa.chapter) && Objects.equals(index, recordJpa.index);
+        return Objects.equals(id, recordJpa.id) && Objects.equals(chapterId, recordJpa.chapterId) && Objects.equals(index, recordJpa.index);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(adventure, chapter, index);
+        return Objects.hash(id, chapterId, index);
     }
-
 
     @Override
     public String toString() {
         return "RecordJpa{" +
-                "adventure='" + adventure + '\'' +
-                ", chapter='" + chapter + '\'' +
+                "id=" + id +
+                ", chapterId=" + chapterId +
                 ", index=" + index +
                 '}';
     }

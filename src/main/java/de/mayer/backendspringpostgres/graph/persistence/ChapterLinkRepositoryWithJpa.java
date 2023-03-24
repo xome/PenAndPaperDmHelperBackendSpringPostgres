@@ -1,49 +1,47 @@
 package de.mayer.backendspringpostgres.graph.persistence;
 
 import de.mayer.backendspringpostgres.graph.domainservice.ChapterLinkRepository;
-import de.mayer.backendspringpostgres.graph.domainservice.ChapterRepository;
 import de.mayer.backendspringpostgres.graph.model.ChapterLink;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Component
 public class ChapterLinkRepositoryWithJpa implements ChapterLinkRepository {
 
     private final ChapterLinkJpaRepository chapterLinkJpaRepository;
-    private final ChapterRepository chapterDomainRepository;
+    private final ChapterRepositoryWithJpa chapterJpaRepository;
+    private final RecordJpaRepository recordJpaRepository;
     private final ConcurrentMapCacheManager jpaCache;
 
     @Autowired
-    public ChapterLinkRepositoryWithJpa(ChapterLinkJpaRepository chapterLinkJpaRepository,
-                                        ChapterRepository chapterDomainRepository, ConcurrentMapCacheManager jpaCache) {
+    public ChapterLinkRepositoryWithJpa(ChapterLinkJpaRepository chapterLinkJpaRepository, ChapterRepositoryWithJpa chapterDomainRepository, RecordJpaRepository recordJpaRepository, ConcurrentMapCacheManager jpaCache) {
         this.chapterLinkJpaRepository = chapterLinkJpaRepository;
-        this.chapterDomainRepository = chapterDomainRepository;
+        this.chapterJpaRepository = chapterDomainRepository;
+        this.recordJpaRepository = recordJpaRepository;
         this.jpaCache = jpaCache;
     }
 
     @Override
     public Set<ChapterLink> findByAdventure(String adventure) {
-        var links = chapterLinkJpaRepository.findByAdventure(adventure);
-        if (links.isEmpty()) return Collections.emptySet();
-        return links
-                .stream()
-                .map(chapterLinkJpa -> {
-                    var chapterFrom = chapterDomainRepository.findById(adventure, chapterLinkJpa.chapterFrom());
-                    var chapterTo = chapterDomainRepository.findById(adventure, chapterLinkJpa.to());
-
-                    if (chapterFrom.isEmpty() || chapterTo.isEmpty()) {
-                        return null;
-                    }
-                    return new ChapterLink(chapterFrom.get(), chapterTo.get());
-                })
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
+        Set<ChapterJpa> chapters = chapterJpaRepository.findJpasByAdventureName(adventure);
+        var chapterLinks = new HashSet<ChapterLink>();
+        chapters.forEach(chapter -> {
+            var jpaRecords = recordJpaRepository.findByChapterId(chapter.getId());
+            jpaRecords.stream().map(recordJpa -> {
+                var chapterJpaLink = chapterLinkJpaRepository.findByRecordId(recordJpa.getId());
+                if (chapterJpaLink.isEmpty()) return null;
+                var chapterTo = chapterJpaRepository.findById(chapterJpaLink.get().getTo()).map(ChapterRepositoryWithJpa::mapJpaToDomain);
+                if (chapterTo.isEmpty()) return null;
+                var chapterFrom = ChapterRepositoryWithJpa.mapJpaToDomain(chapter);
+                return new ChapterLink(chapterFrom, chapterTo.get());
+            }).filter(Objects::nonNull).forEach(chapterLinks::add);
+        });
+        return chapterLinks;
     }
 
     @Override
