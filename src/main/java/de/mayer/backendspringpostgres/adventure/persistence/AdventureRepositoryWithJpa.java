@@ -41,4 +41,10 @@ public class AdventureRepositoryWithJpa implements AdventureRepository {
             log.debug("Changed name of Adventure: {}", adventureJpa);
         }
     }
+
+    @Override
+    public void delete(Adventure adventure) {
+        var adventureJpa = adventureJpaRepository.findByName(adventure.name());
+        adventureJpa.ifPresent(adventureJpaRepository::delete);
+    }
 }

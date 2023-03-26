@@ -10,4 +10,6 @@ public interface AdventureRepository {
     void save(Adventure adventure);
 
     void changeName(Adventure adventure, String newAdventureName);
+
+    void delete(Adventure adventure);
 }

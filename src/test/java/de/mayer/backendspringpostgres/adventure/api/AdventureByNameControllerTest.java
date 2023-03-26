@@ -117,5 +117,49 @@ class AdventureByNameControllerTest {
 
     }
 
+    @DisplayName("""
+            Given there is no Adventure by the name Testadventure,
+            When the Adventure is to be deleted,
+            Then HTTP.NOT_FOUND is returned
+            """)
+    @Test
+    void deleteNotFound() {
+
+        var adventure = new AdventureJpa("Testadventure");
+
+        var given = given()
+                .port(port)
+                .pathParam("adventureName", adventure.getName());
+
+        given.when().delete("/adventure/{adventureName}")
+                .then().statusCode(is(HttpStatus.NOT_FOUND.value()));
+
+    }
+
+    @DisplayName("""
+            Given there is an Adventure by the name Testadventure,
+            When the Adventure is to be deleted,
+            Then HTTP.OK is returned
+                And the Adventure is deleted
+            """)
+    @Test
+    void delete() {
+
+        var adventure = new AdventureJpa("Testadventure");
+
+        adventure = adventureJpaRepository.save(adventure);
+
+        var given = given()
+                .port(port)
+                .pathParam("adventureName", adventure.getName());
+
+        given.when().delete("/adventure/{adventureName}")
+                .then().statusCode(is(HttpStatus.OK.value()));
+
+        assertThat(adventureJpaRepository.findById(adventure.getId()).isEmpty(), is(true));
+        assertThat(adventureJpaRepository.findByName(adventure.getName()).isEmpty(), is(true));
+
+    }
+
 
 }
