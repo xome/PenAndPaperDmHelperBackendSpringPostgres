@@ -4,9 +4,12 @@ import de.mayer.backendspringpostgres.adventure.domainservice.AdventureRepositor
 import de.mayer.backendspringpostgres.adventure.model.Adventure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Component
 public class AdventureRepositoryWithJpa implements AdventureRepository {
@@ -46,5 +49,13 @@ public class AdventureRepositoryWithJpa implements AdventureRepository {
     public void delete(Adventure adventure) {
         var adventureJpa = adventureJpaRepository.findByName(adventure.name());
         adventureJpa.ifPresent(adventureJpaRepository::delete);
+    }
+
+    @Override
+    public List<Adventure> findAll(Sort orderBy) {
+        return adventureJpaRepository.findAll(orderBy)
+                .stream()
+                .map(jpa -> new Adventure(jpa.getName(), null))
+                .collect(Collectors.toList());
     }
 }

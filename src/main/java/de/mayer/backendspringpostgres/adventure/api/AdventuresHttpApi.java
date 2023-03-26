@@ -1,5 +1,7 @@
 package de.mayer.backendspringpostgres.adventure.api;
 
+import de.mayer.backendspringpostgres.adventure.model.Adventure;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -9,7 +11,7 @@ import java.util.List;
 public interface AdventuresHttpApi {
 
     @GetMapping("/adventures")
-    default List<String> getAdventures(){
+    default ResponseEntity<List<Adventure>> getAdventures(){
         throw new RuntimeException("Not yet implemented!");
     }
 
