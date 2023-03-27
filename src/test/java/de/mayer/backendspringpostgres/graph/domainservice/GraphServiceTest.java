@@ -25,8 +25,8 @@ class GraphServiceTest {
             then an exception is thrown
             """)
     void noStartpointsAndEndings() {
-        var c01 = new Chapter("c01", 0.0d);
-        var c02 = new Chapter("c02", 1.0d);
+        var c01 = new Chapter("c01", 0);
+        var c02 = new Chapter("c02", 1);
         var chapters = new HashSet<>(Arrays.asList(c01, c02));
         var links = new HashSet<>(Arrays.asList(
                 new ChapterLink(c01, c02),
@@ -48,9 +48,9 @@ class GraphServiceTest {
             then an exception is thrown
             """)
     void oneCirclePath() {
-        var c01 = new Chapter("c01", 0.0d);
-        var c02 = new Chapter("c02", 1.0d);
-        var c03 = new Chapter("c03", 1.0d);
+        var c01 = new Chapter("c01", 0);
+        var c02 = new Chapter("c02", 1);
+        var c03 = new Chapter("c03", 1);
 
         var chapters = new HashSet<>(Arrays.asList(c01, c02, c03));
         var links = new HashSet<>(Arrays.asList(
@@ -76,10 +76,10 @@ class GraphServiceTest {
             then an exception is thrown
             """)
     void oneCirclePathAndOneNormalPath() {
-        var c01 = new Chapter("c01", 1.0d);
-        var c02 = new Chapter("c02", 1.0d);
-        var c03 = new Chapter("c03", 1.0d);
-        var c04 = new Chapter("c04", 1.0d);
+        var c01 = new Chapter("c01", 1);
+        var c02 = new Chapter("c02", 1);
+        var c03 = new Chapter("c03", 1);
+        var c04 = new Chapter("c04", 1);
         var chapters = new HashSet<>(Arrays.asList(c01, c02, c03, c04));
         var links = new HashSet<>(Arrays.asList(
                 new ChapterLink(c01, c03),
@@ -114,10 +114,10 @@ class GraphServiceTest {
             then all possible Paths are returned
             """)
     void multipleStartingPointsJustOneEndingNoCircles() throws InvalidGraphException {
-        var c01 = new Chapter("c01", 1.0d);
-        var c02 = new Chapter("c02", 1.0d);
-        var c03 = new Chapter("c03", 1.0d);
-        var c04 = new Chapter("c04", 1.0d);
+        var c01 = new Chapter("c01", 1);
+        var c02 = new Chapter("c02", 1);
+        var c03 = new Chapter("c03", 1);
+        var c04 = new Chapter("c04", 1);
         var chapters = Set.of(c01, c02, c03, c04);
 
         var link01to02 = new ChapterLink(c01, c02);
@@ -148,10 +148,10 @@ class GraphServiceTest {
             all Paths are single-chapter-paths
             """)
     void singleChaptersAdventures() throws InvalidGraphException {
-        var c01 = new Chapter("c01", 1.0d);
-        var c02 = new Chapter("c02", 1.0d);
-        var c03 = new Chapter("c03", 1.0d);
-        var c04 = new Chapter("c04", 1.0d);
+        var c01 = new Chapter("c01", 1);
+        var c02 = new Chapter("c02", 1);
+        var c03 = new Chapter("c03", 1);
+        var c04 = new Chapter("c04", 1);
         var chapters = Set.of(c01, c02, c03, c04);
 
         var path01 = new PathBuilder(c01).build();
@@ -176,10 +176,10 @@ class GraphServiceTest {
             then all possible Paths are returned
             """)
     void multipleEndingPointsJustOneStartNoCircles() throws InvalidGraphException {
-        var c01 = new Chapter("c01", 1.0d);
-        var c02 = new Chapter("c02", 1.0d);
-        var c03 = new Chapter("c03", 1.0d);
-        var c04 = new Chapter("c04", 1.0d);
+        var c01 = new Chapter("c01", 1);
+        var c02 = new Chapter("c02", 1);
+        var c03 = new Chapter("c03", 1);
+        var c04 = new Chapter("c04", 1);
         var chapters = Set.of(c01, c02, c03, c04);
 
         var link01to02 = new ChapterLink(c01, c02);
@@ -232,8 +232,8 @@ class GraphServiceTest {
     void invalidGraph() {
         var inMemoryChapterRepository = new InMemoryChapterRepository();
         var adventure = "Adventure";
-        var chapter1 = new Chapter("c01", 1.0d);
-        var chapter2 = new Chapter("c02", 1.0d);
+        var chapter1 = new Chapter("c01", 1);
+        var chapter2 = new Chapter("c02", 1);
 
         inMemoryChapterRepository.save(adventure, chapter1);
         inMemoryChapterRepository.save(adventure, chapter2);
@@ -259,8 +259,8 @@ class GraphServiceTest {
     void validGraph() throws InvalidGraphException, NoChaptersForAdventureException {
         var inMemoryChapterRepository = new InMemoryChapterRepository();
         var adventure = "Adventure";
-        var chapter1 = new Chapter("c01", 1.0d);
-        var chapter2 = new Chapter("c02", 1.0d);
+        var chapter1 = new Chapter("c01", 1);
+        var chapter2 = new Chapter("c02", 1);
         var link = new ChapterLink(chapter1, chapter2);
 
         inMemoryChapterRepository.save(adventure, chapter1);
@@ -284,8 +284,8 @@ class GraphServiceTest {
             """)
     void serviceUsesCache() throws InvalidGraphException, NoChaptersForAdventureException {
         var adventure = "Adventure";
-        var chapter01 = new Chapter("Chapter01", 1d);
-        var chapter02 = new Chapter("Chapter02", 2d);
+        var chapter01 = new Chapter("Chapter01", 1);
+        var chapter02 = new Chapter("Chapter02", 2);
         var chapterLink = new ChapterLink(chapter01, chapter02);
 
         InMemoryChapterRepository chapterRepo = new InMemoryChapterRepository();
@@ -311,7 +311,7 @@ class GraphServiceTest {
             """)
     void validGraphIsCached() throws InvalidGraphException, NoChaptersForAdventureException {
         var adventure = "Adventure";
-        var chapter01 = new Chapter("Chapter01", 1d);
+        var chapter01 = new Chapter("Chapter01", 1);
 
         InMemoryChapterRepository chapterRepo = new InMemoryChapterRepository();
         chapterRepo.save(adventure, chapter01);
@@ -339,11 +339,11 @@ class GraphServiceTest {
         var chapterRepo = new InMemoryChapterRepository();
         var linkRepo = new InMemoryChapterLinkRepository();
 
-        var chapter1 = new Chapter("1", 1d);
-        var chapter2 = new Chapter("2", 2d);
-        var chapter3 = new Chapter("3", 3d);
-        var chapter4 = new Chapter("4", 1d);
-        var chapter5 = new Chapter("5", 100d);
+        var chapter1 = new Chapter("1", 1);
+        var chapter2 = new Chapter("2", 2);
+        var chapter3 = new Chapter("3", 3);
+        var chapter4 = new Chapter("4", 1);
+        var chapter5 = new Chapter("5", 100);
         chapterRepo.save(adventure, chapter1);
         chapterRepo.save(adventure, chapter2);
         chapterRepo.save(adventure, chapter3);
@@ -398,8 +398,8 @@ class GraphServiceTest {
         var chapterRepo = new InMemoryChapterRepository();
         var linkRepo = new InMemoryChapterLinkRepository();
 
-        var chapter = new Chapter("1", 1d);
-        var chapter2 = new Chapter("2", 2d);
+        var chapter = new Chapter("1", 1);
+        var chapter2 = new Chapter("2", 2);
         var expectedPaths = new HashSet<>(Set.of(new PathBuilder(chapter).addChapter(chapter2).build()));
         cache.put("AllPaths - %s".formatted(adventure), expectedPaths);
 
@@ -422,7 +422,7 @@ class GraphServiceTest {
         var chapterRepo = new InMemoryChapterRepository();
         var linkRepo = new InMemoryChapterLinkRepository();
 
-        var chapter = new Chapter("1", 1d);
+        var chapter = new Chapter("1", 1);
 
         var graph = new Graph(Set.of(chapter), Collections.emptySet());
         var expectedPath = new HashSet<>(Set.of(new PathBuilder(chapter).build()));
@@ -446,8 +446,8 @@ class GraphServiceTest {
     void nextPathsTwoChapters() throws InvalidGraphException, NoChaptersForAdventureException {
 
         var adventure = "Adventure";
-        var chapter1 = new Chapter("1", 1d);
-        var chapter2 = new Chapter("2", 2d);
+        var chapter1 = new Chapter("1", 1);
+        var chapter2 = new Chapter("2", 2);
         var link = new ChapterLink(chapter1, chapter2);
 
         var cache = new InMemoryCache();
@@ -473,8 +473,8 @@ class GraphServiceTest {
             """)
     void nextPathsEndingChapterAsStartingPoint() throws InvalidGraphException, NoChaptersForAdventureException {
         var adventure = "Adventure";
-        var chapter1 = new Chapter("1", 1d);
-        var chapter2 = new Chapter("2", 2d);
+        var chapter1 = new Chapter("1", 1);
+        var chapter2 = new Chapter("2", 2);
         var link = new ChapterLink(chapter1, chapter2);
 
         var cache = new InMemoryCache();

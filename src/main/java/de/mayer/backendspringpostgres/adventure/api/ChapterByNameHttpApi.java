@@ -1,31 +1,29 @@
 package de.mayer.backendspringpostgres.adventure.api;
 
 import de.mayer.backendspringpostgres.adventure.model.Chapter;
-import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-@RestController("/chapter/{adventureName}/{chapterName}")
+@Controller
 public interface ChapterByNameHttpApi {
 
-    @GetMapping
-    default Chapter getChapterByName(@PathVariable("adventureName") String adventure,
-                                     @PathVariable("chapterName") String chapterName,
-                                     HttpServletResponse httpResponse) {
+    @GetMapping("/chapter/{adventureName}/{chapterName}")
+    default ResponseEntity<Chapter> getChapterByName(@PathVariable("adventureName") String adventureName,
+                                                    @PathVariable("chapterName") String chapterName) {
         throw new RuntimeException("Not yet implemented!");
     }
 
-    @PatchMapping
-    default void patchChapterByName(@PathVariable("adventureName") String adventure,
+    @PatchMapping("/chapter/{adventureName}/{chapterName}")
+    default ResponseEntity<Void> patchChapterByName(@PathVariable("adventureName") String adventureName,
                                    @PathVariable("chapterName") String chapterName,
-                                   @RequestBody Chapter chapter,
-                                   HttpServletResponse httpResponse) {
+                                   @RequestBody Chapter chapter) {
         throw new RuntimeException("Not yet implemented!");
     }
 
-    @DeleteMapping
-    default void deleteChapterByName(@PathVariable("adventureName") String adventure,
-                                    @PathVariable("chapterName") String chapterName,
-                                    HttpServletResponse httpResponse) {
+    @DeleteMapping("/chapter/{adventureName}/{chapterName}")
+    default ResponseEntity<Void> deleteChapterByName(@PathVariable("adventureName") String adventureName,
+                                    @PathVariable("chapterName") String chapterName) {
         throw new RuntimeException("Not yet implemented!");
     }
 

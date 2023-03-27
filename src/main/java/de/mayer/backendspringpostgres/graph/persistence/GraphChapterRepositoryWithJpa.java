@@ -12,23 +12,23 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
-public class ChapterRepositoryWithJpa implements ChapterRepository {
+public class GraphChapterRepositoryWithJpa implements ChapterRepository {
 
-    private final ChapterJpaRepository jpaRepository;
+    private final GraphChapterJpaRepository jpaRepository;
 
     private final ConcurrentMapCacheManager jpaCache;
 
-    private final AdventureGraphJpaRepository adventureJpaRepository;
+    private final GraphAdventureJpaRepository adventureJpaRepository;
 
     @Autowired
-    public ChapterRepositoryWithJpa(ChapterJpaRepository jpaRepository, ConcurrentMapCacheManager jpaCache, AdventureGraphJpaRepository adventureJpaRepository) {
+    public GraphChapterRepositoryWithJpa(GraphChapterJpaRepository jpaRepository, ConcurrentMapCacheManager jpaCache, GraphAdventureJpaRepository adventureJpaRepository) {
         this.jpaRepository = jpaRepository;
         this.jpaCache = jpaCache;
         this.adventureJpaRepository = adventureJpaRepository;
     }
 
     public static Chapter mapJpaToDomain(ChapterJpa chapterJpa) {
-        return new Chapter(chapterJpa.getName(), chapterJpa.getApproximateDurationInMinutes());
+        return new Chapter(chapterJpa.getName(), chapterJpa.getApproximateDurationInMinutes().intValue());
     }
 
 
@@ -36,7 +36,7 @@ public class ChapterRepositoryWithJpa implements ChapterRepository {
     public Set<Chapter> findByAdventure(String adventure) {
         return findJpasByAdventureName(adventure)
                 .stream()
-                .map(ChapterRepositoryWithJpa::mapJpaToDomain)
+                .map(GraphChapterRepositoryWithJpa::mapJpaToDomain)
                 .collect(Collectors.toSet());
 
     }
@@ -54,7 +54,7 @@ public class ChapterRepositoryWithJpa implements ChapterRepository {
         var adventureJpa = adventureJpaRepository.findByName(adventure);
         return adventureJpa.flatMap(jpa -> jpaRepository
                 .findByAdventureAndName(jpa.getId(), chapter)
-                .map(ChapterRepositoryWithJpa::mapJpaToDomain));
+                .map(GraphChapterRepositoryWithJpa::mapJpaToDomain));
     }
 
     public Optional<ChapterJpa> findById(Long id){

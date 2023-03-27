@@ -30,7 +30,7 @@ class ChapterMixinTest {
 
         var out = new ByteArrayOutputStream();
 
-        objectMapper.writeValue(out, new Chapter("chapter", 1d));
+        objectMapper.writeValue(out, new Chapter("chapter", 1));
 
         assertThat(out.toString(), is("\"chapter\""));
 

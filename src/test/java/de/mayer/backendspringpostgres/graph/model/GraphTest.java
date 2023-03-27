@@ -21,8 +21,8 @@ class GraphTest {
             """)
     void chaptersCannotBeNull() {
 
-        var c01 = new Chapter("c01", 0.0d);
-        var c02 = new Chapter("c02", 1.0d);
+        var c01 = new Chapter("c01", 0);
+        var c02 = new Chapter("c02", 1);
 
         var exc = assertThrows(RuntimeException.class,
                 () ->
@@ -44,8 +44,8 @@ class GraphTest {
             then an exception is thrown
             """)
     void chaptersCannotBeEmpty() {
-        var c01 = new Chapter("c01", 0.0d);
-        var c02 = new Chapter("c02", 1.0d);
+        var c01 = new Chapter("c01", 0);
+        var c02 = new Chapter("c02", 1);
         var exc = assertThrows(RuntimeException.class,
                 () ->
                         new Graph(Collections.emptySet(),
@@ -66,7 +66,7 @@ class GraphTest {
             then an exception is thrown
             """)
     void chapterLinksCannotBeNull() {
-        var c01 = new Chapter("c01", 0.0d);
+        var c01 = new Chapter("c01", 0);
         var exc = assertThrows(RuntimeException.class,
                 () ->
                         new Graph(Collections.singleton(c01),

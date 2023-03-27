@@ -11,15 +11,15 @@ import java.util.Objects;
 import java.util.Set;
 
 @Component
-public class ChapterLinkRepositoryWithJpa implements ChapterLinkRepository {
+public class GraphChapterLinkRepositoryWithJpa implements ChapterLinkRepository {
 
     private final ChapterLinkJpaRepository chapterLinkJpaRepository;
-    private final ChapterRepositoryWithJpa chapterJpaRepository;
+    private final GraphChapterRepositoryWithJpa chapterJpaRepository;
     private final RecordJpaRepository recordJpaRepository;
     private final ConcurrentMapCacheManager jpaCache;
 
     @Autowired
-    public ChapterLinkRepositoryWithJpa(ChapterLinkJpaRepository chapterLinkJpaRepository, ChapterRepositoryWithJpa chapterDomainRepository, RecordJpaRepository recordJpaRepository, ConcurrentMapCacheManager jpaCache) {
+    public GraphChapterLinkRepositoryWithJpa(ChapterLinkJpaRepository chapterLinkJpaRepository, GraphChapterRepositoryWithJpa chapterDomainRepository, RecordJpaRepository recordJpaRepository, ConcurrentMapCacheManager jpaCache) {
         this.chapterLinkJpaRepository = chapterLinkJpaRepository;
         this.chapterJpaRepository = chapterDomainRepository;
         this.recordJpaRepository = recordJpaRepository;
@@ -35,9 +35,9 @@ public class ChapterLinkRepositoryWithJpa implements ChapterLinkRepository {
             jpaRecords.stream().map(recordJpa -> {
                 var chapterJpaLink = chapterLinkJpaRepository.findByRecordId(recordJpa.getId());
                 if (chapterJpaLink.isEmpty()) return null;
-                var chapterTo = chapterJpaRepository.findById(chapterJpaLink.get().getTo()).map(ChapterRepositoryWithJpa::mapJpaToDomain);
+                var chapterTo = chapterJpaRepository.findById(chapterJpaLink.get().getTo()).map(GraphChapterRepositoryWithJpa::mapJpaToDomain);
                 if (chapterTo.isEmpty()) return null;
-                var chapterFrom = ChapterRepositoryWithJpa.mapJpaToDomain(chapter);
+                var chapterFrom = GraphChapterRepositoryWithJpa.mapJpaToDomain(chapter);
                 return new ChapterLink(chapterFrom, chapterTo.get());
             }).filter(Objects::nonNull).forEach(chapterLinks::add);
         });

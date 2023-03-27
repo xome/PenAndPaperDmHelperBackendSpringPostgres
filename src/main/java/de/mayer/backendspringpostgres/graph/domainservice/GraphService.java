@@ -160,19 +160,19 @@ public class GraphService {
         var allPaths = generatePaths(adventureName, createGraph(adventureName));
         var optionalMin = allPaths
                 .stream()
-                .mapToDouble(Path::approximateDurationInMinutes)
+                .mapToInt(Path::approximateDurationInMinutes)
                 .min();
 
         if (optionalMin.isEmpty()) {
             return Collections.emptyList();
         }
 
-        double minDuration = optionalMin.getAsDouble();
+        int minDuration = optionalMin.getAsInt();
 
         return getAllPathsWithDuration(allPaths, minDuration);
     }
 
-    private static List<Path> getAllPathsWithDuration(Set<Path> allPaths, double duration) {
+    private static List<Path> getAllPathsWithDuration(Set<Path> allPaths, int duration) {
         return allPaths
                 .stream()
                 .filter(path -> path.approximateDurationInMinutes().equals(duration))
@@ -184,13 +184,13 @@ public class GraphService {
         var allPaths = generatePaths(adventureName, createGraph(adventureName));
         var optionalMax = allPaths
                 .stream()
-                .mapToDouble(Path::approximateDurationInMinutes)
+                .mapToInt(Path::approximateDurationInMinutes)
                 .max();
 
         if (optionalMax.isEmpty()) {
             return Collections.emptyList();
         }
-        return getAllPathsWithDuration(allPaths, optionalMax.getAsDouble());
+        return getAllPathsWithDuration(allPaths, optionalMax.getAsInt());
     }
 
 

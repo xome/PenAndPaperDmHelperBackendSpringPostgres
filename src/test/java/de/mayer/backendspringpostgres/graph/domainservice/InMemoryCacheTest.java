@@ -21,7 +21,7 @@ class InMemoryCacheTest {
             """)
     void emptyAddOne(){
         var cache = new InMemoryCache();
-        var chapter01 = new Chapter("Chapter 01", 2.0d);
+        var chapter01 = new Chapter("Chapter 01", 2);
         var graph = new Graph(Set.of(chapter01), Collections.emptySet());
 
         cache.put("Adventure", graph);
@@ -41,7 +41,7 @@ class InMemoryCacheTest {
             """)
     void invalidatedKeyReturnsNull(){
         var cache = new InMemoryCache();
-        var chapter = new Chapter("Chapter01", 1.0d);
+        var chapter = new Chapter("Chapter01", 1);
         var graph = new Graph(Set.of(chapter), Collections.emptySet());
         var key = "Adventure";
         cache.put(key, graph);
@@ -59,7 +59,7 @@ class InMemoryCacheTest {
             """)
     void validateKey(){
         var cache = new InMemoryCache();
-        var chapter = new Chapter("Chapter01", 1.0d);
+        var chapter = new Chapter("Chapter01", 1);
         var graph = new Graph(Set.of(chapter), Collections.emptySet());
         var key = "Adventure";
         cache.invalidate(key, Graph.class);
@@ -90,7 +90,7 @@ class InMemoryCacheTest {
             """)
     void classCacheNotInitialised(){
         var cache = new InMemoryCache();
-        cache.put("a key", new Chapter("Chapter 01", 2.0d));
+        cache.put("a key", new Chapter("Chapter 01", 2));
 
         assertThat("There is no object retrieved for the given Key and Class",
                 cache.get("a key", Graph.class).isEmpty(), is(true));
@@ -104,7 +104,7 @@ class InMemoryCacheTest {
             """)
     void unknownKey(){
         var cache = new InMemoryCache();
-        cache.put("a key", new Chapter("Chapter 01", 1d));
+        cache.put("a key", new Chapter("Chapter 01", 1));
 
         assertThat("No object can be retrieved for the given key",
                 cache.get("another key", Chapter.class).isEmpty(), is(true));

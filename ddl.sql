@@ -14,7 +14,7 @@ create table chapter (
     adventure                       bigint,
     name                            text,
     subheader                       text,
-    approximate_duration_in_minutes float4,
+    approximate_duration_in_minutes int,
     constraint chapter_adventure_fk foreign key (adventure) references adventure (id)
         on delete cascade on update cascade,
     constraint chapter_pk primary key (id),

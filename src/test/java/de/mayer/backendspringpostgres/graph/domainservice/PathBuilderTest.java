@@ -11,7 +11,6 @@ import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class PathBuilderTest {
 
@@ -22,7 +21,7 @@ class PathBuilderTest {
             then a new Path with no Chapters is returned.
             """)
     void noChapterBuild() {
-        assertThat(new PathBuilder().build(), Is.is(new Path(new LinkedList<>(), 0.0d)));
+        assertThat(new PathBuilder().build(), Is.is(new Path(new LinkedList<>(), 0)));
     }
 
     @Test
@@ -32,8 +31,8 @@ class PathBuilderTest {
             then the Path from initiate is returned.
             """)
     void buildFromInitiate() {
-        var path = new Path(new LinkedList<>(List.of(new Chapter("c01", 1.0d))),
-                1.0d);
+        var path = new Path(new LinkedList<>(List.of(new Chapter("c01", 1))),
+                1);
         assertThat(new PathBuilder()
                 .initiateFrom(path)
                 .build(),
@@ -47,10 +46,10 @@ class PathBuilderTest {
             then build returns a path consisting only of the chapter
             """)
     void addChapterToEmptyPath(){
-        var chapter = new Chapter("c01", 1.0d);
+        var chapter = new Chapter("c01", 1);
 
         var pathExpected = new Path(new LinkedList<>(List.of(chapter)),
-                1.0d);
+                1);
 
         assertThat(new PathBuilder()
                 .addChapter(chapter)

@@ -20,11 +20,11 @@ public final class ChapterJpa {
     @Column(name = "name")
     private String name;
     @Column(name = "approximate_duration_in_minutes")
-    private Double approximateDurationInMinutes;
+    private Long approximateDurationInMinutes;
 
     public ChapterJpa(Long adventure,
                       String name,
-                      Double approximateDurationInMinutes
+                      Long approximateDurationInMinutes
     ) {
         this.adventure = adventure;
         this.name = name;
@@ -51,7 +51,7 @@ public final class ChapterJpa {
         this.name = name;
     }
 
-    public void setApproximateDurationInMinutes(Double approximateDurationInMinutes) {
+    public void setApproximateDurationInMinutes(Long approximateDurationInMinutes) {
         this.approximateDurationInMinutes = approximateDurationInMinutes;
     }
 
@@ -66,7 +66,7 @@ public final class ChapterJpa {
     }
 
     @Column(name = "approximate_duration_in_minutes")
-    public Double getApproximateDurationInMinutes() {
+    public Long getApproximateDurationInMinutes() {
         return approximateDurationInMinutes;
     }
 

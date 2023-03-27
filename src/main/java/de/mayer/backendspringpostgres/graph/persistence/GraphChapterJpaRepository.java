@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.Optional;
 import java.util.Set;
 
-public interface ChapterJpaRepository extends JpaRepository<ChapterJpa, Long> {
+public interface GraphChapterJpaRepository extends JpaRepository<ChapterJpa, Long> {
     @Query("select c from ChapterJpa c where c.adventure = ?1")
     @Cacheable("graphChaptersByAdventure")
     Set<ChapterJpa> findByAdventure(Long adventure);

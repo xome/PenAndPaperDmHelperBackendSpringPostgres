@@ -31,7 +31,7 @@ public class PathBuilder {
 
     public Path build(){
         if (path == null){
-            return new Path(new LinkedList<>(), 0.0d);
+            return new Path(new LinkedList<>(), 0);
         }
         return this.path;
     }
