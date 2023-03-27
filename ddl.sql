@@ -60,7 +60,7 @@ create table chapter_link (
     record_id  bigint,
     chapter_to bigint,
     constraint chapter_link_pk primary key (id),
-    constraint chapter_link_records_fk foreign key (id)
+    constraint chapter_link_records_fk foreign key (record_id)
         references record (id)
         on delete cascade on update cascade,
     constraint chapter_link_chapter_to_fk foreign key (chapter_to)
