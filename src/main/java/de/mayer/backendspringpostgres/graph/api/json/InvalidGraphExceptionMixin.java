@@ -1,7 +1,6 @@
-package de.mayer.backendspringpostgres.graph.api.jackson;
+package de.mayer.backendspringpostgres.graph.api.json;
 
 import com.fasterxml.jackson.annotation.*;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import de.mayer.backendspringpostgres.graph.model.InvalidGraphException;
 import de.mayer.backendspringpostgres.graph.model.Path;
 import org.springframework.boot.jackson.JsonMixin;

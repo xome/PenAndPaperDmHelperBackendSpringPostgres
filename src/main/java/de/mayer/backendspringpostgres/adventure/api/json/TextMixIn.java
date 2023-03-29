@@ -1,4 +1,4 @@
-package de.mayer.backendspringpostgres.adventure.api.jackson;
+package de.mayer.backendspringpostgres.adventure.api.json;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import de.mayer.backendspringpostgres.adventure.model.Text;
