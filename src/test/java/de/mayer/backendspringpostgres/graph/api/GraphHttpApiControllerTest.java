@@ -31,7 +31,7 @@ class GraphHttpApiControllerTest {
     private int port;
 
     @Autowired
-    ChapterLinkJpaRepository chapterLinkJpaRepository;
+    GraphChapterLinkJpaRepository chapterLinkJpaRepository;
 
     @Autowired
     GraphChapterJpaRepository chapterJpaRepository;
@@ -48,7 +48,7 @@ class GraphHttpApiControllerTest {
     @Autowired
     GraphAdventureJpaRepository adventureJpaRepository;
     @Autowired
-    private RecordJpaRepository recordJpaRepository;
+    private GraphRecordJpaRepository recordJpaRepository;
 
     @AfterEach
     void cleanup() {

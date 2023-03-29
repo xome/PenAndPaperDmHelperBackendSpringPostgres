@@ -13,13 +13,13 @@ import java.util.Set;
 @Component
 public class GraphChapterLinkRepositoryWithJpa implements ChapterLinkRepository {
 
-    private final ChapterLinkJpaRepository chapterLinkJpaRepository;
+    private final GraphChapterLinkJpaRepository chapterLinkJpaRepository;
     private final GraphChapterRepositoryWithJpa chapterJpaRepository;
-    private final RecordJpaRepository recordJpaRepository;
+    private final GraphRecordJpaRepository recordJpaRepository;
     private final ConcurrentMapCacheManager jpaCache;
 
     @Autowired
-    public GraphChapterLinkRepositoryWithJpa(ChapterLinkJpaRepository chapterLinkJpaRepository, GraphChapterRepositoryWithJpa chapterDomainRepository, RecordJpaRepository recordJpaRepository, ConcurrentMapCacheManager jpaCache) {
+    public GraphChapterLinkRepositoryWithJpa(GraphChapterLinkJpaRepository chapterLinkJpaRepository, GraphChapterRepositoryWithJpa chapterDomainRepository, GraphRecordJpaRepository recordJpaRepository, ConcurrentMapCacheManager jpaCache) {
         this.chapterLinkJpaRepository = chapterLinkJpaRepository;
         this.chapterJpaRepository = chapterDomainRepository;
         this.recordJpaRepository = recordJpaRepository;

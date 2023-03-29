@@ -19,7 +19,7 @@ class BackgroundMusicTest {
             """)
     void nameCannotBeNull() {
         var exc = assertThrows(RuntimeException.class,
-                () -> new BackgroundMusic(null, new byte[1])
+                () -> new BackgroundMusic(null, " ")
         );
 
         assertThat(exc.getCause(), is(instanceOf(IllegalAccessException.class)));
@@ -34,7 +34,7 @@ class BackgroundMusicTest {
             """)
     void nameCannotBeEmpty() {
         var exc = assertThrows(RuntimeException.class,
-                () -> new BackgroundMusic("", new byte[1])
+                () -> new BackgroundMusic("", " ")
         );
 
         assertThat(exc.getCause(), is(instanceOf(IllegalAccessException.class)));
@@ -58,13 +58,13 @@ class BackgroundMusicTest {
 
     @Test
     @DisplayName("""
-            Given data is a byte array of size 0,
+            Given data is an empty String,
             when a BackgroundMusic record is created,
             then an exception is raised
             """)
     void dataCannotBeEmpty() {
         var exc = assertThrows(RuntimeException.class,
-                () -> new BackgroundMusic("Music", new byte[0])
+                () -> new BackgroundMusic("Music", "")
         );
 
         assertThat(exc.getCause(), is(instanceOf(IllegalAccessException.class)));

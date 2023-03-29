@@ -25,6 +25,7 @@ create table record (
     id         bigserial,
     chapter_id bigint,
     index      integer check ( index >= 0 ),
+    type text not null,
     constraint record_chapter_fk foreign key (chapter_id) references chapter (id)
         on delete cascade on update cascade,
     constraint records_pk primary key (id),
