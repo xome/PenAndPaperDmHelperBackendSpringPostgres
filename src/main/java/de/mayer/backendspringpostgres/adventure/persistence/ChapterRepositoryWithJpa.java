@@ -1,44 +1,31 @@
 package de.mayer.backendspringpostgres.adventure.persistence;
 
 
+import de.mayer.backendspringpostgres.adventure.domainservice.ChapterNotFoundException;
 import de.mayer.backendspringpostgres.adventure.domainservice.ChapterRepository;
+import de.mayer.backendspringpostgres.adventure.domainservice.RecordRepository;
 import de.mayer.backendspringpostgres.adventure.model.*;
+import de.mayer.backendspringpostgres.adventure.persistence.dto.ChapterJpa;
+import de.mayer.backendspringpostgres.adventure.persistence.jparepo.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 @Component
 public class ChapterRepositoryWithJpa implements ChapterRepository {
 
     private final ChapterJpaRepository chapterJpaRepository;
     private final AdventureJpaRepository adventureJpaRepository;
-    private final RecordJpaRepository recordJpaRepository;
-    private final TextJpaRepository textJpaRepository;
-    private final PictureJpaRepository pictureJpaRepository;
-    private final BackgroundMusicRepository backgroundMusicRepository;
-    private final ChapterLinkJpaRepository chapterLinkJpaRepository;
-    private final EnvironmentLightningJpaRepository environmentLightningJpaRepository;
-
-    private final Logger log = LoggerFactory.getLogger(ChapterRepositoryWithJpa.class);
+    private final RecordRepository recordRepository;
 
     public ChapterRepositoryWithJpa(ChapterJpaRepository chapterJpaRepository,
-                                    AdventureJpaRepository adventureJpaRepository, RecordJpaRepository recordJpaRepository,
-                                    TextJpaRepository textJpaRepository,
-                                    PictureJpaRepository pictureJpaRepository,
-                                    BackgroundMusicRepository backgroundMusicRepository,
-                                    ChapterLinkJpaRepository chapterLinkJpaRepository,
-                                    EnvironmentLightningJpaRepository environmentLightningJpaRepository) {
+                                    AdventureJpaRepository adventureJpaRepository,
+                                    RecordRepository recordRepository) {
         this.chapterJpaRepository = chapterJpaRepository;
         this.adventureJpaRepository = adventureJpaRepository;
-        this.recordJpaRepository = recordJpaRepository;
-        this.textJpaRepository = textJpaRepository;
-        this.pictureJpaRepository = pictureJpaRepository;
-        this.backgroundMusicRepository = backgroundMusicRepository;
-        this.chapterLinkJpaRepository = chapterLinkJpaRepository;
-        this.environmentLightningJpaRepository = environmentLightningJpaRepository;
+        this.recordRepository = recordRepository;
     }
 
     @Override
@@ -50,84 +37,66 @@ public class ChapterRepositoryWithJpa implements ChapterRepository {
         var optionalChapter = chapterJpaRepository
                 .findByAdventureAndName(adventureOptional.get().getId(), chapterName);
 
-        return optionalChapter.map(this::mapJpaToDomain);
+        if (optionalChapter.isPresent()) {
+            try {
+                return Optional.of(mapJpaToDomain(adventureName, optionalChapter.get()));
+            } catch (ChapterNotFoundException e) {
+                return Optional.empty();
+            }
+        }
 
+        return Optional.empty();
     }
 
-    private Chapter mapJpaToDomain(ChapterJpa chapterJpa) {
+    @Override
+    public void updateChapter(String adventure, String nameOfChapterToBeUpdated, Chapter chapterWithNewData)
+            throws ChapterNotFoundException {
 
-        var allJpaRecords = recordJpaRepository.findByChapterIdOrderByIndex(chapterJpa.getId());
-        var records = new LinkedList<RecordInAChapter>();
+        var optionalAdventureJpa = adventureJpaRepository.findByName(adventure);
+        if (optionalAdventureJpa.isEmpty()) {
+            throw new ChapterNotFoundException();
+        }
+        var adventureJpa = optionalAdventureJpa.get();
 
-        var recordsToDelete = new ArrayList<RecordJpa>();
+        var optionalChapterJpa = chapterJpaRepository.findByAdventureAndName(adventureJpa.getId(),
+                nameOfChapterToBeUpdated);
 
-        allJpaRecords
-                .forEach(recordJpa -> {
+        if (optionalChapterJpa.isEmpty()) {
+            throw new ChapterNotFoundException();
+        }
+        var chapterJpa = optionalChapterJpa.get();
 
-                    AtomicBoolean subTypeFound = new AtomicBoolean(true);
+        if (chapterWithNewData.name() != null) {
+            chapterJpa.setName(chapterWithNewData.name());
+        }
 
-                    switch (recordJpa.getType()) {
-                        case Text -> textJpaRepository
-                                .findByRecordId(recordJpa.getId())
-                                .ifPresentOrElse(textJpa -> records.add(recordJpa.getIndex(),
-                                                new Text(textJpa.getText())),
-                                        () -> subTypeFound.set(false));
+        if (chapterWithNewData.subheader() != null) {
+            chapterJpa.setSubheader(chapterWithNewData.subheader());
+        }
 
-                        case Picture -> pictureJpaRepository
-                                .findByRecordId(recordJpa.getId())
-                                .ifPresentOrElse(pictureJpa -> records.add(recordJpa.getIndex(),
-                                                new Picture(pictureJpa.getBase64(),
-                                                        pictureJpa.getFileFormat(),
-                                                        pictureJpa.getShareableWithGroup())),
-                                        () -> subTypeFound.set(false));
+        if (chapterWithNewData.approximateDurationInMinutes() != null) {
+            chapterJpa.setApproximateDurationInMinutes(Long.valueOf(chapterWithNewData.approximateDurationInMinutes()));
+        }
 
-                        case ChapterLink -> {
-                            var optionalLink = chapterLinkJpaRepository.findByRecordId(recordJpa.getId());
-                            if (optionalLink.isPresent()) {
-                                var chapterTo = chapterJpaRepository.findById(optionalLink.get().getChapterTo());
-                                chapterTo
-                                        .ifPresentOrElse(
-                                                chapterToJpa -> records.add(recordJpa.getIndex(),
-                                                        new ChapterLink(chapterToJpa.getName())),
-                                                () -> {
-                                                    throw new RuntimeException("ChapterTo not found.");
-                                                });
-                            } else {
-                                subTypeFound.set(false);
-                            }
-                        }
+        var chapter = new Chapter(chapterJpa.getName(),
+                null,
+                null,
+                null);
 
-                        case EnvironmentLightning -> environmentLightningJpaRepository
-                                .findByRecordId(recordJpa.getId())
-                                .ifPresentOrElse(environmentLightningJpa -> records.add(
-                                                new EnvironmentLightning(environmentLightningJpa.getBrightness(),
-                                                        new int[]{environmentLightningJpa.getRgb1(),
-                                                                environmentLightningJpa.getRgb2(),
-                                                                environmentLightningJpa.getRgb3()})),
-                                        () -> subTypeFound.set(false));
+        if (chapterWithNewData.records() != null) {
+            recordRepository.deleteAllByAdventureAndChapter(adventure, nameOfChapterToBeUpdated);
+            recordRepository.saveRecords(
+                    new Adventure(adventureJpa.getName(), null),
+                    chapter,
+                    chapterWithNewData.records());
+        }
 
-                        case Music -> backgroundMusicRepository
-                                .findByRecordId(recordJpa.getId())
-                                .ifPresentOrElse(backgroundMusicJpa -> records.add(recordJpa.getIndex(),
-                                                new BackgroundMusic(backgroundMusicJpa.getName(),
-                                                        backgroundMusicJpa.getBase64())),
-                                        () -> subTypeFound.set(false));
+        chapterJpaRepository.save(chapterJpa);
+    }
 
-                        default -> {
-                            log.error("Subtype not implemented: %s".formatted(recordJpa.getType()));
-                            subTypeFound.set(false);
-                        }
-                    }
+    private Chapter mapJpaToDomain(String adventureName, ChapterJpa chapterJpa) throws ChapterNotFoundException {
 
-                    if (!subTypeFound.get()) {
-                        log.error("No subtype record found for Record. It will be deleted: %s"
-                                .formatted(recordJpa));
-                        recordsToDelete.add(recordJpa);
-                    }
-                });
-
-        recordJpaRepository.deleteAll(recordsToDelete);
-
+        var records = recordRepository.findRecordsByAdventureAndChapter(adventureName, chapterJpa.getName());
 
         return new Chapter(chapterJpa.getName(),
                 chapterJpa.getSubheader(),

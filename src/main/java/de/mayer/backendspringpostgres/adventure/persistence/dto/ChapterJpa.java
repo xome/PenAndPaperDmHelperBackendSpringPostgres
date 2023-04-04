@@ -1,4 +1,4 @@
-package de.mayer.backendspringpostgres.adventure.persistence;
+package de.mayer.backendspringpostgres.adventure.persistence.dto;
 
 import jakarta.persistence.*;
 

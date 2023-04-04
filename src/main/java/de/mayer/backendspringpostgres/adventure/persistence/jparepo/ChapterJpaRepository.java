@@ -1,5 +1,6 @@
-package de.mayer.backendspringpostgres.adventure.persistence;
+package de.mayer.backendspringpostgres.adventure.persistence.jparepo;
 
+import de.mayer.backendspringpostgres.adventure.persistence.dto.ChapterJpa;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

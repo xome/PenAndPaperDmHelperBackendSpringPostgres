@@ -1,4 +1,4 @@
-package de.mayer.backendspringpostgres.adventure.persistence;
+package de.mayer.backendspringpostgres.adventure.persistence.dto;
 
 import jakarta.persistence.*;
 
@@ -12,8 +12,9 @@ public class BackgroundMusicJpa {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "record_id")
-    private Long recordId;
+    @JoinColumn(name = "record_id")
+    @OneToOne()
+    private RecordJpa recordJpa;
 
     @Column(name = "name")
     private String name;
@@ -24,8 +25,8 @@ public class BackgroundMusicJpa {
     public BackgroundMusicJpa() {
     }
 
-    public BackgroundMusicJpa(Long recordId, String name, String base64) {
-        this.recordId = recordId;
+    public BackgroundMusicJpa(RecordJpa recordJpa, String name, String base64) {
+        this.recordJpa = recordJpa;
         this.name = name;
         this.base64 = base64;
     }
@@ -34,7 +35,7 @@ public class BackgroundMusicJpa {
     public String toString() {
         return "BackgroundMusicJpa{" +
                 "id=" + id +
-                ", recordId=" + recordId +
+                ", recordJpa=" + recordJpa +
                 ", name='" + name + '\'' +
                 ", base64='" + base64 + '\'' +
                 '}';
@@ -61,12 +62,12 @@ public class BackgroundMusicJpa {
         this.id = id;
     }
 
-    public Long getRecordId() {
-        return recordId;
+    public RecordJpa getRecordJpa() {
+        return recordJpa;
     }
 
-    public void setRecordId(Long recordId) {
-        this.recordId = recordId;
+    public void setRecordJpa(RecordJpa recordJpa) {
+        this.recordJpa = recordJpa;
     }
 
     public String getName() {

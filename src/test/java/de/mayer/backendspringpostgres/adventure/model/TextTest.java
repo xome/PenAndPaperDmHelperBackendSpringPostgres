@@ -18,7 +18,7 @@ class TextTest {
             """)
     void textCannotBeNull() {
         var exc = assertThrows(RuntimeException.class, () -> new Text(null));
-        assertThat(exc.getCause(), is(instanceOf(IllegalAccessException.class)));
+        assertThat(exc, is(instanceOf(IllegalModelAccessException.class)));
     }
 
     @Test
@@ -29,7 +29,7 @@ class TextTest {
             """)
     void textCannotBeEmpty() {
         var exc = assertThrows(RuntimeException.class, () -> new Text(""));
-        assertThat(exc.getCause(), is(instanceOf(IllegalAccessException.class)));
+        assertThat(exc, is(instanceOf(IllegalModelAccessException.class)));
     }
 
 }

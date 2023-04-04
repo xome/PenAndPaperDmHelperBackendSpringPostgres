@@ -6,11 +6,4 @@ public record Chapter(String name,
                       String subheader,
                       Integer approximateDurationInMinutes,
                       List<RecordInAChapter> records
-) {
-
-    public Chapter {
-        if (name == null || name.isEmpty())
-            throw new IllegalModelAccessException("Name cannot be null or empty");
-    }
-
-}
+){}

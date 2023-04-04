@@ -75,7 +75,7 @@ class EnvironmentLightningTest {
                         new EnvironmentLightning(null, new int[]{-1, 0, 0})
         );
 
-        assertThat(exc.getCause().getMessage(), containsStringIgnoringCase("r value has to be positive"));
+        assertThat(exc.getMessage(), containsStringIgnoringCase("r value has to be positive"));
     }
 
     @Test
@@ -90,7 +90,7 @@ class EnvironmentLightningTest {
                         new EnvironmentLightning(null, new int[]{256, 0, 0})
         );
 
-        assertThat(exc.getCause().getMessage(), containsStringIgnoringCase("r value has to be less than or equal to 255"));
+        assertThat(exc.getMessage(), containsStringIgnoringCase("r value has to be less than or equal to 255"));
     }
 
 

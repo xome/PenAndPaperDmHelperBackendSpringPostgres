@@ -1,5 +1,6 @@
 package de.mayer.backendspringpostgres.adventure.api;
 
+import de.mayer.backendspringpostgres.adventure.domainservice.ChapterNotFoundException;
 import de.mayer.backendspringpostgres.adventure.domainservice.ChapterRepository;
 import de.mayer.backendspringpostgres.adventure.model.Chapter;
 import org.springframework.http.HttpStatus;
@@ -30,6 +31,12 @@ public class ChapterByNameController implements ChapterByNameHttpApi {
 
     @Override
     public ResponseEntity<Void> patchChapterByName(String adventureName, String chapterName, Chapter chapter) {
-        return ChapterByNameHttpApi.super.patchChapterByName(adventureName, chapterName, chapter);
+        try {
+            chapterRepository.updateChapter(adventureName, chapterName, chapter);
+        } catch (ChapterNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        return ResponseEntity.ok().build();
+
     }
 }

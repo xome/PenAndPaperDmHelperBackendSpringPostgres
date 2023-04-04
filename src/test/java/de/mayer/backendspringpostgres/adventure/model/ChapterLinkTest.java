@@ -22,8 +22,8 @@ class ChapterLinkTest {
                 () -> new ChapterLink(null)
         );
 
-        assertThat(exc.getCause(), is(instanceOf(IllegalAccessException.class)));
-        assertThat(exc.getCause().getMessage(), containsStringIgnoringCase("chapterNameTo cannot be null or empty"));
+        assertThat(exc, is(instanceOf(IllegalModelAccessException.class)));
+        assertThat(exc.getMessage(), containsStringIgnoringCase("chapterNameTo cannot be null or empty"));
     }
 
     @Test
@@ -37,8 +37,8 @@ class ChapterLinkTest {
                 () -> new ChapterLink("")
         );
 
-        assertThat(exc.getCause(), is(instanceOf(IllegalAccessException.class)));
-        assertThat(exc.getCause().getMessage(), containsStringIgnoringCase("chapterNameTo cannot be null or empty"));
+        assertThat(exc, is(instanceOf(IllegalModelAccessException.class)));
+        assertThat(exc.getMessage(), containsStringIgnoringCase("chapterNameTo cannot be null or empty"));
     }
 
 }

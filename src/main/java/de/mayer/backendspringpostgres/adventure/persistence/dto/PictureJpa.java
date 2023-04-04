@@ -1,4 +1,4 @@
-package de.mayer.backendspringpostgres.adventure.persistence;
+package de.mayer.backendspringpostgres.adventure.persistence.dto;
 
 import jakarta.persistence.*;
 
@@ -12,8 +12,9 @@ public class PictureJpa {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "record_id")
-    private Long recordId;
+    @JoinColumn(name = "record_id")
+    @OneToOne(cascade = CascadeType.REMOVE)
+    private RecordJpa recordJpa;
 
     @Column(name = "base64")
     private String base64;
@@ -27,8 +28,8 @@ public class PictureJpa {
     public PictureJpa() {
     }
 
-    public PictureJpa(Long recordId, String base64, String fileFormat, Boolean isShareableWithGroup) {
-        this.recordId = recordId;
+    public PictureJpa(RecordJpa recordJpa, String base64, String fileFormat, Boolean isShareableWithGroup) {
+        this.recordJpa = recordJpa;
         this.base64 = base64;
         this.fileFormat = fileFormat;
         this.isShareableWithGroup = isShareableWithGroup;
@@ -38,7 +39,7 @@ public class PictureJpa {
     public String toString() {
         return "PictureJpa{" +
                 "id=" + id +
-                ", recordId=" + recordId +
+                ", recordJpa=" + recordJpa +
                 ", base64='" + base64 + '\'' +
                 ", fileFormat='" + fileFormat + '\'' +
                 ", isShareableWithGroup=" + isShareableWithGroup +
@@ -66,12 +67,12 @@ public class PictureJpa {
         this.id = id;
     }
 
-    public Long getRecordId() {
-        return recordId;
+    public RecordJpa getRecordJpa() {
+        return recordJpa;
     }
 
-    public void setRecordId(Long recordId) {
-        this.recordId = recordId;
+    public void setRecordJpa(RecordJpa recordJpa) {
+        this.recordJpa = recordJpa;
     }
 
     public String getBase64() {

@@ -22,8 +22,8 @@ class BackgroundMusicTest {
                 () -> new BackgroundMusic(null, " ")
         );
 
-        assertThat(exc.getCause(), is(instanceOf(IllegalAccessException.class)));
-        assertThat(exc.getCause().getMessage(), containsStringIgnoringCase("name cannot be null"));
+        assertThat(exc, is(instanceOf(IllegalModelAccessException.class)));
+        assertThat(exc.getMessage(), containsStringIgnoringCase("name cannot be null"));
     }
 
     @Test
@@ -37,8 +37,8 @@ class BackgroundMusicTest {
                 () -> new BackgroundMusic("", " ")
         );
 
-        assertThat(exc.getCause(), is(instanceOf(IllegalAccessException.class)));
-        assertThat(exc.getCause().getMessage(), containsStringIgnoringCase("name cannot be null or empty"));
+        assertThat(exc, is(instanceOf(IllegalModelAccessException.class)));
+        assertThat(exc.getMessage(), containsStringIgnoringCase("name cannot be null or empty"));
     }
 
     @Test
@@ -52,8 +52,8 @@ class BackgroundMusicTest {
                 () -> new BackgroundMusic("Music", null)
         );
 
-        assertThat(exc.getCause(), is(instanceOf(IllegalAccessException.class)));
-        assertThat(exc.getCause().getMessage(), containsStringIgnoringCase("data cannot be null"));
+        assertThat(exc, is(instanceOf(IllegalModelAccessException.class)));
+        assertThat(exc.getMessage(), containsStringIgnoringCase("data cannot be null"));
     }
 
     @Test
@@ -67,8 +67,8 @@ class BackgroundMusicTest {
                 () -> new BackgroundMusic("Music", "")
         );
 
-        assertThat(exc.getCause(), is(instanceOf(IllegalAccessException.class)));
-        assertThat(exc.getCause().getMessage(), containsStringIgnoringCase("data cannot be null or empty"));
+        assertThat(exc, is(instanceOf(IllegalModelAccessException.class)));
+        assertThat(exc.getMessage(), containsStringIgnoringCase("data cannot be null or empty"));
     }
 
 

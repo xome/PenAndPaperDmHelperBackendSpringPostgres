@@ -1,6 +1,7 @@
 package de.mayer.backendspringpostgres.adventure.api;
 
 import de.mayer.backendspringpostgres.adventure.model.Chapter;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +15,7 @@ public interface ChapterByNameHttpApi {
         throw new RuntimeException("Not yet implemented!");
     }
 
-    @PatchMapping("/chapter/{adventureName}/{chapterName}")
+    @PatchMapping(value = "/chapter/{adventureName}/{chapterName}", consumes = MediaType.APPLICATION_JSON_VALUE)
     default ResponseEntity<Void> patchChapterByName(@PathVariable("adventureName") String adventureName,
                                    @PathVariable("chapterName") String chapterName,
                                    @RequestBody Chapter chapter) {

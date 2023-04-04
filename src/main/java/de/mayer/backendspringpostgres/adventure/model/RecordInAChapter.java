@@ -1,4 +1,8 @@
 package de.mayer.backendspringpostgres.adventure.model;
 
-public interface RecordInAChapter {
+public sealed interface RecordInAChapter permits BackgroundMusic,
+        ChapterLink,
+        EnvironmentLightning,
+        Picture,
+        Text {
 }

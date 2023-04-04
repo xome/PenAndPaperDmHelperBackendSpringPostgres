@@ -1,4 +1,4 @@
-package de.mayer.backendspringpostgres.adventure.persistence;
+package de.mayer.backendspringpostgres.adventure.persistence.dto;
 
 import jakarta.persistence.*;
 
@@ -12,8 +12,9 @@ public class TextJpa {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "record_id")
-    private Long recordId;
+    @JoinColumn(name = "record_id")
+    @OneToOne(cascade = CascadeType.REMOVE)
+    private RecordJpa recordJpa;
 
     @Column(name = "text")
     private String text;
@@ -21,18 +22,9 @@ public class TextJpa {
     public TextJpa() {
     }
 
-    public TextJpa(Long recordId, String text) {
-        this.recordId = recordId;
+    public TextJpa(RecordJpa recordJpa, String text) {
+        this.recordJpa = recordJpa;
         this.text = text;
-    }
-
-    @Override
-    public String toString() {
-        return "TextJpa{" +
-                "id=" + id +
-                ", recordId=" + recordId +
-                ", text='" + text + '\'' +
-                '}';
     }
 
     @Override
@@ -48,6 +40,15 @@ public class TextJpa {
         return Objects.hash(id);
     }
 
+    @Override
+    public String toString() {
+        return "TextJpa{" +
+                "id=" + id +
+                ", recordJpa=" + recordJpa +
+                ", text='" + text + '\'' +
+                '}';
+    }
+
     public Long getId() {
         return id;
     }
@@ -56,12 +57,12 @@ public class TextJpa {
         this.id = id;
     }
 
-    public Long getRecordId() {
-        return recordId;
+    public RecordJpa getRecordJpa() {
+        return recordJpa;
     }
 
-    public void setRecordId(Long recordId) {
-        this.recordId = recordId;
+    public void setRecordJpa(RecordJpa recordJpa) {
+        this.recordJpa = recordJpa;
     }
 
     public String getText() {

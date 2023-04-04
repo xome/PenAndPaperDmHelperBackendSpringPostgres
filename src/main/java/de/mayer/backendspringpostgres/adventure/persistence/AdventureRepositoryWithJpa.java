@@ -2,6 +2,8 @@ package de.mayer.backendspringpostgres.adventure.persistence;
 
 import de.mayer.backendspringpostgres.adventure.domainservice.AdventureRepository;
 import de.mayer.backendspringpostgres.adventure.model.Adventure;
+import de.mayer.backendspringpostgres.adventure.persistence.dto.AdventureJpa;
+import de.mayer.backendspringpostgres.adventure.persistence.jparepo.AdventureJpaRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort;

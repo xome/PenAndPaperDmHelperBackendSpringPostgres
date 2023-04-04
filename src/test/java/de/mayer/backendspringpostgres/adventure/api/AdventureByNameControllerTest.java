@@ -2,8 +2,8 @@ package de.mayer.backendspringpostgres.adventure.api;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.mayer.backendspringpostgres.adventure.persistence.AdventureJpa;
-import de.mayer.backendspringpostgres.adventure.persistence.AdventureJpaRepository;
+import de.mayer.backendspringpostgres.adventure.persistence.dto.AdventureJpa;
+import de.mayer.backendspringpostgres.adventure.persistence.jparepo.AdventureJpaRepository;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;

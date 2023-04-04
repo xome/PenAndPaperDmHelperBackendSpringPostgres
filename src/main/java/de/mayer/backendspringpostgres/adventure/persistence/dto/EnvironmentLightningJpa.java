@@ -1,4 +1,4 @@
-package de.mayer.backendspringpostgres.adventure.persistence;
+package de.mayer.backendspringpostgres.adventure.persistence.dto;
 
 import jakarta.persistence.*;
 
@@ -12,8 +12,9 @@ public class EnvironmentLightningJpa {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "record_id")
-    private Long recordId;
+    @JoinColumn(name = "record_id")
+    @OneToOne(cascade = CascadeType.REMOVE)
+    private RecordJpa recordJpa;
 
     @Column(name = "rgb_1")
     private Integer rgb1;
@@ -30,8 +31,9 @@ public class EnvironmentLightningJpa {
     public EnvironmentLightningJpa() {
     }
 
-    public EnvironmentLightningJpa(Long recordId, Integer rgb1, Integer rgb2, Integer rgb3, Double brightness) {
-        this.recordId = recordId;
+
+    public EnvironmentLightningJpa(RecordJpa recordJpa, Integer rgb1, Integer rgb2, Integer rgb3, Double brightness) {
+        this.recordJpa = recordJpa;
         this.rgb1 = rgb1;
         this.rgb2 = rgb2;
         this.rgb3 = rgb3;
@@ -42,7 +44,7 @@ public class EnvironmentLightningJpa {
     public String toString() {
         return "EnvironmentLightningJpa{" +
                 "id=" + id +
-                ", recordId=" + recordId +
+                ", recordJpa=" + recordJpa +
                 ", rgb1=" + rgb1 +
                 ", rgb2=" + rgb2 +
                 ", rgb3=" + rgb3 +
@@ -71,12 +73,12 @@ public class EnvironmentLightningJpa {
         this.id = id;
     }
 
-    public Long getRecordId() {
-        return recordId;
+    public RecordJpa getRecordJpa() {
+        return recordJpa;
     }
 
-    public void setRecordId(Long recordId) {
-        this.recordId = recordId;
+    public void setRecordJpa(RecordJpa recordJpa) {
+        this.recordJpa = recordJpa;
     }
 
     public Integer getRgb1() {

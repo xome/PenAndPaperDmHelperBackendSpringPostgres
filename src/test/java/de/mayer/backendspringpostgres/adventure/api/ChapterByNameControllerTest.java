@@ -3,6 +3,10 @@ package de.mayer.backendspringpostgres.adventure.api;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.mayer.backendspringpostgres.adventure.persistence.*;
+import de.mayer.backendspringpostgres.adventure.persistence.dto.*;
+import de.mayer.backendspringpostgres.adventure.persistence.jparepo.*;
+import io.restassured.http.ContentType;
+import io.restassured.specification.RequestSpecification;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,14 +16,11 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.Map;
+import java.util.*;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
@@ -51,13 +52,23 @@ class ChapterByNameControllerTest {
     @Autowired
     ChapterLinkJpaRepository chapterLinkJpaRepository;
     @Autowired
-    BackgroundMusicRepository backgroundMusicRepository;
+    BackgroundMusicJpaRepository backgroundMusicRepository;
 
 
     @AfterEach
     void cleanup() {
         chapterJpaRepository.deleteAll();
         adventureJpaRepository.deleteAll();
+    }
+
+    private static final String PATH = "chapter/{adventureName}/{chapterName}";
+
+    private RequestSpecification getGivenForPathWithParams(String adventure, String chapter) {
+        var given = given()
+                .port(port)
+                .pathParam("adventureName", "Testadventure")
+                .pathParam("chapterName", "Testchapter");
+        return given;
     }
 
     @DisplayName("""
@@ -68,12 +79,8 @@ class ChapterByNameControllerTest {
     @Test
     void getChapterNotFound() {
 
-        var given = given()
-                .port(port)
-                .pathParam("adventureName", "Testadventure")
-                .pathParam("chapterName", "Testchapter");
-
-        var when = given.when().get("chapter/{adventureName}/{chapterName}");
+        var when = getGivenForPathWithParams("Testadventure", "Testchapter")
+                .when().get(PATH);
 
         when.then()
                 .statusCode(is(HttpStatus.NOT_FOUND.value()));
@@ -100,12 +107,8 @@ class ChapterByNameControllerTest {
         map.put("records", Collections.emptyList());
         var expectedBody = jsonMapper.writer().writeValueAsString(map);
 
-        var given = given()
-                .port(port)
-                .pathParam("adventureName", "Testadventure")
-                .pathParam("chapterName", "Testchapter");
-
-        var when = given.when().get("chapter/{adventureName}/{chapterName}");
+        var when = getGivenForPathWithParams(adventure.getName(), chapter.getName())
+                .when().get(PATH);
 
         var bodyReturned = when.then()
                 .statusCode(is(HttpStatus.OK.value()))
@@ -133,20 +136,34 @@ class ChapterByNameControllerTest {
                 "This is a subheader",
                 30L));
 
-        var recordText = recordJpaRepository.save(new RecordJpa(chapter.getId(), 0, RecordType.Text));
-        var recordEnvLight = recordJpaRepository.save(new RecordJpa(chapter.getId(), 1, RecordType.EnvironmentLightning));
-        var recordPic = recordJpaRepository.save(new RecordJpa(chapter.getId(), 2, RecordType.Picture));
-        var recordLink = recordJpaRepository.save(new RecordJpa(chapter.getId(), 3, RecordType.ChapterLink));
-        var recordMusic = recordJpaRepository.save(new RecordJpa(chapter.getId(), 4, RecordType.Music));
+        var map = saveExampleRecordsAndGetLinkedHashMapOfJsonRepresentation(chapter, chapter2);
+        var expectedBody = jsonMapper.writer().writeValueAsString(map);
 
-        var text = textJpaRepository.save(new TextJpa(recordText.getId(), "Testtext"));
-        var envLight = environmentLightningJpaRepository.save(new EnvironmentLightningJpa(recordEnvLight.getId(),
+        var when = getGivenForPathWithParams(adventure.getName(), chapter.getName())
+                .when().get(PATH);
+
+        var bodyReturned = when.then()
+                .statusCode(is(HttpStatus.OK.value()))
+                .extract().asString();
+
+        assertThat(bodyReturned, is(expectedBody));
+
+    }
+
+    private Map<String, Object> saveExampleRecordsAndGetLinkedHashMapOfJsonRepresentation(ChapterJpa chapter, ChapterJpa chapter2) {
+        var recordText = recordJpaRepository.save(new RecordJpa(chapter.getId(), 0, RecordType.Text));
+        var text = textJpaRepository.save(new TextJpa(recordText, "Testtext"));
+        var recordEnvLight = recordJpaRepository.save(new RecordJpa(chapter.getId(), 1, RecordType.EnvironmentLightning));
+        var envLight = environmentLightningJpaRepository.save(new EnvironmentLightningJpa(recordEnvLight,
                 255, 255, 255, 0.4));
-        var pic = pictureJpaRepository.save(new PictureJpa(recordPic.getId(),
+        var recordPic = recordJpaRepository.save(new RecordJpa(chapter.getId(), 2, RecordType.Picture));
+        var pic = pictureJpaRepository.save(new PictureJpa(recordPic,
                 "thisisvalidbase64===============",
                 "png", true));
-        chapterLinkJpaRepository.save(new ChapterLinkJpa(recordLink.getId(), chapter2.getId()));
-        var music = backgroundMusicRepository.save(new BackgroundMusicJpa(recordMusic.getId(),
+        var recordLink = recordJpaRepository.save(new RecordJpa(chapter.getId(), 3, RecordType.ChapterLink));
+        chapterLinkJpaRepository.save(new ChapterLinkJpa(recordLink, chapter2.getId()));
+        var recordMusic = recordJpaRepository.save(new RecordJpa(chapter.getId(), 4, RecordType.Music));
+        var music = backgroundMusicRepository.save(new BackgroundMusicJpa(recordMusic,
                 "Testmusic",
                 "thisisvalidbase64==============="));
 
@@ -177,23 +194,215 @@ class ChapterByNameControllerTest {
         Map<String, Object> map = new LinkedHashMap<>();
         map.put("name", chapter.getName());
         map.put("subheader", chapter.getSubheader());
-        map.put("approximateDurationInMinutes", chapter.getApproximateDurationInMinutes().intValue());
+        if (chapter.getApproximateDurationInMinutes() == null){
+            map.put("approximateDurationInMinutes", chapter.getApproximateDurationInMinutes());
+        } else {
+            map.put("approximateDurationInMinutes", chapter.getApproximateDurationInMinutes().intValue());
+        }
         map.put("records", listRecords);
-        var expectedBody = jsonMapper.writer().writeValueAsString(map);
+        return map;
+    }
 
-        var given = given()
-                .port(port)
-                .pathParam("adventureName", "Testadventure")
-                .pathParam("chapterName", "Testchapter");
 
-        var when = given.when().get("chapter/{adventureName}/{chapterName}");
+    @DisplayName("""
+            Given there is no Chapter by the Name "Testchapter" in the adventure "Testadventure"
+            When the Chapter is patched,
+            Then http status code 404 is returned.
+            """)
+    @Test
+    void patchNonExistentChapter() throws JsonProcessingException {
 
-        var bodyReturned = when.then()
-                .statusCode(is(HttpStatus.OK.value()))
-                .extract().asString();
+        var simpleChapterForPatch = new LinkedHashMap<>();
+        simpleChapterForPatch.put("name", "new name for a chapter");
+        simpleChapterForPatch.put("subheader", null);
+        simpleChapterForPatch.put("approximateDurationInMinutes", null);
+        simpleChapterForPatch.put("records", null);
 
-        assertThat(bodyReturned, is(expectedBody));
+        var given = getGivenForPathWithParams("Testadventure", "Testchapter");
+        given.body(jsonMapper.writeValueAsString(simpleChapterForPatch))
+                .contentType(ContentType.JSON);
+
+        given.when().patch(PATH)
+                .then().statusCode(is(HttpStatus.NOT_FOUND.value()));
 
     }
+
+    @DisplayName("""
+            Given there is a Chapter by the name "Testchapter",
+            When it is patched with a new name,
+            Then the Chapter is saved with the new name
+            """)
+    @Test
+    void patchName() throws JsonProcessingException {
+        var adventure = adventureJpaRepository.save(new AdventureJpa("Testadventure"));
+        var chapter = chapterJpaRepository.save(
+                new ChapterJpa(adventure.getId(),
+                        "Testchapter",
+                        null,
+                        null));
+
+        String newName = "new name for a chapter";
+
+        var simpleChapterForPatch = new LinkedHashMap<>();
+        simpleChapterForPatch.put("name", newName);
+        simpleChapterForPatch.put("subheader", null);
+        simpleChapterForPatch.put("approximateDurationInMinutes", null);
+        simpleChapterForPatch.put("records", null);
+
+        var given = getGivenForPathWithParams(adventure.getName(), chapter.getName());
+        given.body(jsonMapper.writeValueAsString(simpleChapterForPatch))
+                .contentType(ContentType.JSON);
+
+        given.when().patch(PATH)
+                .then().statusCode(is(HttpStatus.OK.value()));
+
+        var patchedChapter = chapterJpaRepository.findByAdventureAndName(adventure.getId(), newName);
+        assertThat(patchedChapter.isPresent(), is(true));
+        assertThat(patchedChapter.get().getId(), is(chapter.getId()));
+
+    }
+
+    @DisplayName("""
+            Given there is a Chapter with the subheader Testsubheader,
+            When it is patched with a new Subheader,
+            Then the Chapter is saved with the new Subheader
+            """)
+    @Test
+    void patchSubheader() throws JsonProcessingException {
+        var adventure = adventureJpaRepository.save(new AdventureJpa("Testadventure"));
+        var chapter = chapterJpaRepository.save(
+                new ChapterJpa(adventure.getId(),
+                        "Testchapter",
+                        "Testsubheader",
+                        null));
+
+        String newSubheader = "new subheader";
+
+        var simpleChapterForPatch = new LinkedHashMap<>();
+        simpleChapterForPatch.put("name", null);
+        simpleChapterForPatch.put("subheader", newSubheader);
+        simpleChapterForPatch.put("approximateDurationInMinutes", null);
+        simpleChapterForPatch.put("records", null);
+
+        var given = getGivenForPathWithParams(adventure.getName(), chapter.getName());
+        given.body(jsonMapper.writeValueAsString(simpleChapterForPatch))
+                .contentType(ContentType.JSON);
+
+        var when = given
+                .when().patch(PATH);
+
+        when
+                .then().statusCode(is(HttpStatus.OK.value()));
+
+        var patchedChapter = chapterJpaRepository.findByAdventureAndName(adventure.getId(), chapter.getName());
+        assertThat(patchedChapter.isPresent(), is(true));
+        assertThat(patchedChapter.get().getId(), is(chapter.getId()));
+        assertThat(patchedChapter.get().getSubheader(), is(newSubheader));
+    }
+
+    @DisplayName("""
+            Given there is a Chapter with a duration of 30 minutes,
+            When it is patched with a new duration of 50 minutes,
+            Then the Chapter is saved with the new duration
+            """)
+    @Test
+    void patchDuration() throws JsonProcessingException {
+        var adventure = adventureJpaRepository.save(new AdventureJpa("Testadventure"));
+        var chapter = chapterJpaRepository.save(
+                new ChapterJpa(adventure.getId(),
+                        "Testchapter",
+                        null,
+                        30L));
+
+        Long newDuration = 50L;
+
+        var simpleChapterForPatch = new LinkedHashMap<>();
+        simpleChapterForPatch.put("name", null);
+        simpleChapterForPatch.put("subheader", null);
+        simpleChapterForPatch.put("approximateDurationInMinutes", newDuration);
+        simpleChapterForPatch.put("records", null);
+
+        var given = getGivenForPathWithParams(adventure.getName(), chapter.getName());
+        given.body(jsonMapper.writeValueAsString(simpleChapterForPatch))
+                .contentType(ContentType.JSON);
+
+        var when = given
+                .when().patch(PATH);
+
+        when
+                .then().statusCode(is(HttpStatus.OK.value()));
+
+        var patchedChapter = chapterJpaRepository.findByAdventureAndName(adventure.getId(), chapter.getName());
+        assertThat(patchedChapter.isPresent(), is(true));
+        assertThat(patchedChapter.get().getId(), is(chapter.getId()));
+        assertThat(patchedChapter.get().getApproximateDurationInMinutes(), is(newDuration));
+    }
+
+    @DisplayName("""
+            Given there is a Chapter with multiple records,
+            When it is patched with records,
+            Then the records are replaced
+            """)
+    @Test
+    void patchRecords() throws JsonProcessingException {
+        var adventure = adventureJpaRepository.save(new AdventureJpa("Testadventure"));
+        var chapter = chapterJpaRepository.save(
+                new ChapterJpa(adventure.getId(),
+                        "Testchapter",
+                        null,
+                        null));
+        var chapter2 = chapterJpaRepository.save(new ChapterJpa(adventure.getId(),
+                "2nd Chapter",
+                null,
+                null));
+        var chapter3 = chapterJpaRepository.save(new ChapterJpa(adventure.getId(),
+                "3rd Chapter",
+                null,
+                null));
+        var chapter4 = chapterJpaRepository.save(new ChapterJpa(adventure.getId(),
+                "4th Chapter",
+                null,
+                null));
+
+        saveExampleRecordsAndGetLinkedHashMapOfJsonRepresentation(chapter, chapter2);
+        List<Long> recordIdsBeforePatch = recordJpaRepository.findByChapterIdOrderByIndex(chapter.getId())
+                .stream()
+                .mapToLong(RecordJpa::getId)
+                .boxed()
+                .toList();
+
+        var newRecords = saveExampleRecordsAndGetLinkedHashMapOfJsonRepresentation(chapter3, chapter4);
+
+        var simpleChapterForPatch = new LinkedHashMap<>();
+        simpleChapterForPatch.put("name", null);
+        simpleChapterForPatch.put("subheader", null);
+        simpleChapterForPatch.put("approximateDurationInMinutes", null);
+        simpleChapterForPatch.put("records", newRecords.get("records"));
+
+        var given = getGivenForPathWithParams(adventure.getName(), chapter.getName());
+        given.body(jsonMapper.writeValueAsString(simpleChapterForPatch))
+                .contentType(ContentType.JSON);
+
+        var when = given
+                .when().patch(PATH);
+
+        when
+                .then().statusCode(is(HttpStatus.OK.value()));
+
+        var recordsAfterPatch = recordJpaRepository.findByChapterIdOrderByIndex(chapter.getId())
+                .stream()
+                .mapToLong(RecordJpa::getId)
+                .boxed()
+                .toList();
+
+        var patchedChapter = chapterJpaRepository.findByAdventureAndName(adventure.getId(), chapter.getName());
+        assertThat(patchedChapter.isPresent(), is(true));
+        assertThat(patchedChapter.get().getId(), is(chapter.getId()));
+        assertThat(recordsAfterPatch, hasSize(5)); // one of every kind
+        for (Long idAfterPatch : recordsAfterPatch) {
+            assertThat(recordIdsBeforePatch, not(hasItem(idAfterPatch)));
+        }
+    }
+
 
 }

@@ -1,4 +1,4 @@
-package de.mayer.backendspringpostgres.adventure.persistence;
+package de.mayer.backendspringpostgres.adventure.persistence.dto;
 
 import jakarta.persistence.*;
 
@@ -12,8 +12,9 @@ public class ChapterLinkJpa {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "record_id")
-    private Long recordId;
+    @JoinColumn(name = "record_id")
+    @OneToOne(cascade = CascadeType.REMOVE)
+    private RecordJpa recordJpa;
 
     @Column(name = "chapter_to")
     private Long chapterTo;
@@ -21,8 +22,8 @@ public class ChapterLinkJpa {
     public ChapterLinkJpa() {
     }
 
-    public ChapterLinkJpa(Long recordId, Long chapterTo) {
-        this.recordId = recordId;
+    public ChapterLinkJpa(RecordJpa recordJpa, Long chapterTo) {
+        this.recordJpa = recordJpa;
         this.chapterTo = chapterTo;
     }
 
@@ -30,7 +31,7 @@ public class ChapterLinkJpa {
     public String toString() {
         return "ChapterLinkJpa{" +
                 "id=" + id +
-                ", recordId=" + recordId +
+                ", recordJpa=" + recordJpa +
                 ", chapterTo=" + chapterTo +
                 '}';
     }
@@ -56,12 +57,12 @@ public class ChapterLinkJpa {
         this.id = id;
     }
 
-    public Long getRecordId() {
-        return recordId;
+    public RecordJpa getRecordJpa() {
+        return recordJpa;
     }
 
-    public void setRecordId(Long recordId) {
-        this.recordId = recordId;
+    public void setRecordJpa(RecordJpa recordJpa) {
+        this.recordJpa = recordJpa;
     }
 
     public Long getChapterTo() {

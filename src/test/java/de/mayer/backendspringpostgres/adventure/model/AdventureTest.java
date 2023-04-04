@@ -1,13 +1,12 @@
 package de.mayer.backendspringpostgres.adventure.model;
 
-import de.mayer.backendspringpostgres.adventure.model.Adventure;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.core.Is.*;
-import static org.hamcrest.MatcherAssert.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.hamcrest.core.Is.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class AdventureTest {
 
@@ -19,7 +18,7 @@ class AdventureTest {
             """)
     void nameCannotBeNullable() {
         Throwable exception = assertThrows(RuntimeException.class, () -> new Adventure(null, null));
-        assertThat(exception.getCause(), is(instanceOf(IllegalAccessException.class)));
+        assertThat(exception, is(instanceOf(IllegalModelAccessException.class)));
     }
 
 
@@ -31,7 +30,7 @@ class AdventureTest {
             """)
     void nameCannotBeEmpty() {
         Throwable exc = assertThrows(RuntimeException.class, () -> new Adventure("", null));
-        assertThat(exc.getCause(), is(instanceOf(IllegalAccessException.class)));
+        assertThat(exc, is(instanceOf(IllegalModelAccessException.class)));
     }
 
 

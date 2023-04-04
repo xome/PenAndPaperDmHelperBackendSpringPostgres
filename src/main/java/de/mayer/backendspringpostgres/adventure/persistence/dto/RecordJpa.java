@@ -1,5 +1,6 @@
-package de.mayer.backendspringpostgres.adventure.persistence;
+package de.mayer.backendspringpostgres.adventure.persistence.dto;
 
+import de.mayer.backendspringpostgres.adventure.persistence.RecordType;
 import jakarta.persistence.*;
 
 import java.util.Objects;

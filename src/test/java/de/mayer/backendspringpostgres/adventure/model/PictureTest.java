@@ -20,7 +20,7 @@ class PictureTest {
     void base64CannotBeNull() {
         var exc = assertThrows(RuntimeException.class, () ->
                 new Picture(null, "png", false));
-        assertThat(exc.getCause(), is(instanceOf(IllegalAccessException.class)));
+        assertThat(exc, is(instanceOf(IllegalModelAccessException.class)));
     }
 
     @Test
@@ -32,7 +32,7 @@ class PictureTest {
     void base64CannotBeEmpty() {
         var exc = assertThrows(RuntimeException.class, () ->
                 new Picture("", "png", false));
-        assertThat(exc.getCause(), is(instanceOf(IllegalAccessException.class)));
+        assertThat(exc, is(instanceOf(IllegalModelAccessException.class)));
     }
 
     @Test
@@ -47,8 +47,8 @@ class PictureTest {
                         null,
                         false));
 
-        assertThat(exc.getCause(), is(instanceOf(IllegalAccessException.class)));
-        assertThat(exc.getCause().getMessage(), Matchers.containsStringIgnoringCase("File format"));
+        assertThat(exc, is(instanceOf(IllegalModelAccessException.class)));
+        assertThat(exc.getMessage(), Matchers.containsStringIgnoringCase("File format"));
 
     }
 
@@ -64,8 +64,8 @@ class PictureTest {
                         "",
                         false));
 
-        assertThat(exc.getCause(), is(instanceOf(IllegalAccessException.class)));
-        assertThat(exc.getCause().getMessage(), Matchers.containsStringIgnoringCase("File format"));
+        assertThat(exc, is(instanceOf(IllegalModelAccessException.class)));
+        assertThat(exc.getMessage(), Matchers.containsStringIgnoringCase("File format"));
 
     }
 
@@ -81,8 +81,8 @@ class PictureTest {
                         "png",
                         null));
 
-        assertThat(exc.getCause(), is(instanceOf(IllegalAccessException.class)));
-        assertThat(exc.getCause().getMessage(), Matchers.containsStringIgnoringCase("isShareableWithGroup"));
+        assertThat(exc, is(instanceOf(IllegalModelAccessException.class)));
+        assertThat(exc.getMessage(), Matchers.containsStringIgnoringCase("isShareableWithGroup"));
 
     }
 
