@@ -48,8 +48,10 @@ jobs:
           cache: maven
       - name : use Maven to build image
         id: build
-        run: mvn -B --file pom.xml surefire-report:report spring-boot:build-image -Dspring-boot.build-image.imageName=${{ env.IMAGE_NAME }}
+        run: mvn -B --file pom.xml spring-boot:build-image -Dspring-boot.build-image.imageName=${{ env.IMAGE_NAME }}
       - name: Surefire Report
         uses: ScaCap/action-surefire-report@v1.7.0
+        with:
+          skip_pubilishing: true
       - name: push to Docker Hub
         run: docker push ${{ env.IMAGE_NAME }}
