@@ -5,6 +5,7 @@ import de.mayer.backendspringpostgres.adventure.persistence.dto.RecordJpa;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface ChapterLinkJpaRepository extends JpaRepository<ChapterLinkJpa, Long> {
@@ -12,4 +13,6 @@ public interface ChapterLinkJpaRepository extends JpaRepository<ChapterLinkJpa, 
 
     @Transactional
     void deleteByRecordJpa(RecordJpa recordJpa);
+
+    List<ChapterLinkJpa> findByChapterTo(Long id);
 }

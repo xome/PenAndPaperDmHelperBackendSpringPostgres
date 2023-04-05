@@ -27,7 +27,12 @@ public class ChapterByNameController implements ChapterByNameHttpApi {
 
     @Override
     public ResponseEntity<Void> deleteChapterByName(String adventureName, String chapterName) {
-        return ChapterByNameHttpApi.super.deleteChapterByName(adventureName, chapterName);
+        try {
+            chapterRepository.deleteChapter(adventureName, chapterName);
+        } catch (ChapterNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        return null;
     }
 
     @Override

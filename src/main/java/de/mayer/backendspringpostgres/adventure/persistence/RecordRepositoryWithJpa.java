@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 @Component
 public class RecordRepositoryWithJpa implements RecordRepository {
@@ -222,7 +223,27 @@ public class RecordRepositoryWithJpa implements RecordRepository {
         }
     }
 
-    private List<RecordJpa> findRecordsByAdventureNameAndChapterName(String adventure, String chapter) throws ChapterNotFoundException {
+    @Override
+    public void deleteAllChapterLinksReferencing(String adventureName, String chapterName) {
+        var adventureJpa = adventureJpaRepository.findByName(adventureName);
+        if (adventureJpa.isEmpty()){
+            return; // There is nothing to delete
+        }
+
+        var chapterJpa = chapterJpaRepository.findByAdventureAndName(adventureJpa.get().getId(), chapterName);
+        if (chapterJpa.isEmpty()){
+            return; // Neither is in this case
+        }
+
+        var chapterLinkJpas = chapterLinkJpaRepository.findByChapterTo(chapterJpa.get().getId());
+        var recordJpasToDelete = chapterLinkJpas.stream().map(ChapterLinkJpa::getRecordJpa).collect(Collectors.toList());
+
+        chapterLinkJpaRepository.deleteAll(chapterLinkJpas);
+        recordJpaRepository.deleteAll(recordJpasToDelete);
+    }
+
+    private List<RecordJpa> findRecordsByAdventureNameAndChapterName(String adventure, String chapter)
+            throws ChapterNotFoundException {
         var adventureJpa = adventureJpaRepository.findByName(adventure);
         if (adventureJpa.isEmpty())
             throw new ChapterNotFoundException();

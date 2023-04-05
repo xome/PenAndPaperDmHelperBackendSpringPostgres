@@ -60,10 +60,9 @@ class ChapterByNameControllerTest {
         chapterJpaRepository.deleteAll();
         adventureJpaRepository.deleteAll();
     }
-
     private static final String PATH = "chapter/{adventureName}/{chapterName}";
 
-    private RequestSpecification getGivenForPathWithParams(String adventure, String chapter) {
+    private static RequestSpecification getGivenForPathWithParams(String adventure, String chapter, int port) {
         return given()
                 .port(port)
                 .pathParam("adventureName", adventure)
@@ -78,7 +77,7 @@ class ChapterByNameControllerTest {
     @Test
     void getChapterNotFound() {
 
-        var when = getGivenForPathWithParams("Testadventure", "Testchapter")
+        var when = getGivenForPathWithParams("Testadventure", "Testchapter", port)
                 .when().get(PATH);
 
         when.then()
@@ -106,7 +105,7 @@ class ChapterByNameControllerTest {
         map.put("records", Collections.emptyList());
         var expectedBody = jsonMapper.writer().writeValueAsString(map);
 
-        var when = getGivenForPathWithParams(adventure.getName(), chapter.getName())
+        var when = getGivenForPathWithParams(adventure.getName(), chapter.getName(), port)
                 .when().get(PATH);
 
         var bodyReturned = when.then()
@@ -138,7 +137,7 @@ class ChapterByNameControllerTest {
         var map = saveExampleRecordsAndGetLinkedHashMapOfJsonRepresentation(chapter, chapter2);
         var expectedBody = jsonMapper.writer().writeValueAsString(map);
 
-        var when = getGivenForPathWithParams(adventure.getName(), chapter.getName())
+        var when = getGivenForPathWithParams(adventure.getName(), chapter.getName(), port)
                 .when().get(PATH);
 
         var bodyReturned = when.then()
@@ -217,7 +216,7 @@ class ChapterByNameControllerTest {
         simpleChapterForPatch.put("approximateDurationInMinutes", null);
         simpleChapterForPatch.put("records", null);
 
-        var given = getGivenForPathWithParams("Testadventure", "Testchapter");
+        var given = getGivenForPathWithParams("Testadventure", "Testchapter", port);
         given.body(jsonMapper.writeValueAsString(simpleChapterForPatch))
                 .contentType(ContentType.JSON);
 
@@ -248,7 +247,7 @@ class ChapterByNameControllerTest {
         simpleChapterForPatch.put("approximateDurationInMinutes", null);
         simpleChapterForPatch.put("records", null);
 
-        var given = getGivenForPathWithParams(adventure.getName(), chapter.getName());
+        var given = getGivenForPathWithParams(adventure.getName(), chapter.getName(), port);
         given.body(jsonMapper.writeValueAsString(simpleChapterForPatch))
                 .contentType(ContentType.JSON);
 
@@ -283,7 +282,7 @@ class ChapterByNameControllerTest {
         simpleChapterForPatch.put("approximateDurationInMinutes", null);
         simpleChapterForPatch.put("records", null);
 
-        var given = getGivenForPathWithParams(adventure.getName(), chapter.getName());
+        var given = getGivenForPathWithParams(adventure.getName(), chapter.getName(), port);
         given.body(jsonMapper.writeValueAsString(simpleChapterForPatch))
                 .contentType(ContentType.JSON);
 
@@ -321,7 +320,7 @@ class ChapterByNameControllerTest {
         simpleChapterForPatch.put("approximateDurationInMinutes", newDuration);
         simpleChapterForPatch.put("records", null);
 
-        var given = getGivenForPathWithParams(adventure.getName(), chapter.getName());
+        var given = getGivenForPathWithParams(adventure.getName(), chapter.getName(), port);
         given.body(jsonMapper.writeValueAsString(simpleChapterForPatch))
                 .contentType(ContentType.JSON);
 
@@ -378,7 +377,7 @@ class ChapterByNameControllerTest {
         chapterWithNewRecordsForPatch.put("approximateDurationInMinutes", null);
         chapterWithNewRecordsForPatch.put("records", newRecords.get("records"));
 
-        var given = getGivenForPathWithParams(adventure.getName(), chapter.getName());
+        var given = getGivenForPathWithParams(adventure.getName(), chapter.getName(), port);
         given.body(jsonMapper.writeValueAsString(chapterWithNewRecordsForPatch))
                 .contentType(ContentType.JSON);
 
@@ -429,7 +428,7 @@ class ChapterByNameControllerTest {
         chapterWithNewNameForPatch.put("approximateDurationInMinutes", null);
         chapterWithNewNameForPatch.put("records", null);
 
-        var given = getGivenForPathWithParams(adventure.getName(), chapter.getName());
+        var given = getGivenForPathWithParams(adventure.getName(), chapter.getName(), port);
         given.body(jsonMapper.writeValueAsString(chapterWithNewNameForPatch))
                 .contentType(ContentType.JSON);
 
@@ -461,7 +460,7 @@ class ChapterByNameControllerTest {
         chapterWithNewNameForPatch.put("approximateDurationInMinutes", null);
         chapterWithNewNameForPatch.put("records", null);
 
-        var given = getGivenForPathWithParams(adventure.getName(), chapter.getName());
+        var given = getGivenForPathWithParams(adventure.getName(), chapter.getName(), port);
         given.body(jsonMapper.writeValueAsString(chapterWithNewNameForPatch))
                 .contentType(ContentType.JSON);
 
@@ -470,6 +469,48 @@ class ChapterByNameControllerTest {
 
         when
                 .then().statusCode(is(HttpStatus.OK.value()));
+
+    }
+
+    @DisplayName("""
+            Given there is no Chapter by the name "Testchapter",
+            When it shall be deleted,
+            Then http status NOT_FOUND is returned
+            """)
+    @Test
+    void deleteNonExistentChapter() {
+        getGivenForPathWithParams("Testadventure", "Testchapter", port)
+                .when().delete(PATH)
+                .then().statusCode(is(HttpStatus.NOT_FOUND.value()));
+    }
+
+    @DisplayName("""
+            Given there is a Chapter with records by the name "Testchapter",
+                And it is referenced to by a ChapterLink in another Chapter,
+            When it shall be deleted,
+            Then all Records, the Chapter and the referencing ChapterLink are deleted
+            """)
+    @Test
+    void deleteChapterWithRecords() {
+        var adventureJpa = adventureJpaRepository.save(new AdventureJpa("Testadventure"));
+        var chapterJpa = chapterJpaRepository.save(new ChapterJpa(adventureJpa.getId(), "Testchapter", null, null));
+        var chapter2Jpa = chapterJpaRepository.save(new ChapterJpa(adventureJpa.getId(), "Chapter2", null, null));
+        saveExampleRecordsAndGetLinkedHashMapOfJsonRepresentation(chapterJpa, chapter2Jpa);
+        saveExampleRecordsAndGetLinkedHashMapOfJsonRepresentation(chapter2Jpa, chapterJpa); // leads to a ChapterLink-Record in Chapter2 referencing Testchapter
+
+        getGivenForPathWithParams("Testadventure", "Testchapter", port)
+                .when().delete(PATH)
+                .then().statusCode(is(HttpStatus.OK.value()));
+
+        var recordsInDeltedChapter = recordJpaRepository.findByChapterIdOrderByIndex(chapterJpa.getId());
+        assertThat(recordsInDeltedChapter, is(empty()));
+
+        var recordsInChapter2 = recordJpaRepository.findByChapterIdOrderByIndex(chapter2Jpa.getId());
+        var hasNoMatchForChapterLink = recordsInChapter2
+                .stream()
+                .noneMatch(record -> record.getType() == RecordType.ChapterLink);
+        assertThat(hasNoMatchForChapterLink, is(true));
+
 
     }
 

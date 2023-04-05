@@ -8,4 +8,6 @@ public interface ChapterRepository {
     Optional<Chapter> findById(String adventureName, String chapterName);
 
     void updateChapter(String adventure, String nameOfChapterToBeUpdated, Chapter chapterWithNewData) throws ChapterNotFoundException, ChapterAlreadyExistsException;
+
+    void deleteChapter(String adventureName, String chapterName) throws ChapterNotFoundException;
 }

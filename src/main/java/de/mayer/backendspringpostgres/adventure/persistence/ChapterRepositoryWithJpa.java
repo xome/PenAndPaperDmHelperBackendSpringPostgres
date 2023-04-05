@@ -102,6 +102,24 @@ public class ChapterRepositoryWithJpa implements ChapterRepository {
         chapterJpaRepository.save(chapterJpa);
     }
 
+    @Override
+    public void deleteChapter(String adventureName, String chapterName) throws ChapterNotFoundException {
+        var adventure = adventureJpaRepository.findByName(adventureName);
+        if (adventure.isEmpty())
+            throw new ChapterNotFoundException();
+
+        var chapter = chapterJpaRepository.findByAdventureAndName(adventure.get().getId(), chapterName);
+        if (chapter.isEmpty())
+            throw new ChapterNotFoundException();
+
+        recordRepository.deleteAllByAdventureAndChapter(adventureName, chapterName);
+        recordRepository.deleteAllChapterLinksReferencing(adventureName, chapterName);
+
+
+        chapterJpaRepository.delete(chapter.get());
+
+    }
+
     private Chapter mapJpaToDomain(String adventureName, ChapterJpa chapterJpa) throws ChapterNotFoundException {
 
         var records = recordRepository.findRecordsByAdventureAndChapter(adventureName, chapterJpa.getName());

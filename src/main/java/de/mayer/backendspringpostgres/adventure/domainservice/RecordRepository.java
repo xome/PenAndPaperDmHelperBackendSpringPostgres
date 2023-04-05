@@ -16,4 +16,6 @@ public interface RecordRepository {
     void deleteAllByAdventureAndChapter(String adventure, String chapter) throws ChapterNotFoundException;
 
     void saveRecords(Adventure adventure, Chapter chapter, List<RecordInAChapter> records) throws ChapterNotFoundException;
+
+    void deleteAllChapterLinksReferencing(String adventureName, String chapterName);
 }
