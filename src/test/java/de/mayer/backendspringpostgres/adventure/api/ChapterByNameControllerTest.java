@@ -64,11 +64,10 @@ class ChapterByNameControllerTest {
     private static final String PATH = "chapter/{adventureName}/{chapterName}";
 
     private RequestSpecification getGivenForPathWithParams(String adventure, String chapter) {
-        var given = given()
+        return given()
                 .port(port)
-                .pathParam("adventureName", "Testadventure")
-                .pathParam("chapterName", "Testchapter");
-        return given;
+                .pathParam("adventureName", adventure)
+                .pathParam("chapterName", chapter);
     }
 
     @DisplayName("""
@@ -439,6 +438,38 @@ class ChapterByNameControllerTest {
 
         when
                 .then().statusCode(is(HttpStatus.BAD_REQUEST.value()));
+
+    }
+
+    @DisplayName("""
+            Given there is an Adventure with a Chapter by the Name "Chapter"
+            When the same Chapter is patched to its own name,
+            Then http status OK is returned
+            """)
+    @Test
+    void patchChapterWithItsOwnName() throws JsonProcessingException {
+        var adventure = adventureJpaRepository.save(new AdventureJpa("Testadventure"));
+        var chapter = chapterJpaRepository.save(
+                new ChapterJpa(adventure.getId(),
+                        "Testchapter",
+                        null,
+                        null));
+
+        var chapterWithNewNameForPatch = new LinkedHashMap<String, Object>();
+        chapterWithNewNameForPatch.put("name", chapter.getName());
+        chapterWithNewNameForPatch.put("subheader", null);
+        chapterWithNewNameForPatch.put("approximateDurationInMinutes", null);
+        chapterWithNewNameForPatch.put("records", null);
+
+        var given = getGivenForPathWithParams(adventure.getName(), chapter.getName());
+        given.body(jsonMapper.writeValueAsString(chapterWithNewNameForPatch))
+                .contentType(ContentType.JSON);
+
+        var when = given
+                .when().patch(PATH);
+
+        when
+                .then().statusCode(is(HttpStatus.OK.value()));
 
     }
 

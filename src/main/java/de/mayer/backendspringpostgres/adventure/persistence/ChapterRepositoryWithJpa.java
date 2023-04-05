@@ -5,14 +5,14 @@ import de.mayer.backendspringpostgres.adventure.domainservice.ChapterAlreadyExis
 import de.mayer.backendspringpostgres.adventure.domainservice.ChapterNotFoundException;
 import de.mayer.backendspringpostgres.adventure.domainservice.ChapterRepository;
 import de.mayer.backendspringpostgres.adventure.domainservice.RecordRepository;
-import de.mayer.backendspringpostgres.adventure.model.*;
+import de.mayer.backendspringpostgres.adventure.model.Adventure;
+import de.mayer.backendspringpostgres.adventure.model.Chapter;
 import de.mayer.backendspringpostgres.adventure.persistence.dto.ChapterJpa;
-import de.mayer.backendspringpostgres.adventure.persistence.jparepo.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import de.mayer.backendspringpostgres.adventure.persistence.jparepo.AdventureJpaRepository;
+import de.mayer.backendspringpostgres.adventure.persistence.jparepo.ChapterJpaRepository;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.Optional;
 
 @Component
 public class ChapterRepositoryWithJpa implements ChapterRepository {
@@ -71,7 +71,8 @@ public class ChapterRepositoryWithJpa implements ChapterRepository {
             var possibleChapterWithConflictingName =
                     chapterJpaRepository.findByAdventureAndName(adventureJpa.getId(), chapterWithNewData.name());
 
-            if (possibleChapterWithConflictingName.isPresent())
+            if (possibleChapterWithConflictingName.isPresent()
+                    && !possibleChapterWithConflictingName.get().getId().equals(chapterJpa.getId()))
                 throw new ChapterAlreadyExistsException();
 
             chapterJpa.setName(chapterWithNewData.name());
