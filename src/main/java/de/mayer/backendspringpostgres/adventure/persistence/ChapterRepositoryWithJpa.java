@@ -1,6 +1,7 @@
 package de.mayer.backendspringpostgres.adventure.persistence;
 
 
+import de.mayer.backendspringpostgres.adventure.domainservice.ChapterAlreadyExistsException;
 import de.mayer.backendspringpostgres.adventure.domainservice.ChapterNotFoundException;
 import de.mayer.backendspringpostgres.adventure.domainservice.ChapterRepository;
 import de.mayer.backendspringpostgres.adventure.domainservice.RecordRepository;
@@ -50,7 +51,7 @@ public class ChapterRepositoryWithJpa implements ChapterRepository {
 
     @Override
     public void updateChapter(String adventure, String nameOfChapterToBeUpdated, Chapter chapterWithNewData)
-            throws ChapterNotFoundException {
+            throws ChapterNotFoundException, ChapterAlreadyExistsException {
 
         var optionalAdventureJpa = adventureJpaRepository.findByName(adventure);
         if (optionalAdventureJpa.isEmpty()) {
@@ -67,6 +68,12 @@ public class ChapterRepositoryWithJpa implements ChapterRepository {
         var chapterJpa = optionalChapterJpa.get();
 
         if (chapterWithNewData.name() != null) {
+            var possibleChapterWithConflictingName =
+                    chapterJpaRepository.findByAdventureAndName(adventureJpa.getId(), chapterWithNewData.name());
+
+            if (possibleChapterWithConflictingName.isPresent())
+                throw new ChapterAlreadyExistsException();
+
             chapterJpa.setName(chapterWithNewData.name());
         }
 

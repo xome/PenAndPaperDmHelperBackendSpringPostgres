@@ -373,14 +373,14 @@ class ChapterByNameControllerTest {
 
         var newRecords = saveExampleRecordsAndGetLinkedHashMapOfJsonRepresentation(chapter3, chapter4);
 
-        var simpleChapterForPatch = new LinkedHashMap<>();
-        simpleChapterForPatch.put("name", null);
-        simpleChapterForPatch.put("subheader", null);
-        simpleChapterForPatch.put("approximateDurationInMinutes", null);
-        simpleChapterForPatch.put("records", newRecords.get("records"));
+        var chapterWithNewRecordsForPatch = new LinkedHashMap<>();
+        chapterWithNewRecordsForPatch.put("name", null);
+        chapterWithNewRecordsForPatch.put("subheader", null);
+        chapterWithNewRecordsForPatch.put("approximateDurationInMinutes", null);
+        chapterWithNewRecordsForPatch.put("records", newRecords.get("records"));
 
         var given = getGivenForPathWithParams(adventure.getName(), chapter.getName());
-        given.body(jsonMapper.writeValueAsString(simpleChapterForPatch))
+        given.body(jsonMapper.writeValueAsString(chapterWithNewRecordsForPatch))
                 .contentType(ContentType.JSON);
 
         var when = given
@@ -402,6 +402,44 @@ class ChapterByNameControllerTest {
         for (Long idAfterPatch : recordsAfterPatch) {
             assertThat(recordIdsBeforePatch, not(hasItem(idAfterPatch)));
         }
+    }
+
+    @DisplayName("""
+            Given there is an Adventure with a Chapter by the Name "New Chapter"
+            When a another Chapter in the Adventure is patched to be renamned to "New Chapter",
+            Then http status BAD_REQUEST is returned
+            """)
+    @Test
+    void patchChapterNewChapterNameAlreadyExists() throws JsonProcessingException {
+        var adventure = adventureJpaRepository.save(new AdventureJpa("Testadventure"));
+        var chapter = chapterJpaRepository.save(
+                new ChapterJpa(adventure.getId(),
+                        "Testchapter",
+                        null,
+                        null));
+        var chapterWithConflictingName = chapterJpaRepository.save(
+                new ChapterJpa(adventure.getId(),
+                        "New Chapter",
+                        null,
+                        null)
+        );
+
+        var chapterWithNewNameForPatch = new LinkedHashMap<String, Object>();
+        chapterWithNewNameForPatch.put("name", chapterWithConflictingName.getName());
+        chapterWithNewNameForPatch.put("subheader", null);
+        chapterWithNewNameForPatch.put("approximateDurationInMinutes", null);
+        chapterWithNewNameForPatch.put("records", null);
+
+        var given = getGivenForPathWithParams(adventure.getName(), chapter.getName());
+        given.body(jsonMapper.writeValueAsString(chapterWithNewNameForPatch))
+                .contentType(ContentType.JSON);
+
+        var when = given
+                .when().patch(PATH);
+
+        when
+                .then().statusCode(is(HttpStatus.BAD_REQUEST.value()));
+
     }
 
 

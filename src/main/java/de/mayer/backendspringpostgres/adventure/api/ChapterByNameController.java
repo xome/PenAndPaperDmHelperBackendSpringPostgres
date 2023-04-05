@@ -1,5 +1,6 @@
 package de.mayer.backendspringpostgres.adventure.api;
 
+import de.mayer.backendspringpostgres.adventure.domainservice.ChapterAlreadyExistsException;
 import de.mayer.backendspringpostgres.adventure.domainservice.ChapterNotFoundException;
 import de.mayer.backendspringpostgres.adventure.domainservice.ChapterRepository;
 import de.mayer.backendspringpostgres.adventure.model.Chapter;
@@ -35,6 +36,8 @@ public class ChapterByNameController implements ChapterByNameHttpApi {
             chapterRepository.updateChapter(adventureName, chapterName, chapter);
         } catch (ChapterNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        } catch (ChapterAlreadyExistsException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
         return ResponseEntity.ok().build();
 
