@@ -1,28 +1,26 @@
 package de.mayer.backendspringpostgres.adventure.api;
 
 import de.mayer.backendspringpostgres.adventure.model.RecordInAChapter;
-import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@RestController("/record/{adventureName}/{chapterName}")
+@Controller
 public interface RecordByChapterHttpApi {
-
-    @GetMapping
-    default List<RecordInAChapter> getRecordsByChapterName(@PathVariable("adventureName") String adventure,
-                                                           @PathVariable("chapterName") String chapterName,
-                                                           HttpServletResponse httpResponse) {
+    String PATH = "/record/{adventureName}/{chapterName}";
+    @GetMapping(PATH)
+    default ResponseEntity<List<RecordInAChapter>> getRecordsByChapterName(@PathVariable("adventureName") String adventure,
+                                                                          @PathVariable("chapterName") String chapterName) {
         throw new RuntimeException("Not yet implemented!");
     }
 
-    @DeleteMapping
-    default void deleteRecordsByChapterName(@PathVariable("adventureName") String adventure,
-                                           @PathVariable("chapterName") String chapterName,
-                                            HttpServletResponse httpResponse) {
+    @DeleteMapping(PATH)
+    default ResponseEntity<Void> deleteRecordsByChapterName(@PathVariable("adventureName") String adventure,
+                                           @PathVariable("chapterName") String chapterName) {
         throw new RuntimeException("Not yet implemented!");
     }
 
