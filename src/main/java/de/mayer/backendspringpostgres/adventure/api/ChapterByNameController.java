@@ -19,7 +19,7 @@ public class ChapterByNameController implements ChapterByNameHttpApi {
 
     @Override
     public ResponseEntity<Chapter> getChapterByName(String adventureName, String chapterName) {
-        var chapter = chapterRepository.findById(adventureName, chapterName);
+        var chapter = chapterRepository.read(adventureName, chapterName);
         return chapter
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND.value()).build());
@@ -28,17 +28,17 @@ public class ChapterByNameController implements ChapterByNameHttpApi {
     @Override
     public ResponseEntity<Void> deleteChapterByName(String adventureName, String chapterName) {
         try {
-            chapterRepository.deleteChapter(adventureName, chapterName);
+            chapterRepository.delete(adventureName, chapterName);
         } catch (ChapterNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
-        return null;
+        return ResponseEntity.ok().build();
     }
 
     @Override
     public ResponseEntity<Void> patchChapterByName(String adventureName, String chapterName, Chapter chapter) {
         try {
-            chapterRepository.updateChapter(adventureName, chapterName, chapter);
+            chapterRepository.update(adventureName, chapterName, chapter);
         } catch (ChapterNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } catch (ChapterAlreadyExistsException e) {

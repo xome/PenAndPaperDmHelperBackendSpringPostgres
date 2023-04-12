@@ -1,10 +1,7 @@
 package de.mayer.backendspringpostgres.adventure.persistence;
 
 
-import de.mayer.backendspringpostgres.adventure.domainservice.ChapterAlreadyExistsException;
-import de.mayer.backendspringpostgres.adventure.domainservice.ChapterNotFoundException;
-import de.mayer.backendspringpostgres.adventure.domainservice.ChapterRepository;
-import de.mayer.backendspringpostgres.adventure.domainservice.RecordRepository;
+import de.mayer.backendspringpostgres.adventure.domainservice.*;
 import de.mayer.backendspringpostgres.adventure.model.Adventure;
 import de.mayer.backendspringpostgres.adventure.model.Chapter;
 import de.mayer.backendspringpostgres.adventure.persistence.dto.ChapterJpa;
@@ -30,7 +27,7 @@ public class ChapterRepositoryWithJpa implements ChapterRepository {
     }
 
     @Override
-    public Optional<Chapter> findById(String adventureName, String chapterName) {
+    public Optional<Chapter> read(String adventureName, String chapterName) {
         var adventureOptional = adventureJpaRepository.findByName(adventureName);
         if (adventureOptional.isEmpty())
             return Optional.empty();
@@ -50,7 +47,7 @@ public class ChapterRepositoryWithJpa implements ChapterRepository {
     }
 
     @Override
-    public void updateChapter(String adventure, String nameOfChapterToBeUpdated, Chapter chapterWithNewData)
+    public void update(String adventure, String nameOfChapterToBeUpdated, Chapter chapterWithNewData)
             throws ChapterNotFoundException, ChapterAlreadyExistsException {
 
         var optionalAdventureJpa = adventureJpaRepository.findByName(adventure);
@@ -103,7 +100,7 @@ public class ChapterRepositoryWithJpa implements ChapterRepository {
     }
 
     @Override
-    public void deleteChapter(String adventureName, String chapterName) throws ChapterNotFoundException {
+    public void delete(String adventureName, String chapterName) throws ChapterNotFoundException {
         var adventure = adventureJpaRepository.findByName(adventureName);
         if (adventure.isEmpty())
             throw new ChapterNotFoundException();
@@ -117,6 +114,26 @@ public class ChapterRepositoryWithJpa implements ChapterRepository {
 
 
         chapterJpaRepository.delete(chapter.get());
+
+    }
+
+    @Override
+    public void create(String adventure, Chapter chapter) throws AdventureNotFoundException,
+            ChapterNotFoundException {
+        var adventureJpa = adventureJpaRepository.findByName(adventure);
+        if (adventureJpa.isEmpty())
+            throw new AdventureNotFoundException();
+
+        var durationAsLong = chapter.approximateDurationInMinutes() == null
+                ? null
+                : chapter.approximateDurationInMinutes().longValue();
+
+        chapterJpaRepository.save(new ChapterJpa(adventureJpa.get().getId(),
+                chapter.name(),
+                chapter.subheader(),
+                durationAsLong));
+
+        recordRepository.saveRecords(new Adventure(adventure, null), chapter, chapter.records());
 
     }
 

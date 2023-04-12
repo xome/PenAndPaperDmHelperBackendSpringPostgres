@@ -1,23 +1,28 @@
 package de.mayer.backendspringpostgres.adventure.api;
 
 import de.mayer.backendspringpostgres.adventure.model.Chapter;
-import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
-@RestController("/chapter/{adventureName}")
+import java.util.List;
+
+@Controller
 public interface ChapterHttpApi {
+    String PATH = "chapter/{adventureName}";
 
-    @PutMapping
-    default void putChapter(@PathVariable("adventureName") String adventure,
-                           @RequestBody Chapter chapter,
-                            HttpServletResponse httResponse){
+    @PutMapping(PATH)
+    default ResponseEntity<Void> putChapters(@PathVariable("adventureName") String adventure,
+                                             @RequestBody List<Chapter> chapters){
         throw new RuntimeException("Not yet implemented!");
     }
 
-    @PatchMapping
-    default void patchChapter(@PathVariable("adventureName") String adventure,
-                             @RequestBody Chapter chapter,
-                              HttpServletResponse httpResponse) {
+    @PatchMapping(PATH)
+    default ResponseEntity<Void> patchChapters(@PathVariable("adventureName") String adventure,
+                                               @RequestBody List<Chapter> chapters) {
         throw new RuntimeException("Not yet implemented!");
     }
 
