@@ -7,12 +7,10 @@ import de.mayer.backendspringpostgres.adventure.persistence.dto.*;
 import de.mayer.backendspringpostgres.adventure.persistence.jparepo.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -122,80 +120,95 @@ public class RecordRepositoryWithJpa implements RecordRepository {
         var allJpaRecords = findRecordsByAdventureNameAndChapterName(adventureName, chapterName);
 
         var records = new LinkedList<RecordInAChapter>();
-        var recordsToDelete = new ArrayList<RecordJpa>();
 
         allJpaRecords
-                .forEach(recordJpa -> {
-
-                    AtomicBoolean subTypeFound = new AtomicBoolean(true);
-
-                    switch (recordJpa.getType()) {
-                        case Text -> textJpaRepository
-                                .findByRecordJpa(recordJpa)
-                                .ifPresentOrElse(textJpa -> records.add(recordJpa.getIndex(),
-                                                new Text(textJpa.getText())),
-                                        () -> subTypeFound.set(false));
-
-                        case Picture -> pictureJpaRepository
-                                .findByRecordJpa(recordJpa)
-                                .ifPresentOrElse(pictureJpa -> records.add(recordJpa.getIndex(),
-                                                new Picture(pictureJpa.getBase64(),
-                                                        pictureJpa.getFileFormat(),
-                                                        pictureJpa.getShareableWithGroup())),
-                                        () -> subTypeFound.set(false));
-
-                        case ChapterLink -> {
-                            var optionalLink = chapterLinkJpaRepository.findByRecordJpa(recordJpa);
-                            if (optionalLink.isPresent()) {
-                                var chapterTo = chapterJpaRepository.findById(optionalLink.get().getChapterTo());
-                                chapterTo
-                                        .ifPresentOrElse(
-                                                chapterToJpa -> records.add(recordJpa.getIndex(),
-                                                        new ChapterLink(chapterToJpa.getName())),
-                                                () -> {
-                                                    log.error("ChapterTo {} not found. Deleting ChapterLink.",
-                                                            optionalLink.get().getChapterTo());
-                                                    chapterLinkJpaRepository.delete(optionalLink.get());
-                                                    subTypeFound.set(false);
-                                                });
-                            } else {
-                                subTypeFound.set(false);
-                            }
-                        }
-
-                        case EnvironmentLightning -> environmentLightningJpaRepository
-                                .findByRecordJpa(recordJpa)
-                                .ifPresentOrElse(environmentLightningJpa -> records.add(
-                                                new EnvironmentLightning(environmentLightningJpa.getBrightness(),
-                                                        new int[]{environmentLightningJpa.getRgb1(),
-                                                                environmentLightningJpa.getRgb2(),
-                                                                environmentLightningJpa.getRgb3()})),
-                                        () -> subTypeFound.set(false));
-
-                        case Music -> backgroundMusicJpaRepository
-                                .findByRecordJpa(recordJpa)
-                                .ifPresentOrElse(backgroundMusicJpa -> records.add(recordJpa.getIndex(),
-                                                new BackgroundMusic(backgroundMusicJpa.getName(),
-                                                        backgroundMusicJpa.getBase64())),
-                                        () -> subTypeFound.set(false));
-
-                        default -> {
-                            log.error("Subtype not implemented: %s".formatted(recordJpa.getType()));
-                            subTypeFound.set(false);
-                        }
-                    }
-
-                    if (!subTypeFound.get()) {
-                        log.error("No subtype record found for Record. It will be deleted: %s"
-                                .formatted(recordJpa));
-                        recordsToDelete.add(recordJpa);
-                    }
+                .stream()
+                .sorted(Comparator.comparing(RecordJpa::getIndex))
+                .map(this::mapRecordJpaToIndexAndModelDto)
+                .forEachOrdered(pairOfIndexAndRecordInAChapter -> {
+                    if (pairOfIndexAndRecordInAChapter.getSecond().isPresent())
+                        records.add(pairOfIndexAndRecordInAChapter.getFirst(),
+                                pairOfIndexAndRecordInAChapter.getSecond().get());
+                    else
+                        throw new RuntimeException("Inconsistency at Record with index %d!"
+                                .formatted(pairOfIndexAndRecordInAChapter.getFirst()));
                 });
 
-        recordJpaRepository.deleteAll(recordsToDelete);
 
         return records;
 
+    }
+
+    private Pair<Integer, Optional<RecordInAChapter>> mapRecordJpaToIndexAndModelDto(RecordJpa recordJpa) {
+        return switch (recordJpa.getType()) {
+            case Text -> {
+                var optionalText = textJpaRepository
+                        .findByRecordJpa(recordJpa);
+                if (optionalText.isPresent())
+                    yield Pair.of(recordJpa.getIndex(),
+                            Optional.of(new Text(optionalText.get().getText())));
+                yield Pair.of(recordJpa.getIndex(), Optional.empty());
+            }
+
+
+            case Picture -> {
+                var optionalPicture =
+                        pictureJpaRepository
+                                .findByRecordJpa(recordJpa);
+                if (optionalPicture.isPresent()) {
+                    var pictureJpa = optionalPicture.get();
+                    yield Pair.of(recordJpa.getIndex(),
+                            Optional.of(new Picture(pictureJpa.getBase64(),
+                                    pictureJpa.getFileFormat(),
+                                    pictureJpa.getShareableWithGroup())));
+                }
+                yield Pair.of(recordJpa.getIndex(), Optional.empty());
+            }
+
+
+            case ChapterLink -> {
+                var optionalLink = chapterLinkJpaRepository.findByRecordJpa(recordJpa);
+                if (optionalLink.isPresent()) {
+                    var chapterTo = chapterJpaRepository.findById(optionalLink.get().getChapterTo());
+                    if (chapterTo.isPresent())
+                        yield Pair.of(recordJpa.getIndex(),
+                                Optional.of(new ChapterLink(chapterTo.get().getName())));
+
+                    log.error("ChapterTo {} not found. Deleting ChapterLink.",
+                            optionalLink.get().getChapterTo());
+                    chapterLinkJpaRepository.delete(optionalLink.get());
+                }
+                yield Pair.of(recordJpa.getIndex(), Optional.empty());
+            }
+
+            case EnvironmentLightning -> {
+                var optionalLightning = environmentLightningJpaRepository
+                        .findByRecordJpa(recordJpa);
+
+                if (optionalLightning.isPresent()) {
+                    var environmentLightningJpa = optionalLightning.get();
+                    yield Pair.of(recordJpa.getIndex(), Optional.of(
+                            new EnvironmentLightning(environmentLightningJpa.getBrightness(),
+                                    new int[]{environmentLightningJpa.getRgb1(),
+                                            environmentLightningJpa.getRgb2(),
+                                            environmentLightningJpa.getRgb3()})));
+                }
+                yield Pair.of(recordJpa.getIndex(), Optional.empty());
+            }
+
+            case Music -> {
+                var optionalMusic = backgroundMusicJpaRepository
+                        .findByRecordJpa(recordJpa);
+
+                if (optionalMusic.isPresent()) {
+                    var backgroundMusicJpa = optionalMusic.get();
+                    yield Pair.of(recordJpa.getIndex(),
+                            Optional.of(new BackgroundMusic(backgroundMusicJpa.getName(),
+                                    backgroundMusicJpa.getBase64())));
+                }
+                yield Pair.of(recordJpa.getIndex(), Optional.empty());
+            }
+        };
     }
 
     @Override
@@ -231,7 +244,7 @@ public class RecordRepositoryWithJpa implements RecordRepository {
         }
 
         var chapterJpa = chapterJpaRepository.findByAdventureAndName(adventureJpa.get().getId(), chapterName);
-        if (chapterJpa.isEmpty()){
+        if (chapterJpa.isEmpty()) {
             return; // Neither is in this case
         }
 
@@ -240,6 +253,18 @@ public class RecordRepositoryWithJpa implements RecordRepository {
 
         chapterLinkJpaRepository.deleteAll(chapterLinkJpas);
         recordJpaRepository.deleteAll(recordJpasToDelete);
+    }
+
+    @Override
+    public Optional<RecordInAChapter> readByAdventureAndChapterAndIndex(String adventure, String chapter, Integer index) {
+        var adventureJpa = adventureJpaRepository.findByName(adventure);
+        if (adventureJpa.isEmpty()) return Optional.empty();
+
+        var chapterJpa = chapterJpaRepository.findByAdventureAndName(adventureJpa.get().getId(), chapter);
+        if (chapterJpa.isEmpty()) return Optional.empty();
+
+        var recordJpa = recordJpaRepository.findByChapterIdAndIndex(chapterJpa.get().getId(), index);
+        return recordJpa.flatMap(jpa -> mapRecordJpaToIndexAndModelDto(jpa).getSecond());
     }
 
     private List<RecordJpa> findRecordsByAdventureNameAndChapterName(String adventure, String chapter)
@@ -254,4 +279,5 @@ public class RecordRepositoryWithJpa implements RecordRepository {
 
         return recordJpaRepository.findByChapterIdOrderByIndex(chapterJpa.get().getId());
     }
+
 }

@@ -1,41 +1,40 @@
 package de.mayer.backendspringpostgres.adventure.api;
 
 import de.mayer.backendspringpostgres.adventure.model.RecordInAChapter;
-import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-@RestController("/record/{adventureName}/{chapterName}/{index}")
+@Controller
 public interface RecordByChapterNameAndIndexHttpApi {
 
-    @GetMapping
-    default RecordInAChapter getRecordByNameAndIndex(@PathVariable("adventureName") String adventure,
-                                                     @PathVariable("chapterName") String chapterName,
-                                                     @PathVariable("index") Integer index,
-                                                     HttpServletResponse httpResponse) {
+    String PATH = "/record/{adventureName}/{chapterName}/{index}";
+
+    @GetMapping(PATH)
+    default ResponseEntity<RecordInAChapter> getRecordByNameAndIndex(@PathVariable("adventureName") String adventure,
+                                                                    @PathVariable("chapterName") String chapterName,
+                                                                    @PathVariable("index") Integer index) {
         throw new RuntimeException("Not yet implemented!");
     }
 
-    @PutMapping
-    default void putRecordByChapterNameAndIndex(@PathVariable("adventureName") String adventure,
-                                               @PathVariable("chapterName") String chapterName,
-                                                  @PathVariable("index") Integer index,
-                                                  HttpServletResponse httpResponse) {
+    @PutMapping(PATH)
+    default ResponseEntity<Void> putRecordByChapterNameAndIndex(@PathVariable("adventureName") String adventure,
+                                        @PathVariable("chapterName") String chapterName,
+                                        @PathVariable("index") Integer index) {
         throw new RuntimeException("Not yet implemented!");
     }
 
-    @PatchMapping
-    default void patchRecordByChapterNameAndIndex(@PathVariable("adventureName") String adventure,
+    @PatchMapping(PATH)
+    default ResponseEntity<Void> patchRecordByChapterNameAndIndex(@PathVariable("adventureName") String adventure,
                                                  @PathVariable("chapterName") String chapterName,
-                                                    @PathVariable("index") Integer index,
-                                                    HttpServletResponse httpResponse) {
+                                                    @PathVariable("index") Integer index) {
         throw new RuntimeException("Not yet implemented!");
     }
 
-    @DeleteMapping
-    default void deleteRecordByChapterNameAndIndex(@PathVariable("adventureName") String adventure,
+    @DeleteMapping(PATH)
+    default ResponseEntity<Void> deleteRecordByChapterNameAndIndex(@PathVariable("adventureName") String adventure,
                                                   @PathVariable("chapterName") String chapterName,
-                                                  @PathVariable("index") Integer index,
-                                                  HttpServletResponse httpResponse) {
+                                                  @PathVariable("index") Integer index) {
         throw new RuntimeException("Not yet implemented!");
     }
     

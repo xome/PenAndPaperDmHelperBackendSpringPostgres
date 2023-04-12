@@ -6,6 +6,7 @@ import de.mayer.backendspringpostgres.adventure.model.RecordInAChapter;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 public interface RecordRepository {
 
@@ -17,4 +18,6 @@ public interface RecordRepository {
     void deleteByAdventureAndChapter(String adventure, String chapter) throws ChapterNotFoundException;
 
     void deleteAllChapterLinksReferencing(String adventureName, String chapterName);
+
+    Optional<RecordInAChapter> readByAdventureAndChapterAndIndex(String adventure, String chapter, Integer index);
 }
