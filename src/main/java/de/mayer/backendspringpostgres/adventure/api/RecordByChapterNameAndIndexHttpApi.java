@@ -19,8 +19,9 @@ public interface RecordByChapterNameAndIndexHttpApi {
 
     @PutMapping(PATH)
     default ResponseEntity<Void> putRecordByChapterNameAndIndex(@PathVariable("adventureName") String adventure,
-                                        @PathVariable("chapterName") String chapterName,
-                                        @PathVariable("index") Integer index) {
+                                                                @PathVariable("chapterName") String chapterName,
+                                                                @PathVariable("index") Integer index,
+                                                                @RequestBody RecordInAChapter record) {
         throw new RuntimeException("Not yet implemented!");
     }
 

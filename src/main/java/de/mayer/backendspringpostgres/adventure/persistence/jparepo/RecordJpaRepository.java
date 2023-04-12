@@ -13,4 +13,6 @@ public interface RecordJpaRepository extends JpaRepository<RecordJpa, Long> {
     @Query("select max(t.index) from RecordJpa t where t.chapterId = :chapterId")
     Long findMaxIndexByChapterId(@Param("chapterId") Long chapterId);
     Optional<RecordJpa> findByChapterIdAndIndex(Long id, Integer index);
+
+    List<RecordJpa> findByChapterIdAndIndexGreaterThanEqual(Long chapterId, Integer index);
 }

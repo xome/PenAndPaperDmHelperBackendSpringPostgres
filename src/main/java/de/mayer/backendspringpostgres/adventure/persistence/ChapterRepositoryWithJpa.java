@@ -145,8 +145,7 @@ public class ChapterRepositoryWithJpa implements ChapterRepository {
         recordRepository.createMultiple(new Adventure(adventure, null), chapter, chapter.records());
 
     }
-
-    private Chapter mapJpaToDomain(String adventureName, ChapterJpa chapterJpa) throws ChapterNotFoundException {
+    public Chapter mapJpaToDomain(String adventureName, ChapterJpa chapterJpa) throws ChapterNotFoundException {
 
         var records = recordRepository.readByAdventureAndChapter(adventureName, chapterJpa.getName());
 
@@ -155,4 +154,5 @@ public class ChapterRepositoryWithJpa implements ChapterRepository {
                 chapterJpa.getApproximateDurationInMinutes().intValue(),
                 records);
     }
+
 }

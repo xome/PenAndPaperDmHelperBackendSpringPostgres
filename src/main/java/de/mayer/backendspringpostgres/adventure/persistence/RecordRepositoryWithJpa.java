@@ -47,7 +47,8 @@ public class RecordRepositoryWithJpa implements RecordRepository {
     @Override
     public void create(Adventure adventure,
                        Chapter chapter,
-                       RecordInAChapter record)
+                       RecordInAChapter record,
+                       Integer index)
             throws ChapterNotFoundException {
         var adventureJpa = adventureJpaRepository.findByName(adventure.name());
         if (adventureJpa.isEmpty()) {
@@ -58,10 +59,26 @@ public class RecordRepositoryWithJpa implements RecordRepository {
         if (chapterJpa.isEmpty()) {
             throw new ChapterNotFoundException();
         }
+        if (index == null) {
+            index = chapter.records() != null ? chapter.records().size() : 0;
+        }
 
+        int indexToPutRecord;
         var currentMaxIndex = recordJpaRepository.findMaxIndexByChapterId(chapterJpa.get().getId());
         if (currentMaxIndex == null) {
-            currentMaxIndex = -1L;
+            indexToPutRecord = 0;
+        } else {
+            if (index < currentMaxIndex){
+                var recordsToUpdate = recordJpaRepository
+                        .findByChapterIdAndIndexGreaterThanEqual(chapterJpa.get().getId(), index)
+                        .stream()
+                        .peek(recordJpa -> recordJpa.setIndex(recordJpa.getIndex() + 1)).toList();
+
+                recordJpaRepository.saveAll(recordsToUpdate);
+                indexToPutRecord = index;
+            } else {
+                indexToPutRecord = currentMaxIndex.intValue() + 1;
+            }
         }
 
         RecordType type;
@@ -80,7 +97,7 @@ public class RecordRepositoryWithJpa implements RecordRepository {
         }
 
         var recordJpa = recordJpaRepository.save(new RecordJpa(chapterJpa.get().getId(),
-                currentMaxIndex.intValue() + 1,
+                indexToPutRecord,
                 type
         ));
 
@@ -232,7 +249,7 @@ public class RecordRepositoryWithJpa implements RecordRepository {
     @Override
     public void createMultiple(Adventure adventure, Chapter chapter, List<RecordInAChapter> records) throws ChapterNotFoundException {
         for (var record : records) {
-            create(adventure, chapter, record);
+            create(adventure, chapter, record, null);
         }
     }
 
@@ -265,6 +282,27 @@ public class RecordRepositoryWithJpa implements RecordRepository {
 
         var recordJpa = recordJpaRepository.findByChapterIdAndIndex(chapterJpa.get().getId(), index);
         return recordJpa.flatMap(jpa -> mapRecordJpaToIndexAndModelDto(jpa).getSecond());
+    }
+
+    @Override
+    public void create(String adventure, String chapterName, Integer index, RecordInAChapter record)
+            throws ChapterNotFoundException {
+        var adventureJpa = adventureJpaRepository.findByName(adventure);
+        if (adventureJpa.isEmpty()) throw new ChapterNotFoundException();
+
+        var chapterJpa = chapterJpaRepository.findByAdventureAndName(adventureJpa.get().getId(), chapterName);
+        if (chapterJpa.isEmpty()) throw new ChapterNotFoundException();
+
+        var currentRecords = readByAdventureAndChapter(adventure, chapterName);
+
+        create(new Adventure(adventure, null),
+                new Chapter(chapterJpa.get().getName(),
+                        null,
+                        null,
+                        currentRecords),
+                record,
+                index);
+
     }
 
     private List<RecordJpa> findRecordsByAdventureNameAndChapterName(String adventure, String chapter)
