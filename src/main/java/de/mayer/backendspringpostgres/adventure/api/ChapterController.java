@@ -27,6 +27,8 @@ public class ChapterController implements ChapterHttpApi {
                 chapterRepository.create(adventure, chapter);
             } catch (AdventureNotFoundException e) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            } catch (ChapterAlreadyExistsException e) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
             } catch (ChapterNotFoundException e) {
                 throw new RuntimeException(e); // this should never happen
             }

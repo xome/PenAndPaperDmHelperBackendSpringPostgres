@@ -47,9 +47,9 @@ public class RecordRepositoryWithJpa implements RecordRepository {
     }
 
     @Override
-    public void saveRecord(Adventure adventure,
-                           Chapter chapter,
-                           RecordInAChapter record)
+    public void create(Adventure adventure,
+                       Chapter chapter,
+                       RecordInAChapter record)
             throws ChapterNotFoundException {
         var adventureJpa = adventureJpaRepository.findByName(adventure.name());
         if (adventureJpa.isEmpty()) {
@@ -118,7 +118,7 @@ public class RecordRepositoryWithJpa implements RecordRepository {
     }
 
     @Override
-    public LinkedList<RecordInAChapter> findRecordsByAdventureAndChapter(String adventureName, String chapterName) throws ChapterNotFoundException {
+    public LinkedList<RecordInAChapter> readByAdventureAndChapter(String adventureName, String chapterName) throws ChapterNotFoundException {
         var allJpaRecords = findRecordsByAdventureNameAndChapterName(adventureName, chapterName);
 
         var records = new LinkedList<RecordInAChapter>();
@@ -199,7 +199,7 @@ public class RecordRepositoryWithJpa implements RecordRepository {
     }
 
     @Override
-    public void deleteAllByAdventureAndChapter(String adventure, String chapter) throws ChapterNotFoundException {
+    public void deleteByAdventureAndChapter(String adventure, String chapter) throws ChapterNotFoundException {
         var records = findRecordsByAdventureNameAndChapterName(adventure, chapter);
 
         records.forEach(recordJpa -> {
@@ -217,9 +217,9 @@ public class RecordRepositoryWithJpa implements RecordRepository {
     }
 
     @Override
-    public void saveRecords(Adventure adventure, Chapter chapter, List<RecordInAChapter> records) throws ChapterNotFoundException {
+    public void createMultiple(Adventure adventure, Chapter chapter, List<RecordInAChapter> records) throws ChapterNotFoundException {
         for (var record : records) {
-            saveRecord(adventure, chapter, record);
+            create(adventure, chapter, record);
         }
     }
 

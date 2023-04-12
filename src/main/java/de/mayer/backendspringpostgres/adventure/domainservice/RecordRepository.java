@@ -9,13 +9,12 @@ import java.util.List;
 
 public interface RecordRepository {
 
-    void saveRecord(Adventure adventure, Chapter chapter, RecordInAChapter record) throws ChapterNotFoundException;
+    void create(Adventure adventure, Chapter chapter, RecordInAChapter record) throws ChapterNotFoundException;
+    void createMultiple(Adventure adventure, Chapter chapter, List<RecordInAChapter> records) throws ChapterNotFoundException;
 
-    LinkedList<RecordInAChapter> findRecordsByAdventureAndChapter(String adventureName, String chapterName) throws ChapterNotFoundException;
+    LinkedList<RecordInAChapter> readByAdventureAndChapter(String adventureName, String chapterName) throws ChapterNotFoundException;
 
-    void deleteAllByAdventureAndChapter(String adventure, String chapter) throws ChapterNotFoundException;
-
-    void saveRecords(Adventure adventure, Chapter chapter, List<RecordInAChapter> records) throws ChapterNotFoundException;
+    void deleteByAdventureAndChapter(String adventure, String chapter) throws ChapterNotFoundException;
 
     void deleteAllChapterLinksReferencing(String adventureName, String chapterName);
 }

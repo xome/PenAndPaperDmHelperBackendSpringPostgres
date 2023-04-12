@@ -5,7 +5,7 @@ import de.mayer.backendspringpostgres.adventure.model.Chapter;
 import java.util.Optional;
 
 public interface ChapterRepository {
-    void create(String adventure, Chapter chapter) throws AdventureNotFoundException, ChapterNotFoundException;
+    void create(String adventure, Chapter chapter) throws AdventureNotFoundException, ChapterNotFoundException, ChapterAlreadyExistsException;
     Optional<Chapter> read(String adventureName, String chapterName);
 
     void update(String adventure, String nameOfChapterToBeUpdated, Chapter chapterWithNewData) throws ChapterNotFoundException, ChapterAlreadyExistsException;

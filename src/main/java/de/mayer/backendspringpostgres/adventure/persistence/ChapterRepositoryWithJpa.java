@@ -7,6 +7,7 @@ import de.mayer.backendspringpostgres.adventure.model.Chapter;
 import de.mayer.backendspringpostgres.adventure.persistence.dto.ChapterJpa;
 import de.mayer.backendspringpostgres.adventure.persistence.jparepo.AdventureJpaRepository;
 import de.mayer.backendspringpostgres.adventure.persistence.jparepo.ChapterJpaRepository;
+import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -89,8 +90,8 @@ public class ChapterRepositoryWithJpa implements ChapterRepository {
                 null);
 
         if (chapterWithNewData.records() != null) {
-            recordRepository.deleteAllByAdventureAndChapter(adventure, nameOfChapterToBeUpdated);
-            recordRepository.saveRecords(
+            recordRepository.deleteByAdventureAndChapter(adventure, nameOfChapterToBeUpdated);
+            recordRepository.createMultiple(
                     new Adventure(adventureJpa.getName(), null),
                     chapter,
                     chapterWithNewData.records());
@@ -109,7 +110,7 @@ public class ChapterRepositoryWithJpa implements ChapterRepository {
         if (chapter.isEmpty())
             throw new ChapterNotFoundException();
 
-        recordRepository.deleteAllByAdventureAndChapter(adventureName, chapterName);
+        recordRepository.deleteByAdventureAndChapter(adventureName, chapterName);
         recordRepository.deleteAllChapterLinksReferencing(adventureName, chapterName);
 
 
@@ -119,7 +120,7 @@ public class ChapterRepositoryWithJpa implements ChapterRepository {
 
     @Override
     public void create(String adventure, Chapter chapter) throws AdventureNotFoundException,
-            ChapterNotFoundException {
+            ChapterNotFoundException, ChapterAlreadyExistsException {
         var adventureJpa = adventureJpaRepository.findByName(adventure);
         if (adventureJpa.isEmpty())
             throw new AdventureNotFoundException();
@@ -128,18 +129,26 @@ public class ChapterRepositoryWithJpa implements ChapterRepository {
                 ? null
                 : chapter.approximateDurationInMinutes().longValue();
 
+        if (chapterJpaRepository.exists(Example.of(
+                new ChapterJpa(adventureJpa.get().getId(),
+                        chapter.name(),
+                        null,
+                        null)))) {
+            throw new ChapterAlreadyExistsException();
+        }
+
         chapterJpaRepository.save(new ChapterJpa(adventureJpa.get().getId(),
                 chapter.name(),
                 chapter.subheader(),
                 durationAsLong));
 
-        recordRepository.saveRecords(new Adventure(adventure, null), chapter, chapter.records());
+        recordRepository.createMultiple(new Adventure(adventure, null), chapter, chapter.records());
 
     }
 
     private Chapter mapJpaToDomain(String adventureName, ChapterJpa chapterJpa) throws ChapterNotFoundException {
 
-        var records = recordRepository.findRecordsByAdventureAndChapter(adventureName, chapterJpa.getName());
+        var records = recordRepository.readByAdventureAndChapter(adventureName, chapterJpa.getName());
 
         return new Chapter(chapterJpa.getName(),
                 chapterJpa.getSubheader(),

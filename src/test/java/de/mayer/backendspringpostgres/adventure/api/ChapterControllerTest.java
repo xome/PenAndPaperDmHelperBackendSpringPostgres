@@ -156,5 +156,33 @@ class ChapterControllerTest {
 
     }
 
+    @DisplayName("""
+            Given there already exists a Chapter by the Name Testchapter,
+            When a new Chapter with the same name is put,
+            Then Status BAD_REQUEST is returned
+            """)
+    @Test
+    void putChapterAlreadyExists() throws JsonProcessingException {
+        var adventure = adventureJpaRepository.save(new AdventureJpa("Testadventure"));
+        var chapter = chapterJpaRepository.save(
+                new ChapterJpa(adventure.getId(),
+                        "Chapter",
+                        null,
+                        null));
+
+        var newChapter = new LinkedHashMap<String, Object>();
+        newChapter.put("name", chapter.getName());
+        newChapter.put("subheader", null);
+        newChapter.put("approximateDurationInMinutes", null);
+        newChapter.put("records", List.of("Textrecord"));
+
+        givenForPathWithParams(adventure.getName())
+                .body(jsonMapper.writeValueAsString(List.of(newChapter)))
+                .when().put(PATH)
+                .then().statusCode(is(HttpStatus.BAD_REQUEST.value()));
+
+
+    }
+
 
 }
