@@ -305,6 +305,68 @@ public class RecordRepositoryWithJpa implements RecordRepository {
 
     }
 
+    @Override
+    public void update(String adventure, String chapterName, Integer index, RecordInAChapter record)
+            throws RecordNotFoundException, ChapterNotFoundException {
+        var adventureJpa = adventureJpaRepository.findByName(adventure)
+                .orElseThrow(ChapterNotFoundException::new);
+        var chapterJpa = chapterJpaRepository.findByAdventureAndName(adventureJpa.getId(), chapterName)
+                .orElseThrow(ChapterNotFoundException::new);
+        var recordJpa = recordJpaRepository.findByChapterIdAndIndex(chapterJpa.getId(), index)
+                .orElseThrow(RecordNotFoundException::new);
+        switch (recordJpa.getType()) {
+            case ChapterLink -> {
+            }
+            case EnvironmentLightning -> {
+                var envModel = (EnvironmentLightning) record;
+                var envJpa = environmentLightningJpaRepository.findByRecordJpa(recordJpa)
+                        .orElseThrow(RecordNotFoundException::new);
+                if (envModel.brightness() != null) {
+                    envJpa.setBrightness(envModel.brightness());
+                }
+                if (envModel.rgb() != null) {
+                    envJpa.setRgb1(envModel.rgb()[0]);
+                    envJpa.setRgb2(envModel.rgb()[1]);
+                    envJpa.setRgb3(envModel.rgb()[2]);
+                }
+                environmentLightningJpaRepository.save(envJpa);
+            }
+
+            case Picture -> {
+                var picModel = (Picture) record;
+                var picJpa = pictureJpaRepository.findByRecordJpa(recordJpa)
+                        .orElseThrow(RecordNotFoundException::new);
+                if (picModel.isShareableWithGroup() != null)
+                    picJpa.setShareableWithGroup(picModel.isShareableWithGroup());
+                if (picModel.base64() != null)
+                    picJpa.setBase64(picModel.base64());
+                if (picModel.fileFormat() != null)
+                    picJpa.setFileFormat(picModel.fileFormat());
+                pictureJpaRepository.save(picJpa);
+
+            }
+            case Text -> {
+                var textModel = (Text) record;
+                var textJpa = textJpaRepository.findByRecordJpa(recordJpa)
+                        .orElseThrow(RecordNotFoundException::new);
+                if (textModel.text() != null) {
+                    textJpa.setText(textModel.text());
+                }
+                textJpaRepository.save(textJpa);
+            }
+            case Music -> {
+                var musicModel = (BackgroundMusic) record;
+                var musicJpa = backgroundMusicJpaRepository.findByRecordJpa(recordJpa)
+                        .orElseThrow(RecordNotFoundException::new);
+                if (musicModel.base64() != null)
+                    musicJpa.setBase64(musicModel.base64());
+                if (musicModel.name() != null)
+                    musicJpa.setName(musicModel.name());
+                backgroundMusicJpaRepository.save(musicJpa);
+            }
+        }
+    }
+
     private List<RecordJpa> findRecordsByAdventureNameAndChapterName(String adventure, String chapter)
             throws ChapterNotFoundException {
         var adventureJpa = adventureJpaRepository.findByName(adventure);

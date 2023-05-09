@@ -3,6 +3,7 @@ package de.mayer.backendspringpostgres.adventure.api;
 import de.mayer.backendspringpostgres.adventure.domainservice.ChapterNotFoundException;
 import de.mayer.backendspringpostgres.adventure.domainservice.RecordRepository;
 import de.mayer.backendspringpostgres.adventure.model.RecordInAChapter;
+import de.mayer.backendspringpostgres.adventure.model.RecordNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -39,8 +40,16 @@ public class RecordByChapterNameAndIndexController implements RecordByChapterNam
     }
 
     @Override
-    public ResponseEntity<Void> patchRecordByChapterNameAndIndex(String adventure, String chapterName, Integer index) {
-        return RecordByChapterNameAndIndexHttpApi.super.patchRecordByChapterNameAndIndex(adventure, chapterName, index);
+    public ResponseEntity<Void> patchRecordByChapterNameAndIndex(String adventure,
+                                                                 String chapterName,
+                                                                 Integer index,
+                                                                 RecordInAChapter record) {
+        try {
+            recordRepository.update(adventure, chapterName, index, record);
+        } catch (RecordNotFoundException | ChapterNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        return ResponseEntity.ok().build();
     }
 
     @Override

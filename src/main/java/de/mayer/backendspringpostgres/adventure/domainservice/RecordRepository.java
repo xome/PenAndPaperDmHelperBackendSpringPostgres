@@ -3,6 +3,7 @@ package de.mayer.backendspringpostgres.adventure.domainservice;
 import de.mayer.backendspringpostgres.adventure.model.Adventure;
 import de.mayer.backendspringpostgres.adventure.model.Chapter;
 import de.mayer.backendspringpostgres.adventure.model.RecordInAChapter;
+import de.mayer.backendspringpostgres.adventure.model.RecordNotFoundException;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -22,4 +23,6 @@ public interface RecordRepository {
     Optional<RecordInAChapter> readByAdventureAndChapterAndIndex(String adventure, String chapter, Integer index);
 
     void create(String adventure, String chapterName, Integer index, RecordInAChapter record) throws ChapterNotFoundException;
+
+    void update(String adventure, String chapterName, Integer index, RecordInAChapter record) throws RecordNotFoundException, ChapterNotFoundException;
 }

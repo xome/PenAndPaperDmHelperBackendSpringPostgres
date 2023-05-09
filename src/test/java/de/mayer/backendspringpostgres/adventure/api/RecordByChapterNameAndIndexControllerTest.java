@@ -172,4 +172,62 @@ class RecordByChapterNameAndIndexControllerTest {
 
     }
 
+    @Test
+    @DisplayName("""
+            Given there exists a Record in a chapter,
+            When it is patched,
+            Then the updated Record is saved
+            """)
+    void patchText() throws Exception {
+        var adventure = adventureJpaRepository.save(new AdventureJpa("Testadventure"));
+        var chapter = chapterJpaRepository.save(new ChapterJpa(adventure.getId(), "Testchapter", null, null));
+
+        var record = recordJpaRepository.save(new RecordJpa(chapter.getId(), 0, RecordType.Text));
+        textJpaRepository.save(new TextJpa(record, "Hello world!"));
+
+        givenForPathWithParams(adventure.getName(), chapter.getName(), record.getIndex())
+                .contentType(ContentType.JSON)
+                .body(jsonMapper.writeValueAsString("Hallo Welt!"))
+                .when().patch(PATH)
+                .then().statusCode(is(HttpStatus.OK.value()));
+
+        var textAfterPatch = textJpaRepository.findByRecordJpa(record);
+
+        assertThat(textAfterPatch.isPresent(), is(true));
+        assertThat(textAfterPatch.get().getText(), is("Hallo Welt!"));
+    }
+
+    @Test
+    @DisplayName("""
+            Given there exists no Record with the given Index,
+            When it shall be patched,
+            Then http status NOT_FOUND is returned
+            """)
+    void recordToPatchNotFound() throws Exception {
+        var adventure = adventureJpaRepository.save(new AdventureJpa("Testadventure"));
+        var chapter = chapterJpaRepository.save(new ChapterJpa(adventure.getId(), "Testchapter", null, null));
+        givenForPathWithParams(adventure.getName(), chapter.getName(), 0)
+                .contentType(ContentType.JSON)
+                .body(jsonMapper.writeValueAsString("Hallo Welt!"))
+                .when().patch(PATH)
+                .then().statusCode(is(HttpStatus.NOT_FOUND.value()));
+
+    }
+
+    @Test
+    @DisplayName("""
+            Given there exists no Chapter with the given Name,
+            When a Record shall be patched,
+            Then http status NOT_FOUND is returned
+            """)
+    void chapterForRecordToPatchNotFound() throws Exception {
+        var adventure = adventureJpaRepository.save(new AdventureJpa("Testadventure"));
+        givenForPathWithParams(adventure.getName(), "Testchapter", 0)
+                .contentType(ContentType.JSON)
+                .body(jsonMapper.writeValueAsString("Hallo Welt!"))
+                .when().patch(PATH)
+                .then().statusCode(is(HttpStatus.NOT_FOUND.value()));
+
+    }
+
 }
