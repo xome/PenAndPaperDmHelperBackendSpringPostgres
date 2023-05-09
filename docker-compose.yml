@@ -1,0 +1,19 @@
+version: '2'
+
+services:
+  dm-helper:
+    image: xome42/pen-and-paper-dm-helper-backend-spring-postgres
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+  db:
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_PASSWORD: password
+      PGDATA: /var/lib/postgresql/data
+    volumes:
+      - /var/lib/postgresql/data:${PATH_TO_DB}

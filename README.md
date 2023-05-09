@@ -2,10 +2,21 @@
 ## Implementation of API [Pen and Paper DM Helper](https://github.com/xome/PenAndPaperHelperOpenApi)
 
 ## Getting started
+### Get Source and use Docker Compose 
 
-### Pull image from docker.io
-
+Checkout Project:
+```shell
+git clone git@github.com:xome/PenAndPaperDmHelperBackendSpringPostgres.git
+cd PenAndPaperDmHelperBackendSpringPostgres
 ```
-docker pull xome42/pen-and-paper-dm-helper-backend-spring-postgres
+
+Define local directory for database files:
+```shell
+echo "PATH_TO_DB=/path/to/persist/postgres/data" > .env
+```
+
+Run Docker Compose:
+```shell
+docker-compose up
 ```
 
