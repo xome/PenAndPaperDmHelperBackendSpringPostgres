@@ -321,14 +321,10 @@ public class RecordRepositoryWithJpa implements RecordRepository {
                 var envModel = (EnvironmentLightning) record;
                 var envJpa = environmentLightningJpaRepository.findByRecordJpa(recordJpa)
                         .orElseThrow(RecordNotFoundException::new);
-                if (envModel.brightness() != null) {
-                    envJpa.setBrightness(envModel.brightness());
-                }
-                if (envModel.rgb() != null) {
-                    envJpa.setRgb1(envModel.rgb()[0]);
-                    envJpa.setRgb2(envModel.rgb()[1]);
-                    envJpa.setRgb3(envModel.rgb()[2]);
-                }
+                envJpa.setBrightness(envModel.brightness());
+                envJpa.setRgb1(envModel.rgb()[0]);
+                envJpa.setRgb2(envModel.rgb()[1]);
+                envJpa.setRgb3(envModel.rgb()[2]);
                 environmentLightningJpaRepository.save(envJpa);
             }
 
@@ -336,12 +332,9 @@ public class RecordRepositoryWithJpa implements RecordRepository {
                 var picModel = (Picture) record;
                 var picJpa = pictureJpaRepository.findByRecordJpa(recordJpa)
                         .orElseThrow(RecordNotFoundException::new);
-                if (picModel.isShareableWithGroup() != null)
-                    picJpa.setShareableWithGroup(picModel.isShareableWithGroup());
-                if (picModel.base64() != null)
-                    picJpa.setBase64(picModel.base64());
-                if (picModel.fileFormat() != null)
-                    picJpa.setFileFormat(picModel.fileFormat());
+                picJpa.setShareableWithGroup(picModel.isShareableWithGroup());
+                picJpa.setBase64(picModel.base64());
+                picJpa.setFileFormat(picModel.fileFormat());
                 pictureJpaRepository.save(picJpa);
 
             }
@@ -349,19 +342,15 @@ public class RecordRepositoryWithJpa implements RecordRepository {
                 var textModel = (Text) record;
                 var textJpa = textJpaRepository.findByRecordJpa(recordJpa)
                         .orElseThrow(RecordNotFoundException::new);
-                if (textModel.text() != null) {
-                    textJpa.setText(textModel.text());
-                }
+                textJpa.setText(textModel.text());
                 textJpaRepository.save(textJpa);
             }
             case Music -> {
                 var musicModel = (BackgroundMusic) record;
                 var musicJpa = backgroundMusicJpaRepository.findByRecordJpa(recordJpa)
                         .orElseThrow(RecordNotFoundException::new);
-                if (musicModel.base64() != null)
-                    musicJpa.setBase64(musicModel.base64());
-                if (musicModel.name() != null)
-                    musicJpa.setName(musicModel.name());
+                musicJpa.setBase64(musicModel.base64());
+                musicJpa.setName(musicModel.name());
                 backgroundMusicJpaRepository.save(musicJpa);
             }
         }
