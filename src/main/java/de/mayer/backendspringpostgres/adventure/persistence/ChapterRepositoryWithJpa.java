@@ -49,7 +49,7 @@ public class ChapterRepositoryWithJpa implements ChapterRepository {
 
     @Override
     public void update(String adventure, String nameOfChapterToBeUpdated, Chapter chapterWithNewData)
-            throws ChapterNotFoundException, ChapterAlreadyExistsException {
+            throws ChapterNotFoundException, ChapterAlreadyExistsException, ChapterToNotFoundException {
 
         var optionalAdventureJpa = adventureJpaRepository.findByName(adventure);
         if (optionalAdventureJpa.isEmpty()) {
@@ -120,7 +120,7 @@ public class ChapterRepositoryWithJpa implements ChapterRepository {
 
     @Override
     public void create(String adventure, Chapter chapter) throws AdventureNotFoundException,
-            ChapterNotFoundException, ChapterAlreadyExistsException {
+            ChapterNotFoundException, ChapterAlreadyExistsException, ChapterToNotFoundException {
         var adventureJpa = adventureJpaRepository.findByName(adventure);
         if (adventureJpa.isEmpty())
             throw new AdventureNotFoundException();

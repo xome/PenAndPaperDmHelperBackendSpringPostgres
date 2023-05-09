@@ -3,10 +3,7 @@ package de.mayer.backendspringpostgres.adventure.api;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.mayer.backendspringpostgres.adventure.persistence.RecordType;
-import de.mayer.backendspringpostgres.adventure.persistence.dto.AdventureJpa;
-import de.mayer.backendspringpostgres.adventure.persistence.dto.ChapterJpa;
-import de.mayer.backendspringpostgres.adventure.persistence.dto.RecordJpa;
-import de.mayer.backendspringpostgres.adventure.persistence.dto.TextJpa;
+import de.mayer.backendspringpostgres.adventure.persistence.dto.*;
 import de.mayer.backendspringpostgres.adventure.persistence.jparepo.*;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
@@ -18,6 +15,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
+
+import java.util.Collections;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.hasSize;
@@ -172,6 +171,24 @@ class RecordByChapterNameAndIndexControllerTest {
 
     }
 
+    @DisplayName("""
+            Given there is a Chapter defined by the parameters
+                And there exists no chapter defined in the new Chapter Link,
+            When the new Chapter Link is to be put,
+            Then http status BAD_REQUEST is returned
+            """)
+    @Test
+    void putInvalidChapterLink() throws JsonProcessingException {
+        var adventure = adventureJpaRepository.save(new AdventureJpa("Testadventure"));
+        var chapter = chapterJpaRepository.save(new ChapterJpa(adventure.getId(), "Testchapter", null, null));
+
+        givenForPathWithParams(adventure.getName(), chapter.getName(), 2)
+                .contentType(ContentType.JSON)
+                .body(jsonMapper.writeValueAsString(Collections.singletonMap("chapterNameTo", "hubba")))
+                .when().put(PATH)
+                .then().statusCode(is(HttpStatus.BAD_REQUEST.value()));
+    }
+
     @Test
     @DisplayName("""
             Given there exists a Record in a chapter,
@@ -229,5 +246,30 @@ class RecordByChapterNameAndIndexControllerTest {
                 .then().statusCode(is(HttpStatus.NOT_FOUND.value()));
 
     }
+
+    @Test
+    @DisplayName("""
+            Given there exists no Chapter To with the given Name,
+            When a Chapter Link shall be patched,
+            Then http status BAD_REQUEST is returned
+            """)
+    void chapterToDoesNotExist() throws Exception {
+        var adventure = adventureJpaRepository.save(new AdventureJpa("Testadventure"));
+        var chapter = chapterJpaRepository.save(new ChapterJpa(adventure.getId(),
+                "Testchapter",
+                null,
+                null));
+        var record = recordJpaRepository.save(new RecordJpa(chapter.getId(), 0, RecordType.ChapterLink));
+        chapterLinkJpaRepository.save(new ChapterLinkJpa(record, -1L));
+
+        givenForPathWithParams(adventure.getName(), chapter.getName(), record.getIndex())
+                .contentType(ContentType.JSON)
+                .body(jsonMapper.writeValueAsString(Collections.singletonMap("chapterNameTo", "hubba")))
+                .when().patch(PATH)
+                .then().statusCode(is(HttpStatus.BAD_REQUEST.value()));
+
+    }
+
+
 
 }

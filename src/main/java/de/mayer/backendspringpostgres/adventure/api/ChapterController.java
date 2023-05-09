@@ -1,9 +1,6 @@
 package de.mayer.backendspringpostgres.adventure.api;
 
-import de.mayer.backendspringpostgres.adventure.domainservice.AdventureNotFoundException;
-import de.mayer.backendspringpostgres.adventure.domainservice.ChapterAlreadyExistsException;
-import de.mayer.backendspringpostgres.adventure.domainservice.ChapterNotFoundException;
-import de.mayer.backendspringpostgres.adventure.domainservice.ChapterRepository;
+import de.mayer.backendspringpostgres.adventure.domainservice.*;
 import de.mayer.backendspringpostgres.adventure.model.Chapter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +24,7 @@ public class ChapterController implements ChapterHttpApi {
                 chapterRepository.create(adventure, chapter);
             } catch (AdventureNotFoundException e) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-            } catch (ChapterAlreadyExistsException e) {
+            } catch (ChapterAlreadyExistsException | ChapterToNotFoundException e) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
             } catch (ChapterNotFoundException e) {
                 throw new RuntimeException(e); // this should never happen
@@ -43,7 +40,7 @@ public class ChapterController implements ChapterHttpApi {
                 chapterRepository.update(adventure, chapter.name(), chapter);
             } catch (ChapterNotFoundException e) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-            } catch (ChapterAlreadyExistsException e) {
+            } catch (ChapterAlreadyExistsException | ChapterToNotFoundException e) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
             }
         }

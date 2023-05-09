@@ -1,6 +1,7 @@
 package de.mayer.backendspringpostgres.adventure.persistence;
 
 import de.mayer.backendspringpostgres.adventure.domainservice.ChapterNotFoundException;
+import de.mayer.backendspringpostgres.adventure.domainservice.ChapterToNotFoundException;
 import de.mayer.backendspringpostgres.adventure.domainservice.RecordRepository;
 import de.mayer.backendspringpostgres.adventure.model.*;
 import de.mayer.backendspringpostgres.adventure.persistence.dto.*;
@@ -49,7 +50,7 @@ public class RecordRepositoryWithJpa implements RecordRepository {
                        Chapter chapter,
                        RecordInAChapter record,
                        Integer index)
-            throws ChapterNotFoundException {
+            throws ChapterNotFoundException, ChapterToNotFoundException {
         var adventureJpa = adventureJpaRepository.findByName(adventure.name());
         if (adventureJpa.isEmpty()) {
             throw new ChapterNotFoundException();
@@ -113,9 +114,9 @@ public class RecordRepositoryWithJpa implements RecordRepository {
             case ChapterLink -> {
                 var link = (ChapterLink) record;
                 var chapterTo = chapterJpaRepository.findByAdventureAndName(adventureJpa.get().getId(),
-                        link.chapterNameTo());
-                chapterTo.ifPresent(chapterToJpa ->
-                        chapterLinkJpaRepository.save(new ChapterLinkJpa(recordJpa, chapterToJpa.getId())));
+                        link.chapterNameTo())
+                        .orElseThrow(ChapterToNotFoundException::new);
+                chapterLinkJpaRepository.save(new ChapterLinkJpa(recordJpa, chapterTo.getId()));
             }
             case EnvironmentLightning -> {
                 var envLight = (EnvironmentLightning) record;
@@ -247,7 +248,7 @@ public class RecordRepositoryWithJpa implements RecordRepository {
     }
 
     @Override
-    public void createMultiple(Adventure adventure, Chapter chapter, List<RecordInAChapter> records) throws ChapterNotFoundException {
+    public void createMultiple(Adventure adventure, Chapter chapter, List<RecordInAChapter> records) throws ChapterNotFoundException, ChapterToNotFoundException {
         for (var record : records) {
             create(adventure, chapter, record, null);
         }
@@ -286,7 +287,7 @@ public class RecordRepositoryWithJpa implements RecordRepository {
 
     @Override
     public void create(String adventure, String chapterName, Integer index, RecordInAChapter record)
-            throws ChapterNotFoundException {
+            throws ChapterNotFoundException, ChapterToNotFoundException {
         var adventureJpa = adventureJpaRepository.findByName(adventure);
         if (adventureJpa.isEmpty()) throw new ChapterNotFoundException();
 
@@ -307,7 +308,7 @@ public class RecordRepositoryWithJpa implements RecordRepository {
 
     @Override
     public void update(String adventure, String chapterName, Integer index, RecordInAChapter record)
-            throws RecordNotFoundException, ChapterNotFoundException {
+            throws RecordNotFoundException, ChapterNotFoundException, ChapterToNotFoundException {
         var adventureJpa = adventureJpaRepository.findByName(adventure)
                 .orElseThrow(ChapterNotFoundException::new);
         var chapterJpa = chapterJpaRepository.findByAdventureAndName(adventureJpa.getId(), chapterName)
@@ -316,6 +317,14 @@ public class RecordRepositoryWithJpa implements RecordRepository {
                 .orElseThrow(RecordNotFoundException::new);
         switch (recordJpa.getType()) {
             case ChapterLink -> {
+                var linkModel = (ChapterLink) record;
+                var linkJpa = chapterLinkJpaRepository.findByRecordJpa(recordJpa)
+                        .orElseThrow(RecordNotFoundException::new);
+                var chapterToJpa = chapterJpaRepository.findByAdventureAndName(adventureJpa.getId(),
+                        linkModel.chapterNameTo())
+                        .orElseThrow(ChapterToNotFoundException::new);
+                linkJpa.setId(chapterToJpa.getId());
+                chapterLinkJpaRepository.save(linkJpa);
             }
             case EnvironmentLightning -> {
                 var envModel = (EnvironmentLightning) record;
