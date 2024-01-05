@@ -19,6 +19,9 @@ public class RecordJpa  {
     @Column(name = "index")
     private Integer index;
 
+    @Column(name = "type")
+    private String type = "ChapterLink";
+
     public RecordJpa() {
     }
 

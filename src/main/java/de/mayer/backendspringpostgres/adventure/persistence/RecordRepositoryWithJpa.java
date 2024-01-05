@@ -51,51 +51,51 @@ public class RecordRepositoryWithJpa implements RecordRepository {
                        RecordInAChapter record,
                        Integer index)
             throws ChapterNotFoundException, ChapterToNotFoundException {
+        log.debug("Entry // Adventure: {}, Chapter: {}, Index to insert: {}", adventure.name(), chapter.name(), index);
+        log.trace("Record: {}", record);
+
         var adventureJpa = adventureJpaRepository.findByName(adventure.name());
         if (adventureJpa.isEmpty()) {
             throw new ChapterNotFoundException();
         }
 
+        log.trace("Adventure with ID {} found.", adventureJpa.get().getId());
+
         var chapterJpa = chapterJpaRepository.findByAdventureAndName(adventureJpa.get().getId(), chapter.name());
         if (chapterJpa.isEmpty()) {
             throw new ChapterNotFoundException();
         }
+
+        log.trace("Chapter with ID {} found.", chapterJpa.get().getId());
+
         if (index == null) {
             index = chapter.records() != null ? chapter.records().size() : 0;
+            log.debug("No Index given. Using {}", index);
         }
 
         int indexToPutRecord;
         var currentMaxIndex = recordJpaRepository.findMaxIndexByChapterId(chapterJpa.get().getId());
         if (currentMaxIndex == null) {
             indexToPutRecord = 0;
+            log.debug("Currently there are no Records in the Chapter. Inserting first one.");
         } else {
             if (index < currentMaxIndex){
-                var recordsToUpdate = recordJpaRepository
+                log.debug("Given Index {} is smaller than current max Index {}. Squeezing new Record in.",
+                        index, currentMaxIndex);
+                recordJpaRepository
                         .findByChapterIdAndIndexGreaterThanEqual(chapterJpa.get().getId(), index)
                         .stream()
-                        .peek(recordJpa -> recordJpa.setIndex(recordJpa.getIndex() + 1)).toList();
-
-                recordJpaRepository.saveAll(recordsToUpdate);
+                        .peek(recordJpa -> recordJpa.setIndex(recordJpa.getIndex() + 1))
+                        .sorted(Comparator.comparing(RecordJpa::getIndex).reversed())
+                        .forEachOrdered(recordJpaRepository::save);
                 indexToPutRecord = index;
             } else {
+                log.debug("Putting new Record at the end of the Chapter.");
                 indexToPutRecord = currentMaxIndex.intValue() + 1;
             }
         }
 
-        RecordType type;
-        if (record instanceof Text) {
-            type = RecordType.Text;
-        } else if (record instanceof BackgroundMusic) {
-            type = RecordType.Music;
-        } else if (record instanceof Picture) {
-            type = RecordType.Picture;
-        } else if (record instanceof EnvironmentLightning) {
-            type = RecordType.EnvironmentLightning;
-        } else if (record instanceof ChapterLink) {
-            type = RecordType.ChapterLink;
-        } else {
-            throw new RuntimeException("%s not implemented!".formatted(record.getClass().getSimpleName()));
-        }
+        RecordType type = getRecordType(record);
 
         var recordJpa = recordJpaRepository.save(new RecordJpa(chapterJpa.get().getId(),
                 indexToPutRecord,
@@ -131,6 +131,24 @@ public class RecordRepositoryWithJpa implements RecordRepository {
                 backgroundMusicJpaRepository.save(new BackgroundMusicJpa(recordJpa, music.name(), music.base64()));
             }
         }
+    }
+
+    private static RecordType getRecordType(RecordInAChapter record) {
+        RecordType type;
+        if (record instanceof Text) {
+            type = RecordType.Text;
+        } else if (record instanceof BackgroundMusic) {
+            type = RecordType.Music;
+        } else if (record instanceof Picture) {
+            type = RecordType.Picture;
+        } else if (record instanceof EnvironmentLightning) {
+            type = RecordType.EnvironmentLightning;
+        } else if (record instanceof ChapterLink) {
+            type = RecordType.ChapterLink;
+        } else {
+            throw new RuntimeException("%s not implemented!".formatted(record.getClass().getSimpleName()));
+        }
+        return type;
     }
 
     @Override

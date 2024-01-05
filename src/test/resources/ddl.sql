@@ -1,14 +1,10 @@
 create table adventure
 (
-    -- Sometimes I hate Hibernate. You can't update primary keys.
-    -- If we want to change the adventure's name (and we want to), we have to introduce a synthetic pk
-    -- and we can't use our natural pk with name as its only column
     id   bigserial,
     name text,
     constraint adventure_pk primary key (id),
     constraint adventure_name_uk unique (name)
 );
-
 create table chapter (
     id                              bigserial,
     adventure                       bigint,
@@ -20,7 +16,6 @@ create table chapter (
     constraint chapter_pk primary key (id),
     constraint chapter_adventure_name_uk unique (adventure, name)
 );
-
 create table record (
     id         bigserial,
     chapter_id bigint,
@@ -31,7 +26,6 @@ create table record (
     constraint records_pk primary key (id),
     constraint record_uk unique (chapter_id, index)
 );
-
 create table picture (
     id                      bigserial,
     record_id               bigint,
@@ -43,7 +37,6 @@ create table picture (
         references record (id)
         on delete cascade on update cascade
 );
-
 create table environment_lightning (
     id         bigserial,
     record_id  bigint,
@@ -68,7 +61,6 @@ create table chapter_link (
         references chapter (id)
         on delete cascade on update cascade
 );
-
 create table background_music (
     id        bigserial,
     record_id bigint,
@@ -79,7 +71,6 @@ create table background_music (
         references record (id)
         on delete cascade on update cascade
 );
-
 create table text (
     id        bigserial,
     record_id bigint,

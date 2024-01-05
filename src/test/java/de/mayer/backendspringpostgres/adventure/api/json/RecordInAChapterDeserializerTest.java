@@ -2,11 +2,13 @@ package de.mayer.backendspringpostgres.adventure.api.json;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.mayer.backendspringpostgres.MyPostgresContainer;
 import de.mayer.backendspringpostgres.adventure.model.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.LinkedHashMap;
@@ -20,6 +22,10 @@ import static org.hamcrest.MatcherAssert.*;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 class RecordInAChapterDeserializerTest {
+
+    // if not defined here, another Spring Instance would be started
+    @ServiceConnection
+    static MyPostgresContainer sqlContainer = MyPostgresContainer.getInstance();
 
     @Autowired
     ObjectMapper mapper;

@@ -2,6 +2,7 @@ package de.mayer.backendspringpostgres.graph.api;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.mayer.backendspringpostgres.MyPostgresContainer;
 import de.mayer.backendspringpostgres.graph.domainservice.Cache;
 import de.mayer.backendspringpostgres.graph.model.Chapter;
 import de.mayer.backendspringpostgres.graph.model.ChapterLink;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
@@ -26,6 +28,9 @@ import static org.hamcrest.Matchers.*;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 class GraphHttpApiControllerTest {
+
+    @ServiceConnection
+    static MyPostgresContainer sqlContainer = MyPostgresContainer.getInstance();
 
     @LocalServerPort
     private int port;
