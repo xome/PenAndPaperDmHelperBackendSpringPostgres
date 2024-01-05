@@ -79,15 +79,15 @@ public class RecordRepositoryWithJpa implements RecordRepository {
             indexToPutRecord = 0;
             log.debug("Currently there are no Records in the Chapter. Inserting first one.");
         } else {
-            if (index < currentMaxIndex){
+            if (index < currentMaxIndex && chapter.records() != null) {
                 log.debug("Given Index {} is smaller than current max Index {}. Squeezing new Record in.",
                         index, currentMaxIndex);
-                recordJpaRepository
-                        .findByChapterIdAndIndexGreaterThanEqual(chapterJpa.get().getId(), index)
-                        .stream()
-                        .peek(recordJpa -> recordJpa.setIndex(recordJpa.getIndex() + 1))
-                        .sorted(Comparator.comparing(RecordJpa::getIndex).reversed())
-                        .forEachOrdered(recordJpaRepository::save);
+
+                for (var i = chapter.records().size() - 1; i >= index ; i--) {
+                    recordJpaRepository
+                            .incrRecordIndexByChapterIdAndIndexEqual(chapterJpa.get().getId(), i);
+                }
+
                 indexToPutRecord = index;
             } else {
                 log.debug("Putting new Record at the end of the Chapter.");
@@ -114,7 +114,7 @@ public class RecordRepositoryWithJpa implements RecordRepository {
             case ChapterLink -> {
                 var link = (ChapterLink) record;
                 var chapterTo = chapterJpaRepository.findByAdventureAndName(adventureJpa.get().getId(),
-                        link.chapterNameTo())
+                                link.chapterNameTo())
                         .orElseThrow(ChapterToNotFoundException::new);
                 chapterLinkJpaRepository.save(new ChapterLinkJpa(recordJpa, chapterTo.getId()));
             }
@@ -275,7 +275,7 @@ public class RecordRepositoryWithJpa implements RecordRepository {
     @Override
     public void deleteAllChapterLinksReferencing(String adventureName, String chapterName) {
         var adventureJpa = adventureJpaRepository.findByName(adventureName);
-        if (adventureJpa.isEmpty()){
+        if (adventureJpa.isEmpty()) {
             return; // There is nothing to delete
         }
 
@@ -339,7 +339,7 @@ public class RecordRepositoryWithJpa implements RecordRepository {
                 var linkJpa = chapterLinkJpaRepository.findByRecordJpa(recordJpa)
                         .orElseThrow(RecordNotFoundException::new);
                 var chapterToJpa = chapterJpaRepository.findByAdventureAndName(adventureJpa.getId(),
-                        linkModel.chapterNameTo())
+                                linkModel.chapterNameTo())
                         .orElseThrow(ChapterToNotFoundException::new);
                 linkJpa.setId(chapterToJpa.getId());
                 chapterLinkJpaRepository.save(linkJpa);
