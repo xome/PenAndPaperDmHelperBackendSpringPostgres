@@ -20,7 +20,7 @@ public class RecordJpa  {
     private Integer index;
 
     @Column(name = "type")
-    private String type = "ChapterLink";
+    private final String type = "ChapterLink";
 
     public RecordJpa() {
     }
