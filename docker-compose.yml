@@ -1,4 +1,4 @@
-version: '2'
+version: '3.8'
 
 services:
   dm-helper:
@@ -6,14 +6,23 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    environment:
+      DB_PASSWORD: ${DB_PASSWORD}
   db:
     image: postgres:latest
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_DB: postgres
-      POSTGRES_PASSWORD: password
-      PGDATA: /var/lib/postgresql/data
+      POSTGRES_USER: dmhelper
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DATABASE: dmhelper
     volumes:
-      - /var/lib/postgresql/data:${PATH_TO_DB}
+      - ${PATH_TO_DB}:/var/lib/postgresql/data
+      - ./src/main/resources/ddl.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready", "-d", "db_prod" ]
+      interval: 3s
+      timeout: 2s
+      retries: 5
