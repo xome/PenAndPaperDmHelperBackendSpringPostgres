@@ -83,7 +83,7 @@ public class RecordRepositoryWithJpa implements RecordRepository {
                 log.debug("Given Index {} is smaller than current max Index {}. Squeezing new Record in.",
                         index, currentMaxIndex);
 
-                for (var i = chapter.records().size() - 1; i >= index ; i--) {
+                for (var i = chapter.records().size() - 1; i >= index; i--) {
                     recordJpaRepository
                             .incrRecordIndexByChapterIdAndIndexEqual(chapterJpa.get().getId(), i);
                 }
@@ -133,27 +133,37 @@ public class RecordRepositoryWithJpa implements RecordRepository {
         }
     }
 
-    private static RecordType getRecordType(RecordInAChapter record) {
-        RecordType type;
-        if (record instanceof Text) {
-            type = RecordType.Text;
-        } else if (record instanceof BackgroundMusic) {
-            type = RecordType.Music;
-        } else if (record instanceof Picture) {
-            type = RecordType.Picture;
-        } else if (record instanceof EnvironmentLightning) {
-            type = RecordType.EnvironmentLightning;
-        } else if (record instanceof ChapterLink) {
-            type = RecordType.ChapterLink;
-        } else {
-            throw new RuntimeException("%s not implemented!".formatted(record.getClass().getSimpleName()));
+    @Override
+    public void create(Adventure adventure, Chapter chapter, List<RecordInAChapter> records) throws ChapterNotFoundException, ChapterToNotFoundException {
+        for (var record : records) {
+            create(adventure, chapter, record, null);
         }
-        return type;
     }
 
     @Override
-    public LinkedList<RecordInAChapter> readByAdventureAndChapter(String adventureName, String chapterName) throws ChapterNotFoundException {
-        var allJpaRecords = findRecordsByAdventureNameAndChapterName(adventureName, chapterName);
+    public void create(String adventure, String chapterName, Integer index, RecordInAChapter record)
+            throws ChapterNotFoundException, ChapterToNotFoundException {
+        var adventureJpa = adventureJpaRepository.findByName(adventure);
+        if (adventureJpa.isEmpty()) throw new ChapterNotFoundException();
+
+        var chapterJpa = chapterJpaRepository.findByAdventureAndName(adventureJpa.get().getId(), chapterName);
+        if (chapterJpa.isEmpty()) throw new ChapterNotFoundException();
+
+        var currentRecords = read(adventure, chapterName);
+
+        create(new Adventure(adventure, null),
+                new Chapter(chapterJpa.get().getName(),
+                        null,
+                        null,
+                        currentRecords),
+                record,
+                index);
+
+    }
+
+    @Override
+    public LinkedList<RecordInAChapter> read(String adventureName, String chapterName) throws ChapterNotFoundException {
+        var allJpaRecords = findRecords(adventureName, chapterName);
 
         var records = new LinkedList<RecordInAChapter>();
 
@@ -173,6 +183,154 @@ public class RecordRepositoryWithJpa implements RecordRepository {
 
         return records;
 
+    }
+
+    @Override
+    public Optional<RecordInAChapter> read(String adventure, String chapter, Integer index) {
+        var adventureJpa = adventureJpaRepository.findByName(adventure);
+        if (adventureJpa.isEmpty()) return Optional.empty();
+
+        var chapterJpa = chapterJpaRepository.findByAdventureAndName(adventureJpa.get().getId(), chapter);
+        if (chapterJpa.isEmpty()) return Optional.empty();
+
+        var recordJpa = recordJpaRepository.findByChapterIdAndIndex(chapterJpa.get().getId(), index);
+        return recordJpa.flatMap(jpa -> mapRecordJpaToIndexAndModelDto(jpa).getSecond());
+    }
+
+    @Override
+    public void update(String adventure, String chapterName, Integer index, RecordInAChapter record)
+            throws RecordNotFoundException, ChapterNotFoundException, ChapterToNotFoundException {
+        var adventureJpa = adventureJpaRepository.findByName(adventure)
+                .orElseThrow(ChapterNotFoundException::new);
+        var chapterJpa = chapterJpaRepository.findByAdventureAndName(adventureJpa.getId(), chapterName)
+                .orElseThrow(ChapterNotFoundException::new);
+        var recordJpa = recordJpaRepository.findByChapterIdAndIndex(chapterJpa.getId(), index)
+                .orElseThrow(RecordNotFoundException::new);
+        switch (recordJpa.getType()) {
+            case ChapterLink -> {
+                var linkModel = (ChapterLink) record;
+                var linkJpa = chapterLinkJpaRepository.findByRecordJpa(recordJpa)
+                        .orElseThrow(RecordNotFoundException::new);
+                var chapterToJpa = chapterJpaRepository.findByAdventureAndName(adventureJpa.getId(),
+                                linkModel.chapterNameTo())
+                        .orElseThrow(ChapterToNotFoundException::new);
+                linkJpa.setId(chapterToJpa.getId());
+                chapterLinkJpaRepository.save(linkJpa);
+            }
+            case EnvironmentLightning -> {
+                var envModel = (EnvironmentLightning) record;
+                var envJpa = environmentLightningJpaRepository.findByRecordJpa(recordJpa)
+                        .orElseThrow(RecordNotFoundException::new);
+                envJpa.setBrightness(envModel.brightness());
+                envJpa.setRgb1(envModel.rgb()[0]);
+                envJpa.setRgb2(envModel.rgb()[1]);
+                envJpa.setRgb3(envModel.rgb()[2]);
+                environmentLightningJpaRepository.save(envJpa);
+            }
+
+            case Picture -> {
+                var picModel = (Picture) record;
+                var picJpa = pictureJpaRepository.findByRecordJpa(recordJpa)
+                        .orElseThrow(RecordNotFoundException::new);
+                picJpa.setShareableWithGroup(picModel.isShareableWithGroup());
+                picJpa.setBase64(picModel.base64());
+                picJpa.setFileFormat(picModel.fileFormat());
+                pictureJpaRepository.save(picJpa);
+
+            }
+            case Text -> {
+                var textModel = (Text) record;
+                var textJpa = textJpaRepository.findByRecordJpa(recordJpa)
+                        .orElseThrow(RecordNotFoundException::new);
+                textJpa.setText(textModel.text());
+                textJpaRepository.save(textJpa);
+            }
+            case Music -> {
+                var musicModel = (BackgroundMusic) record;
+                var musicJpa = backgroundMusicJpaRepository.findByRecordJpa(recordJpa)
+                        .orElseThrow(RecordNotFoundException::new);
+                musicJpa.setBase64(musicModel.base64());
+                musicJpa.setName(musicModel.name());
+                backgroundMusicJpaRepository.save(musicJpa);
+            }
+        }
+    }
+
+    @Override
+    public void delete(String adventure, String chapter) throws ChapterNotFoundException {
+        var records = findRecords(adventure, chapter);
+        deleteRecords(records);
+    }
+
+    private void deleteRecords(List<RecordJpa> records) {
+        records.forEach(recordJpa -> {
+            switch (recordJpa.getType()) {
+                case Text -> textJpaRepository.deleteByRecordJpa(recordJpa);
+                case Picture -> pictureJpaRepository.deleteByRecordJpa(recordJpa);
+                case ChapterLink -> chapterLinkJpaRepository.deleteByRecordJpa(recordJpa);
+                case EnvironmentLightning -> environmentLightningJpaRepository.deleteByRecordJpa(recordJpa);
+                case Music -> backgroundMusicJpaRepository.deleteByRecordJpa(recordJpa);
+            }
+        });
+
+        recordJpaRepository.deleteAll(records);
+    }
+
+    @Override
+    public void delete(String adventure, String chapter, Integer index) throws ChapterNotFoundException, RecordNotFoundException {
+        recordJpaRepository
+                .findByChapterIdAndIndex(findChapterId(adventure, chapter), index)
+                .ifPresent(recordJpa -> deleteRecords(List.of(recordJpa)));
+    }
+
+
+    @Override
+    public void deleteChapterLinksReferencing(String adventureName, String chapterName) {
+        var adventureJpa = adventureJpaRepository.findByName(adventureName);
+        if (adventureJpa.isEmpty()) {
+            return; // There is nothing to delete
+        }
+
+        var chapterJpa = chapterJpaRepository.findByAdventureAndName(adventureJpa.get().getId(), chapterName);
+        if (chapterJpa.isEmpty()) {
+            return; // Neither is in this case
+        }
+
+        var chapterLinkJpas = chapterLinkJpaRepository.findByChapterTo(chapterJpa.get().getId());
+        var recordJpasToDelete = chapterLinkJpas.stream().map(ChapterLinkJpa::getRecordJpa).collect(Collectors.toList());
+
+        chapterLinkJpaRepository.deleteAll(chapterLinkJpas);
+        recordJpaRepository.deleteAll(recordJpasToDelete);
+    }
+
+    private List<RecordJpa> findRecords(String adventure, String chapter)
+            throws ChapterNotFoundException {
+        Long chapterId = findChapterId(adventure, chapter);
+
+        return recordJpaRepository.findByChapterIdOrderByIndex(chapterId);
+    }
+
+    private Long findChapterId(String adventure, String chapter) throws ChapterNotFoundException {
+        var adventureJpa = adventureJpaRepository.findByName(adventure);
+        if (adventureJpa.isEmpty())
+            throw new ChapterNotFoundException();
+
+        var chapterJpa = chapterJpaRepository.findByAdventureAndName(adventureJpa.get().getId(), chapter);
+        if (chapterJpa.isEmpty())
+            throw new ChapterNotFoundException();
+
+        return chapterJpa.get().getId();
+    }
+
+    private static RecordType getRecordType(RecordInAChapter record) {
+        return switch (record) {
+            case Text ignored -> RecordType.Text;
+            case BackgroundMusic ignored -> RecordType.Music;
+            case Picture ignored -> RecordType.Picture;
+            case EnvironmentLightning ignored -> RecordType.EnvironmentLightning;
+            case ChapterLink ignored -> RecordType.ChapterLink;
+            case null -> throw new RuntimeException("Record is NULL. Cannot infer type!");
+        };
     }
 
     private Pair<Integer, Optional<RecordInAChapter>> mapRecordJpaToIndexAndModelDto(RecordJpa recordJpa) {
@@ -247,153 +405,5 @@ public class RecordRepositoryWithJpa implements RecordRepository {
         };
     }
 
-    @Override
-    public void deleteByAdventureAndChapter(String adventure, String chapter) throws ChapterNotFoundException {
-        var records = findRecordsByAdventureNameAndChapterName(adventure, chapter);
-
-        records.forEach(recordJpa -> {
-            switch (recordJpa.getType()) {
-                case Text -> textJpaRepository.deleteByRecordJpa(recordJpa);
-                case Picture -> pictureJpaRepository.deleteByRecordJpa(recordJpa);
-                case ChapterLink -> chapterLinkJpaRepository.deleteByRecordJpa(recordJpa);
-                case EnvironmentLightning -> environmentLightningJpaRepository.deleteByRecordJpa(recordJpa);
-                case Music -> backgroundMusicJpaRepository.deleteByRecordJpa(recordJpa);
-            }
-        });
-
-        recordJpaRepository.deleteAll(records);
-
-    }
-
-    @Override
-    public void createMultiple(Adventure adventure, Chapter chapter, List<RecordInAChapter> records) throws ChapterNotFoundException, ChapterToNotFoundException {
-        for (var record : records) {
-            create(adventure, chapter, record, null);
-        }
-    }
-
-    @Override
-    public void deleteAllChapterLinksReferencing(String adventureName, String chapterName) {
-        var adventureJpa = adventureJpaRepository.findByName(adventureName);
-        if (adventureJpa.isEmpty()) {
-            return; // There is nothing to delete
-        }
-
-        var chapterJpa = chapterJpaRepository.findByAdventureAndName(adventureJpa.get().getId(), chapterName);
-        if (chapterJpa.isEmpty()) {
-            return; // Neither is in this case
-        }
-
-        var chapterLinkJpas = chapterLinkJpaRepository.findByChapterTo(chapterJpa.get().getId());
-        var recordJpasToDelete = chapterLinkJpas.stream().map(ChapterLinkJpa::getRecordJpa).collect(Collectors.toList());
-
-        chapterLinkJpaRepository.deleteAll(chapterLinkJpas);
-        recordJpaRepository.deleteAll(recordJpasToDelete);
-    }
-
-    @Override
-    public Optional<RecordInAChapter> readByAdventureAndChapterAndIndex(String adventure, String chapter, Integer index) {
-        var adventureJpa = adventureJpaRepository.findByName(adventure);
-        if (adventureJpa.isEmpty()) return Optional.empty();
-
-        var chapterJpa = chapterJpaRepository.findByAdventureAndName(adventureJpa.get().getId(), chapter);
-        if (chapterJpa.isEmpty()) return Optional.empty();
-
-        var recordJpa = recordJpaRepository.findByChapterIdAndIndex(chapterJpa.get().getId(), index);
-        return recordJpa.flatMap(jpa -> mapRecordJpaToIndexAndModelDto(jpa).getSecond());
-    }
-
-    @Override
-    public void create(String adventure, String chapterName, Integer index, RecordInAChapter record)
-            throws ChapterNotFoundException, ChapterToNotFoundException {
-        var adventureJpa = adventureJpaRepository.findByName(adventure);
-        if (adventureJpa.isEmpty()) throw new ChapterNotFoundException();
-
-        var chapterJpa = chapterJpaRepository.findByAdventureAndName(adventureJpa.get().getId(), chapterName);
-        if (chapterJpa.isEmpty()) throw new ChapterNotFoundException();
-
-        var currentRecords = readByAdventureAndChapter(adventure, chapterName);
-
-        create(new Adventure(adventure, null),
-                new Chapter(chapterJpa.get().getName(),
-                        null,
-                        null,
-                        currentRecords),
-                record,
-                index);
-
-    }
-
-    @Override
-    public void update(String adventure, String chapterName, Integer index, RecordInAChapter record)
-            throws RecordNotFoundException, ChapterNotFoundException, ChapterToNotFoundException {
-        var adventureJpa = adventureJpaRepository.findByName(adventure)
-                .orElseThrow(ChapterNotFoundException::new);
-        var chapterJpa = chapterJpaRepository.findByAdventureAndName(adventureJpa.getId(), chapterName)
-                .orElseThrow(ChapterNotFoundException::new);
-        var recordJpa = recordJpaRepository.findByChapterIdAndIndex(chapterJpa.getId(), index)
-                .orElseThrow(RecordNotFoundException::new);
-        switch (recordJpa.getType()) {
-            case ChapterLink -> {
-                var linkModel = (ChapterLink) record;
-                var linkJpa = chapterLinkJpaRepository.findByRecordJpa(recordJpa)
-                        .orElseThrow(RecordNotFoundException::new);
-                var chapterToJpa = chapterJpaRepository.findByAdventureAndName(adventureJpa.getId(),
-                                linkModel.chapterNameTo())
-                        .orElseThrow(ChapterToNotFoundException::new);
-                linkJpa.setId(chapterToJpa.getId());
-                chapterLinkJpaRepository.save(linkJpa);
-            }
-            case EnvironmentLightning -> {
-                var envModel = (EnvironmentLightning) record;
-                var envJpa = environmentLightningJpaRepository.findByRecordJpa(recordJpa)
-                        .orElseThrow(RecordNotFoundException::new);
-                envJpa.setBrightness(envModel.brightness());
-                envJpa.setRgb1(envModel.rgb()[0]);
-                envJpa.setRgb2(envModel.rgb()[1]);
-                envJpa.setRgb3(envModel.rgb()[2]);
-                environmentLightningJpaRepository.save(envJpa);
-            }
-
-            case Picture -> {
-                var picModel = (Picture) record;
-                var picJpa = pictureJpaRepository.findByRecordJpa(recordJpa)
-                        .orElseThrow(RecordNotFoundException::new);
-                picJpa.setShareableWithGroup(picModel.isShareableWithGroup());
-                picJpa.setBase64(picModel.base64());
-                picJpa.setFileFormat(picModel.fileFormat());
-                pictureJpaRepository.save(picJpa);
-
-            }
-            case Text -> {
-                var textModel = (Text) record;
-                var textJpa = textJpaRepository.findByRecordJpa(recordJpa)
-                        .orElseThrow(RecordNotFoundException::new);
-                textJpa.setText(textModel.text());
-                textJpaRepository.save(textJpa);
-            }
-            case Music -> {
-                var musicModel = (BackgroundMusic) record;
-                var musicJpa = backgroundMusicJpaRepository.findByRecordJpa(recordJpa)
-                        .orElseThrow(RecordNotFoundException::new);
-                musicJpa.setBase64(musicModel.base64());
-                musicJpa.setName(musicModel.name());
-                backgroundMusicJpaRepository.save(musicJpa);
-            }
-        }
-    }
-
-    private List<RecordJpa> findRecordsByAdventureNameAndChapterName(String adventure, String chapter)
-            throws ChapterNotFoundException {
-        var adventureJpa = adventureJpaRepository.findByName(adventure);
-        if (adventureJpa.isEmpty())
-            throw new ChapterNotFoundException();
-
-        var chapterJpa = chapterJpaRepository.findByAdventureAndName(adventureJpa.get().getId(), chapter);
-        if (chapterJpa.isEmpty())
-            throw new ChapterNotFoundException();
-
-        return recordJpaRepository.findByChapterIdOrderByIndex(chapterJpa.get().getId());
-    }
 
 }

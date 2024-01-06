@@ -20,7 +20,7 @@ public class RecordByChapterNameAndIndexController implements RecordByChapterNam
 
     @Override
     public ResponseEntity<RecordInAChapter> getRecordByNameAndIndex(String adventure, String chapterName, Integer index) {
-        var optionalRecord = recordRepository.readByAdventureAndChapterAndIndex(adventure, chapterName, index);
+        var optionalRecord = recordRepository.read(adventure, chapterName, index);
         return optionalRecord
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
@@ -59,6 +59,11 @@ public class RecordByChapterNameAndIndexController implements RecordByChapterNam
 
     @Override
     public ResponseEntity<Void> deleteRecordByChapterNameAndIndex(String adventure, String chapterName, Integer index) {
-        return RecordByChapterNameAndIndexHttpApi.super.deleteRecordByChapterNameAndIndex(adventure, chapterName, index);
+        try {
+            recordRepository.delete(adventure, chapterName, index);
+        } catch (ChapterNotFoundException | RecordNotFoundException e) {
+            return ResponseEntity.status((HttpStatus.NOT_FOUND)).build();
+        }
+        return ResponseEntity.ok().build();
     }
 }

@@ -8,22 +8,23 @@ import de.mayer.backendspringpostgres.adventure.persistence.dto.*;
 import de.mayer.backendspringpostgres.adventure.persistence.jparepo.*;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.utility.DockerImageName;
 
 import java.util.Collections;
+import java.util.Optional;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
-import static org.hamcrest.MatcherAssert.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
@@ -275,6 +276,76 @@ class RecordByChapterNameAndIndexControllerTest {
 
     }
 
+    @Test
+    @DisplayName("""
+            Given there exists no Adventure with the given Name,
+            When a Record shall be deleted,
+            Then http status NOT_FOUND is returned
+            """)
+    void adventureWithRecordToBeDeletedDoesNotExist() {
+        givenForPathWithParams("Dummy", "Dummy", 0)
+                .contentType(ContentType.JSON)
+                .when().delete(PATH)
+                .then().statusCode(is(HttpStatus.NOT_FOUND.value()));
+
+    }
+
+    @Test
+    @DisplayName("""
+            Given there exists no Chapter with the given Name,
+            When a Record shall be deleted,
+            Then http status NOT_FOUND is returned
+            """)
+    void chapterWithRecordToBeDeletedDoesNotExist() {
+        var adventure = adventureJpaRepository.save(new AdventureJpa("Testadventure"));
+
+        givenForPathWithParams(adventure.getName(), "Dummy", 0)
+                .contentType(ContentType.JSON)
+                .when().delete(PATH)
+                .then().statusCode(is(HttpStatus.NOT_FOUND.value()));
+
+    }
+
+    @Test
+    @DisplayName("""
+            Given there exists no Record with the given Index,
+            When a Record shall be deleted,
+            Then http status OK is returned
+            """)
+    void recordToBeDeletedDoesNotExist() {
+        var adventure = adventureJpaRepository.save(new AdventureJpa("Testadventure"));
+        var chapter = chapterJpaRepository.save(new ChapterJpa(adventure.getId(), "Chapter", null, 0L));
+
+        givenForPathWithParams(adventure.getName(), chapter.getName(), 0)
+                .contentType(ContentType.JSON)
+                .when().delete(PATH)
+                .then().statusCode(is(HttpStatus.OK.value()));
+
+    }
+
+    @Test
+    @DisplayName("""
+            Given there exists a Record with the given Index,
+            When the Record shall be deleted,
+            Then http status OK is returned
+            """)
+    void recordToBeDeletedDoesExist() {
+        var adventure = adventureJpaRepository.save(new AdventureJpa("Testadventure"));
+        var chapter = chapterJpaRepository.save(new ChapterJpa(adventure.getId(), "Chapter", null, 0L));
+        var record = recordJpaRepository.save(new RecordJpa(chapter.getId(), 0, RecordType.Text));
+        textJpaRepository.save(new TextJpa(record, "Test"));
+
+        givenForPathWithParams(adventure.getName(), chapter.getName(), 0)
+                .contentType(ContentType.JSON)
+                .when().delete(PATH)
+                .then().statusCode(is(HttpStatus.OK.value()));
+
+        assertThat(recordJpaRepository.findByChapterIdAndIndex(chapter.getId(), record.getIndex()),
+                is(Optional.empty()));
+        assertThat(textJpaRepository.findByRecordJpa(record),
+                is(Optional.empty()));
+
+    }
 
 
 }
