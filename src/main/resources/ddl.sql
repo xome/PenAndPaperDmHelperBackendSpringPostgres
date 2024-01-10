@@ -1,4 +1,3 @@
-\set autocommit
 create table adventure
 (
     id   bigserial,
