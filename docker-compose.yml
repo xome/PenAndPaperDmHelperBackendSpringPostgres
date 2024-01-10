@@ -4,25 +4,27 @@ services:
   dm-helper:
     image: xome42/pen-and-paper-dm-helper-backend-spring-postgres
     ports:
-      - "8080:8080"
+      - "${APP_PORT}:8080"
     depends_on:
       db:
         condition: service_healthy
     environment:
+      DB_URL: ${DB_URL}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
   db:
-    image: postgres:latest
+    image: xome42/pen-and-paper-dm-helper-db
     ports:
-      - "5432:5432"
+      - "${DB_PORT}:5432"
     environment:
-      POSTGRES_USER: dmhelper
+      POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DATABASE: dmhelper
+      POSTGRES_DATABASE: ${DB_NAME}
     volumes:
       - ${PATH_TO_DB}:/var/lib/postgresql/data
-      - ./src/main/resources/ddl.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -d dmhelper -U dmhelper" ]
       interval: 3s
       timeout: 2s
-      retries: 5
+      retries: 50
