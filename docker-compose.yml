@@ -8,11 +8,13 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    restart: on-failure
     environment:
       DB_URL: ${DB_URL}
       DB_NAME: ${DB_NAME}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
+      DB_PORT: ${DB_PORT}
   db:
     image: xome42/pen-and-paper-dm-helper-db
     ports:
@@ -24,7 +26,7 @@ services:
     volumes:
       - ${PATH_TO_DB}:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -d dmhelper -U dmhelper" ]
+      test: [ "CMD-SHELL", "pg_isready -d ${DB_NAME} -U ${DB_USER}" ]
       interval: 3s
       timeout: 2s
       retries: 50
