@@ -17,12 +17,15 @@ services:
       DB_PORT: ${DB_PORT}
   db:
     image: xome42/pen-and-paper-dm-helper-db
+    expose:
+      - "${DB_PORT}"
     ports:
-      - "${DB_PORT}:5432"
+      - "${DB_PORT}:${DB_PORT}"
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DATABASE: ${DB_NAME}
+      PGPORT: ${DB_PORT}
     volumes:
       - ${PATH_TO_DB}:/var/lib/postgresql/data
     healthcheck:
