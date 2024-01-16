@@ -11,18 +11,29 @@ import java.util.Optional;
 
 public interface RecordRepository {
 
-    void create(Adventure adventure, Chapter chapter, RecordInAChapter record, Integer index) throws ChapterNotFoundException, ChapterToNotFoundException;
-    void createMultiple(Adventure adventure, Chapter chapter, List<RecordInAChapter> records) throws ChapterNotFoundException, ChapterToNotFoundException;
+    void create(Adventure adventure, Chapter chapter, RecordInAChapter record, Integer index)
+            throws ChapterNotFoundException, ChapterToNotFoundException;
 
-    LinkedList<RecordInAChapter> readByAdventureAndChapter(String adventureName, String chapterName) throws ChapterNotFoundException;
+    void create(String adventure, String chapterName, Integer index, RecordInAChapter record)
+            throws ChapterNotFoundException, ChapterToNotFoundException;
 
-    void deleteByAdventureAndChapter(String adventure, String chapter) throws ChapterNotFoundException;
+    void create(Adventure adventure, Chapter chapter, List<RecordInAChapter> records)
+            throws ChapterNotFoundException, ChapterToNotFoundException;
 
-    void deleteAllChapterLinksReferencing(String adventureName, String chapterName);
+    LinkedList<RecordInAChapter> read(String adventureName, String chapterName)
+            throws ChapterNotFoundException;
 
-    Optional<RecordInAChapter> readByAdventureAndChapterAndIndex(String adventure, String chapter, Integer index);
+    Optional<RecordInAChapter> read(String adventure, String chapter, Integer index);
 
-    void create(String adventure, String chapterName, Integer index, RecordInAChapter record) throws ChapterNotFoundException, ChapterToNotFoundException;
+    void update(String adventure, String chapterName, Integer index, RecordInAChapter record)
+            throws RecordNotFoundException, ChapterNotFoundException, ChapterToNotFoundException;
 
-    void update(String adventure, String chapterName, Integer index, RecordInAChapter record) throws RecordNotFoundException, ChapterNotFoundException, ChapterToNotFoundException;
+    void delete(String adventure, String chapter)
+            throws ChapterNotFoundException;
+
+    void delete(String adventure, String chapter, Integer index)
+            throws ChapterNotFoundException, RecordNotFoundException;
+
+    void deleteChapterLinksReferencing(String adventureName, String chapterName);
+
 }

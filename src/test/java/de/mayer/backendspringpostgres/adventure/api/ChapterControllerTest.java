@@ -2,18 +2,20 @@ package de.mayer.backendspringpostgres.adventure.api;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.mayer.backendspringpostgres.MyPostgresContainer;
 import de.mayer.backendspringpostgres.adventure.persistence.dto.*;
 import de.mayer.backendspringpostgres.adventure.persistence.jparepo.*;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.utility.DockerImageName;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -55,6 +57,8 @@ class ChapterControllerTest {
     @Autowired
     BackgroundMusicJpaRepository backgroundMusicRepository;
 
+    @ServiceConnection
+    static MyPostgresContainer sqlContainer = MyPostgresContainer.getInstance();
 
     @AfterEach
     void cleanup() {

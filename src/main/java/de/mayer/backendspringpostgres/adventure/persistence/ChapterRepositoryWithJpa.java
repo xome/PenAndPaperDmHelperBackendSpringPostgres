@@ -90,8 +90,8 @@ public class ChapterRepositoryWithJpa implements ChapterRepository {
                 null);
 
         if (chapterWithNewData.records() != null) {
-            recordRepository.deleteByAdventureAndChapter(adventure, nameOfChapterToBeUpdated);
-            recordRepository.createMultiple(
+            recordRepository.delete(adventure, nameOfChapterToBeUpdated);
+            recordRepository.create(
                     new Adventure(adventureJpa.getName(), null),
                     chapter,
                     chapterWithNewData.records());
@@ -110,8 +110,8 @@ public class ChapterRepositoryWithJpa implements ChapterRepository {
         if (chapter.isEmpty())
             throw new ChapterNotFoundException();
 
-        recordRepository.deleteByAdventureAndChapter(adventureName, chapterName);
-        recordRepository.deleteAllChapterLinksReferencing(adventureName, chapterName);
+        recordRepository.delete(adventureName, chapterName);
+        recordRepository.deleteChapterLinksReferencing(adventureName, chapterName);
 
 
         chapterJpaRepository.delete(chapter.get());
@@ -142,12 +142,12 @@ public class ChapterRepositoryWithJpa implements ChapterRepository {
                 chapter.subheader(),
                 durationAsLong));
 
-        recordRepository.createMultiple(new Adventure(adventure, null), chapter, chapter.records());
+        recordRepository.create(new Adventure(adventure, null), chapter, chapter.records());
 
     }
     public Chapter mapJpaToDomain(String adventureName, ChapterJpa chapterJpa) throws ChapterNotFoundException {
 
-        var records = recordRepository.readByAdventureAndChapter(adventureName, chapterJpa.getName());
+        var records = recordRepository.read(adventureName, chapterJpa.getName());
 
         return new Chapter(chapterJpa.getName(),
                 chapterJpa.getSubheader(),

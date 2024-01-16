@@ -21,7 +21,7 @@ public class RecordByChapterController implements RecordByChapterHttpApi {
     @Override
     public ResponseEntity<List<RecordInAChapter>> getRecordsByChapterName(String adventure, String chapterName) {
         try {
-            return ResponseEntity.ok(recordRepository.readByAdventureAndChapter(adventure, chapterName));
+            return ResponseEntity.ok(recordRepository.read(adventure, chapterName));
         } catch (ChapterNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
@@ -30,7 +30,7 @@ public class RecordByChapterController implements RecordByChapterHttpApi {
     @Override
     public ResponseEntity<Void> deleteRecordsByChapterName(String adventure, String chapterName) {
         try {
-            recordRepository.deleteByAdventureAndChapter(adventure, chapterName);
+            recordRepository.delete(adventure, chapterName);
             return ResponseEntity.ok().build();
         } catch (ChapterNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
