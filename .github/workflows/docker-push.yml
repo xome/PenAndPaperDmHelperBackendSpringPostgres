@@ -16,7 +16,7 @@ env:
   REGISTRY: docker.io
   # github.repository as <account>/<repo>
   IMAGE_NAME: xome42/pen-and-paper-dm-helper-backend-spring-postgres
-  IMAGE_NAME_DB: xome42/xome42/pen-and-paper-dm-helper-db
+  IMAGE_NAME_DB: xome42/pen-and-paper-dm-helper-db
 
 
 jobs:
