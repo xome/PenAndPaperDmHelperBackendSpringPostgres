@@ -1,24 +1,18 @@
 package de.mayer.backendspringpostgres.graph.domainservice;
 
 import de.mayer.backendspringpostgres.graph.model.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-@Service
-@Scope("prototype")
 public class GraphService {
 
     private final ChapterRepository chapterRepository;
     private final ChapterLinkRepository chapterLinkRepository;
     private final Cache cache;
 
-    @Autowired
     public GraphService(ChapterRepository chapterRepository,
                         ChapterLinkRepository chapterLinkRepository,
                         Cache cache) {
