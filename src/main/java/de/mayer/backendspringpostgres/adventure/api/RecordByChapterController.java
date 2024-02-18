@@ -1,8 +1,8 @@
 package de.mayer.backendspringpostgres.adventure.api;
 
-import de.mayer.backendspringpostgres.adventure.domainservice.ChapterNotFoundException;
-import de.mayer.backendspringpostgres.adventure.domainservice.RecordRepository;
-import de.mayer.backendspringpostgres.adventure.model.RecordInAChapter;
+import de.mayer.penandpaperdmhelperjcore.adventure.domainservice.ChapterNotFoundException;
+import de.mayer.penandpaperdmhelperjcore.adventure.domainservice.RecordRepository;
+import de.mayer.penandpaperdmhelperjcore.adventure.model.RecordInAChapter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;

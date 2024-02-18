@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import de.mayer.backendspringpostgres.adventure.model.*;
+import de.mayer.penandpaperdmhelperjcore.adventure.model.*;
 
 import java.io.IOException;
 

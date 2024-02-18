@@ -1,11 +1,11 @@
 package de.mayer.backendspringpostgres.adventure.persistence;
 
-import de.mayer.backendspringpostgres.adventure.domainservice.ChapterNotFoundException;
-import de.mayer.backendspringpostgres.adventure.domainservice.ChapterToNotFoundException;
-import de.mayer.backendspringpostgres.adventure.domainservice.RecordRepository;
-import de.mayer.backendspringpostgres.adventure.model.*;
 import de.mayer.backendspringpostgres.adventure.persistence.dto.*;
 import de.mayer.backendspringpostgres.adventure.persistence.jparepo.*;
+import de.mayer.penandpaperdmhelperjcore.adventure.domainservice.ChapterNotFoundException;
+import de.mayer.penandpaperdmhelperjcore.adventure.domainservice.ChapterToNotFoundException;
+import de.mayer.penandpaperdmhelperjcore.adventure.domainservice.RecordRepository;
+import de.mayer.penandpaperdmhelperjcore.adventure.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.util.Pair;

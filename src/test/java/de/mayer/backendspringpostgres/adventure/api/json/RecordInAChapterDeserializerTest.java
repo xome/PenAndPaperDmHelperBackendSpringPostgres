@@ -3,7 +3,7 @@ package de.mayer.backendspringpostgres.adventure.api.json;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.mayer.backendspringpostgres.MyPostgresContainer;
-import de.mayer.backendspringpostgres.adventure.model.*;
+import de.mayer.penandpaperdmhelperjcore.adventure.model.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

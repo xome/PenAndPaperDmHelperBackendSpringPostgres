@@ -1,9 +1,6 @@
 package de.mayer.backendspringpostgres.graph;
 
-import de.mayer.backendspringpostgres.graph.domainservice.Cache;
-import de.mayer.backendspringpostgres.graph.domainservice.ChapterLinkRepository;
-import de.mayer.backendspringpostgres.graph.domainservice.ChapterRepository;
-import de.mayer.backendspringpostgres.graph.domainservice.GraphService;
+import de.mayer.penandpaperdmhelperjcore.graph.domainservice.*;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -22,6 +19,12 @@ public class SpringConfiguration implements BeanFactoryAware {
         return new GraphService(beanFactory.getBean(ChapterRepository.class),
                 beanFactory.getBean(ChapterLinkRepository.class),
                 beanFactory.getBean(Cache.class));
+    }
+
+    @Bean
+    @Scope("singleton")
+    public Cache inmemoryCache() {
+        return new InMemoryCache();
     }
 
     @Override

@@ -1,7 +1,7 @@
 package de.mayer.backendspringpostgres.adventure.api;
 
-import de.mayer.backendspringpostgres.adventure.domainservice.*;
-import de.mayer.backendspringpostgres.adventure.model.Chapter;
+import de.mayer.penandpaperdmhelperjcore.adventure.domainservice.*;
+import de.mayer.penandpaperdmhelperjcore.adventure.model.Chapter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;

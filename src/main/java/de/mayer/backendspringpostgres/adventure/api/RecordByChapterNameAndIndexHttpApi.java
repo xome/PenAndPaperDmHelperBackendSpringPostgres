@@ -1,6 +1,6 @@
 package de.mayer.backendspringpostgres.adventure.api;
 
-import de.mayer.backendspringpostgres.adventure.model.RecordInAChapter;
+import de.mayer.penandpaperdmhelperjcore.adventure.model.RecordInAChapter;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -12,8 +12,8 @@ public interface RecordByChapterNameAndIndexHttpApi {
 
     @GetMapping(PATH)
     default ResponseEntity<RecordInAChapter> getRecordByNameAndIndex(@PathVariable("adventureName") String adventure,
-                                                                    @PathVariable("chapterName") String chapterName,
-                                                                    @PathVariable("index") Integer index) {
+                                                                     @PathVariable("chapterName") String chapterName,
+                                                                     @PathVariable("index") Integer index) {
         throw new RuntimeException("Not yet implemented!");
     }
 

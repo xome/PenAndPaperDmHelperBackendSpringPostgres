@@ -1,7 +1,7 @@
 package de.mayer.backendspringpostgres.graph.persistence;
 
-import de.mayer.backendspringpostgres.graph.domainservice.ChapterRepository;
-import de.mayer.backendspringpostgres.graph.model.Chapter;
+import de.mayer.penandpaperdmhelperjcore.graph.domainservice.ChapterRepository;
+import de.mayer.penandpaperdmhelperjcore.graph.model.Chapter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.stereotype.Component;

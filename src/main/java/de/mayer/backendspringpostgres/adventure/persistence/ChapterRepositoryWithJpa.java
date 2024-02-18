@@ -1,12 +1,12 @@
 package de.mayer.backendspringpostgres.adventure.persistence;
 
 
-import de.mayer.backendspringpostgres.adventure.domainservice.*;
-import de.mayer.backendspringpostgres.adventure.model.Adventure;
-import de.mayer.backendspringpostgres.adventure.model.Chapter;
 import de.mayer.backendspringpostgres.adventure.persistence.dto.ChapterJpa;
 import de.mayer.backendspringpostgres.adventure.persistence.jparepo.AdventureJpaRepository;
 import de.mayer.backendspringpostgres.adventure.persistence.jparepo.ChapterJpaRepository;
+import de.mayer.penandpaperdmhelperjcore.adventure.domainservice.*;
+import de.mayer.penandpaperdmhelperjcore.adventure.model.Adventure;
+import de.mayer.penandpaperdmhelperjcore.adventure.model.Chapter;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Component;
 
