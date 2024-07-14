@@ -1,11 +1,11 @@
-create table adventure
+create table if not exists adventure
 (
     id   bigserial,
     name text,
     constraint adventure_pk primary key (id),
     constraint adventure_name_uk unique (name)
 );
-create table chapter (
+create table if not exists chapter (
     id                              bigserial,
     adventure                       bigint,
     name                            text,
@@ -16,7 +16,7 @@ create table chapter (
     constraint chapter_pk primary key (id),
     constraint chapter_adventure_name_uk unique (adventure, name)
 );
-create table record (
+create table if not exists record (
     id         bigserial,
     chapter_id bigint,
     index      integer check ( index >= 0 ),
@@ -26,7 +26,7 @@ create table record (
     constraint records_pk primary key (id),
     constraint record_uk unique (chapter_id, index)
 );
-create table picture (
+create table if not exists picture (
     id                      bigserial,
     record_id               bigint,
     base64                  text,
@@ -37,7 +37,7 @@ create table picture (
         references record (id)
         on delete cascade on update cascade
 );
-create table environment_lightning (
+create table if not exists environment_lightning (
     id         bigserial,
     record_id  bigint,
     rgb_1      integer check (rgb_1 between 0 and 255),
@@ -49,7 +49,7 @@ create table environment_lightning (
         references record (id)
         on delete cascade on update cascade
 );
-create table chapter_link (
+create table if not exists chapter_link (
     id         bigserial,
     record_id  bigint,
     chapter_to bigint,
@@ -61,7 +61,7 @@ create table chapter_link (
         references chapter (id)
         on delete cascade on update cascade
 );
-create table background_music (
+create table if not exists background_music (
     id        bigserial,
     record_id bigint,
     name      text not null,
@@ -71,7 +71,7 @@ create table background_music (
         references record (id)
         on delete cascade on update cascade
 );
-create table text (
+create table if not exists text (
     id        bigserial,
     record_id bigint,
     text      text,
