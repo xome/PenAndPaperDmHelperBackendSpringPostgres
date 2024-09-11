@@ -35,9 +35,14 @@ docker build . -f Dockerfile -t xome42/pen-and-paper-dm-helper-backend-spring-po
 docker build . -f DockerfileDatabase -t xome42/pen-and-paper-dm-helper-db
 ```
 
+Alternatively, build with 
+```shell
+docker compose build
+``` 
+
 Run Docker Compose:
 ```shell
-docker-compose up
+docker-compose up -d
 ```
 
 Try to create an Adventure with curl:
