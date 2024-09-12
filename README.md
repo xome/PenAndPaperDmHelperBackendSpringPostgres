@@ -72,6 +72,21 @@ cd .k8s
 kubectl apply -f '*.yaml'
 ```
 
+Then choose either single pod:
+```shell
+kubectl apply -f app/app-pod.yaml
+```
+
+Or ReplicaSet:
+```shell
+kubectl apply -f app/app-rs.yaml
+```
+
+Or Deployment:
+```shell
+kubectl apply -f app/app-deploy.yaml
+```
+
 Verify that app is running:
 ```shell
 PNP_BACKEND_PORT=$(kubectl get service pen-and-paper-dm-helper-service \

@@ -8,32 +8,32 @@ metadata:
   namespace: default
 spec:
   containers:
-  - env:
-    - name: POSTGRES_USER
-      valueFrom:
-        secretKeyRef:
-          key: db_user
-          name: pen-and-paper-dm-helper-db-user
-    - name: POSTGRES_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          key: db_password
-          name: pen-and-paper-dm-helper-db-user
-    - name: POSTGRES_DATABASE
-      valueFrom:
-        configMapKeyRef:
-          key: db-name
-          name: dm-helper-env
-    image: xome42/pen-and-paper-dm-helper-db
-    imagePullPolicy: Always
-    name: pen-and-paper-dm-helper-db
-    volumeMounts:
-      - mountPath: /var/lib/postgresql/data
-        name: db-volume
-    ports:
-    - containerPort: 5432
-      name: postgres
-      protocol: TCP
+    - name: pen-and-paper-dm-helper-db
+      env:
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              key: db_user
+              name: pen-and-paper-dm-helper-db-user
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: db_password
+              name: pen-and-paper-dm-helper-db-user
+        - name: POSTGRES_DATABASE
+          valueFrom:
+            configMapKeyRef:
+              key: db-name
+              name: dm-helper-env
+      image: xome42/pen-and-paper-dm-helper-db
+      imagePullPolicy: Always
+      ports:
+        - containerPort: 5432
+          name: postgres
+          protocol: TCP
+      volumeMounts:
+        - mountPath: /var/lib/postgresql/data
+          name: db-volume
   volumes:
     - name: db-volume
       persistentVolumeClaim:
