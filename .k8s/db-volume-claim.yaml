@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pen-and-paper-dm-helper-db-volume-claim
+  labels:
+    app: pen-and-paper-dm-helper
+    role: db-volume
+spec:
+  accessModes:
+    - ReadWriteOncePod
+  resources:
+    requests:
+      storage: 1Gi

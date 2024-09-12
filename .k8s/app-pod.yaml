@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: pen-and-paper-dm-helper
+    role: backend
+  name: pen-and-paper-dm-helper
+spec:
+  containers:
+  - env:
+    - name: DB_URL
+      value: pen-and-paper-dm-helper-db-service
+    - name: DB_USER
+      valueFrom:
+        secretKeyRef:
+          key: db_user
+          name: pen-and-paper-dm-helper-db-user
+    - name: DB_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          key: db_password
+          name: pen-and-paper-dm-helper-db-user
+    - name: DB_NAME
+      valueFrom:
+        configMapKeyRef:
+          key: db-name
+          name: dm-helper-env
+    - name: DB_PORT
+      valueFrom:
+        configMapKeyRef:
+          key: db-port
+          name: dm-helper-env
+    image: xome42/pen-and-paper-dm-helper-backend-spring-postgres
+    imagePullPolicy: Always
+    name: backend
+    ports:
+    - containerPort: 8080
+      name: api-port
+      protocol: TCP
+  restartPolicy: Always
