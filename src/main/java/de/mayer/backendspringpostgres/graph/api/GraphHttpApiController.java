@@ -1,8 +1,8 @@
 package de.mayer.backendspringpostgres.graph.api;
 
-import de.mayer.backendspringpostgres.graph.domainservice.GraphService;
-import de.mayer.backendspringpostgres.graph.model.NoChaptersForAdventureException;
-import de.mayer.backendspringpostgres.graph.model.InvalidGraphException;
+import de.mayer.penandpaperdmhelperjcore.graph.domainservice.GraphService;
+import de.mayer.penandpaperdmhelperjcore.graph.model.InvalidGraphException;
+import de.mayer.penandpaperdmhelperjcore.graph.model.NoChaptersForAdventureException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

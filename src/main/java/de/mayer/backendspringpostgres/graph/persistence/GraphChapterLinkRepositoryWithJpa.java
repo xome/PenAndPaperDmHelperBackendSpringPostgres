@@ -1,7 +1,7 @@
 package de.mayer.backendspringpostgres.graph.persistence;
 
-import de.mayer.backendspringpostgres.graph.domainservice.ChapterLinkRepository;
-import de.mayer.backendspringpostgres.graph.model.ChapterLink;
+import de.mayer.penandpaperdmhelperjcore.graph.domainservice.ChapterLinkRepository;
+import de.mayer.penandpaperdmhelperjcore.graph.model.ChapterLink;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.stereotype.Component;

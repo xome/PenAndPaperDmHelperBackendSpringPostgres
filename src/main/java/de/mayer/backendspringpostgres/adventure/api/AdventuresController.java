@@ -1,8 +1,7 @@
 package de.mayer.backendspringpostgres.adventure.api;
 
-import de.mayer.backendspringpostgres.adventure.domainservice.AdventureRepository;
-import de.mayer.backendspringpostgres.adventure.model.Adventure;
-import org.springframework.data.domain.Sort;
+import de.mayer.penandpaperdmhelperjcore.adventure.domainservice.AdventureRepository;
+import de.mayer.penandpaperdmhelperjcore.adventure.model.Adventure;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 
@@ -19,7 +18,7 @@ public class AdventuresController implements AdventuresHttpApi {
 
     @Override
     public ResponseEntity<List<Adventure>> getAdventures() {
-        return ResponseEntity.ok(adventureRepository.findAll(Sort.by(Sort.Order.asc("name"))));
+        return ResponseEntity.ok(adventureRepository.findAll());
 
     }
 }

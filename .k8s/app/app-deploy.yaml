@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pen-and-paper-dm-helper-backend-deploy
+  labels:
+    app: pen-and-paper-dm-helper
+    role: backend
+spec:
+  replicas: 3
+  minReadySeconds: 30
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 2
+  selector:
+    matchLabels:
+      app: pen-and-paper-dm-helper
+      role: backend
+  template:
+    metadata:
+      name: pen-and-paper-dm-helper-backend
+      labels:
+        app: pen-and-paper-dm-helper
+        role: backend
+    spec:
+      containers:
+        - name: backend
+          image: xome42/pen-and-paper-dm-helper-backend-spring-postgres
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: DB_URL
+              value: pen-and-paper-dm-helper-db-service
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  key: db_user
+                  name: pen-and-paper-dm-helper-db-user
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: db_password
+                  name: pen-and-paper-dm-helper-db-user
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  key: db-name
+                  name: dm-helper-env
+            - name: DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  key: db-port
+                  name: dm-helper-env
+          ports:
+            - containerPort: 8080
+              name: api-port
+              protocol: TCP
+      restartPolicy: Always

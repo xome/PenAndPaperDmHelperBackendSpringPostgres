@@ -1,8 +1,8 @@
 package de.mayer.backendspringpostgres.adventure.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.mayer.backendspringpostgres.adventure.domainservice.AdventureRepository;
-import de.mayer.backendspringpostgres.adventure.model.Adventure;
+import de.mayer.penandpaperdmhelperjcore.adventure.domainservice.AdventureRepository;
+import de.mayer.penandpaperdmhelperjcore.adventure.model.Adventure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;

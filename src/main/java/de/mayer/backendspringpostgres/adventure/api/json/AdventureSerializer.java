@@ -3,7 +3,7 @@ package de.mayer.backendspringpostgres.adventure.api.json;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import de.mayer.backendspringpostgres.adventure.model.Adventure;
+import de.mayer.penandpaperdmhelperjcore.adventure.model.Adventure;
 
 import java.io.IOException;
 

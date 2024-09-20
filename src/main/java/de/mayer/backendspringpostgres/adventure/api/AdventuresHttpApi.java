@@ -1,6 +1,6 @@
 package de.mayer.backendspringpostgres.adventure.api;
 
-import de.mayer.backendspringpostgres.adventure.model.Adventure;
+import de.mayer.penandpaperdmhelperjcore.adventure.model.Adventure;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;

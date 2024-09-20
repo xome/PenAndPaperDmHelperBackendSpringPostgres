@@ -1,10 +1,10 @@
 package de.mayer.backendspringpostgres.adventure.api;
 
-import de.mayer.backendspringpostgres.adventure.domainservice.ChapterAlreadyExistsException;
-import de.mayer.backendspringpostgres.adventure.domainservice.ChapterNotFoundException;
-import de.mayer.backendspringpostgres.adventure.domainservice.ChapterRepository;
-import de.mayer.backendspringpostgres.adventure.domainservice.ChapterToNotFoundException;
-import de.mayer.backendspringpostgres.adventure.model.Chapter;
+import de.mayer.penandpaperdmhelperjcore.adventure.domainservice.ChapterAlreadyExistsException;
+import de.mayer.penandpaperdmhelperjcore.adventure.domainservice.ChapterNotFoundException;
+import de.mayer.penandpaperdmhelperjcore.adventure.domainservice.ChapterRepository;
+import de.mayer.penandpaperdmhelperjcore.adventure.domainservice.ChapterToNotFoundException;
+import de.mayer.penandpaperdmhelperjcore.adventure.model.Chapter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;

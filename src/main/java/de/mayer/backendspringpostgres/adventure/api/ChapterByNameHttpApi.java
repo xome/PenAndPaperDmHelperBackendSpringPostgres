@@ -1,6 +1,6 @@
 package de.mayer.backendspringpostgres.adventure.api;
 
-import de.mayer.backendspringpostgres.adventure.model.Chapter;
+import de.mayer.penandpaperdmhelperjcore.adventure.model.Chapter;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -11,7 +11,7 @@ public interface ChapterByNameHttpApi {
 
     @GetMapping("/chapter/{adventureName}/{chapterName}")
     default ResponseEntity<Chapter> getChapterByName(@PathVariable("adventureName") String adventureName,
-                                                    @PathVariable("chapterName") String chapterName) {
+                                                     @PathVariable("chapterName") String chapterName) {
         throw new RuntimeException("Not yet implemented!");
     }
 

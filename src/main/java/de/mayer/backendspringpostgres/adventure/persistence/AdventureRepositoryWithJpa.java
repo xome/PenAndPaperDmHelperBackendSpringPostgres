@@ -1,9 +1,9 @@
 package de.mayer.backendspringpostgres.adventure.persistence;
 
-import de.mayer.backendspringpostgres.adventure.domainservice.AdventureRepository;
-import de.mayer.backendspringpostgres.adventure.model.Adventure;
 import de.mayer.backendspringpostgres.adventure.persistence.dto.AdventureJpa;
 import de.mayer.backendspringpostgres.adventure.persistence.jparepo.AdventureJpaRepository;
+import de.mayer.penandpaperdmhelperjcore.adventure.domainservice.AdventureRepository;
+import de.mayer.penandpaperdmhelperjcore.adventure.model.Adventure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort;
@@ -38,7 +38,7 @@ public class AdventureRepositoryWithJpa implements AdventureRepository {
     @Override
     public void changeName(Adventure adventure, String newAdventureName) {
         var optionalAdventure = adventureJpaRepository.findByName(adventure.name());
-        if (optionalAdventure.isPresent()){
+        if (optionalAdventure.isPresent()) {
             var adventureJpa = optionalAdventure.get();
             adventureJpa.setName(newAdventureName);
 
@@ -54,8 +54,8 @@ public class AdventureRepositoryWithJpa implements AdventureRepository {
     }
 
     @Override
-    public List<Adventure> findAll(Sort orderBy) {
-        return adventureJpaRepository.findAll(orderBy)
+    public List<Adventure> findAll() {
+        return adventureJpaRepository.findAll(Sort.by("name"))
                 .stream()
                 .map(jpa -> new Adventure(jpa.getName(), null))
                 .collect(Collectors.toList());
